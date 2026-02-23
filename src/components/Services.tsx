@@ -45,7 +45,7 @@ export default function Services() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Послуги</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-3 gold-line-center">
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary mb-3 gold-line-center">
             Повний спектр<br />стоматологічних послуг
           </h2>
         </div>
@@ -76,7 +76,7 @@ export default function Services() {
         <div className="text-center mt-10">
           <a
             href="tel:+380504800825"
-            className="inline-flex items-center gap-2 border-2 border-navy text-custom-dark hover:bg-navy hover:text-primary-foreground px-8 py-3.5 rounded-full font-body font-semibold text-sm transition-all duration-200"
+            className="inline-flex items-center gap-2 border-2 border-secondary text-secondary hover:bg-navy hover:text-primary-foreground px-8 py-3.5 rounded-full font-body font-semibold text-sm transition-all duration-200"
           >
             Записатися на консультацію
           </a>
