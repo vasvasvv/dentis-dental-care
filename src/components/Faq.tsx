@@ -17,7 +17,7 @@ const Faq: FC = () => {
       <div className="divide-y divide-gray-200 grid sm:grid-cols-1 gap-6 max-w-890px mx-auto">
         {faqItems.map((item, index) => (
           <details key={index} className="className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300" open={openIndex === index} onChange={() => setOpenIndex(openIndex === index ? null : index)}>
-            <summary className="flex items-center justify-between cursor-pointer py-5 text-lg md:text-xl font-semibold text-[#2b6f73] hover:text-[#1e5559] transition-colors duration-300">
+            <summary className="bg-card flex items-center justify-between cursor-pointer py-5 text-lg md:text-xl font-semibold text-[#2b6f73] hover:text-[#1e5559] transition-colors duration-300">
               {item.question}
               <span className="ml-4 text-2xl font-bold transition-transform duration-300 group-open:rotate-180">
                 {openIndex === index ? '−' : '+'}
