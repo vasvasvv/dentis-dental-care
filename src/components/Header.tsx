@@ -41,8 +41,8 @@ export default function Header() {
           className="flex items-center leading-none"
           onClick={(e) => {e.preventDefault();window.scrollTo({ top: 0, behavior: "smooth" });}}>
           <img
+            rel="preload"
             src={logo}
-            fetchPriority="high"
             alt="Dentis Logo"
             className="h-20 w-auto brightness-100 opacity-90 hover:opacity-100 transition-opacity duration-200"
           />

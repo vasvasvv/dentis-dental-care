@@ -60,21 +60,11 @@ const cardVariants: Variants = {
 };
 export default function Services() {
   return (
-    <motion.section
-      id="services"
-      className="py-24 bg-secondary"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={containerVariants}
-    >
+    <section id="services" className="py-24 bg-secondary">
       <div className="container mx-auto px-4">
-        {/* Заголовок */}
-        <motion.div variants={cardVariants} className="text-center mb-14">
-          <p className="text-gold text-sm tracking-[0.3em] uppercase mb-3">
-            Послуги
-          </p>
-          <h2 className="text-4xl md:text-5xl font-bold text-navy">
+        <div className="text-center mb-14">
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Послуги</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-3 gold-line-center">
             Повний спектр<br />стоматологічних послуг
           </h2>
         </motion.div>
@@ -118,12 +108,7 @@ export default function Services() {
         >
           <motion.a
             href="tel:+380504800825"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 border-2 border-navy 
-                       hover:bg-navy hover:text-white 
-                       px-8 py-3.5 rounded-full font-semibold text-sm 
-                       transition-all duration-200"
+            className="inline-flex items-center gap-2 border-2 border-navy text-custom-dark hover:bg-navy hover:text-primary-foreground px-8 py-3.5 rounded-full font-body font-semibold text-sm transition-all duration-200"
           >
             Записатися на консультацію
           </motion.a>
