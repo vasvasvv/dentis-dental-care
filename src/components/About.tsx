@@ -17,7 +17,7 @@ export default function About() {
             <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Про нас</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-navy leading-tight mb-6 gold-line">
               Довіра пацієнтів —<br />
-              <em className="not-italic text-custom-dark">наша найвища нагорода</em>
+              <em className="not-italic text-navy">наша найвища нагорода</em>
             </h2>
             <p className="font-body text-navy leading-relaxed mb-5">
               Стоматологічна клініка <strong className="text-custom-dark">«Дентіс»</strong> — це місце, де сучасна медицина поєднується з турботою та теплом. Ми надаємо стоматологічну допомогу найвищого рівня.

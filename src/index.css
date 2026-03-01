@@ -4,6 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@font-face {
+  font-family: "NueneMontreal";
+  src: url("/src/assets/fonts/NeueMontreal-Regular.woff2") format("woff2"),
+       url("/src/assets/fonts/NeueMontreal-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NueneMontrealBold";
+  src: url("/src/assets/fonts/NeueMontreal-Bold.woff2") format("woff2"),
+       url("/src/assets/fonts/NeueMontreal-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     /* Core palette */
@@ -51,13 +70,21 @@
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(180 60% 20%) 0%, hsl(180 55% 28%) 60%, hsl(180 50% 35%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 62% 52%), hsl(38 70% 62%));
+    --gradient-gold: linear-gradient(135deg, hsl(38, 64%, 46%), hsl(38, 51%, 53%));
     --gradient-section: linear-gradient(180deg, hsl(40 20% 98%) 0%, hsl(40 25% 96%) 100%);
 
     /* Shadows */
     --shadow-card: 0 4px 24px -4px hsl(180 60% 25% / 0.10);
     --shadow-gold: 0 4px 20px -4px hsl(38 62% 52% / 0.35);
     --shadow-nav: 0 2px 20px hsl(180 60% 25% / 0.12);
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0px 1px 1.5px 0px hsla(0, 0%, 0%, 0.65);
+    --shadow: 0px 1px 3px 0px hsla(0, 0%, 0%, 0.65);
+    --shadow-md: 0px 1px 4.5px 0px hsla(0, 0%, 0%, 0.65);
+    --shadow-lg: 0px 1px 7.5px 0px hsla(0, 0%, 0%, 0.65);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -67,14 +94,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-    --font-serif: Lora, ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
-    --font-mono: "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+    --font-custom: "NueneMontreal", system-ui, serif, -apple-system, BlinkMacSystemFont, sans-serif; 
+
   }
+
   .dark {
-    --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-    --font-serif: Lora, ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
-    --font-mono: "Cascadia Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
     --radius: 0.75rem;
   }
 }
@@ -90,23 +114,23 @@ html {
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'NueneMontreal', sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5 {
-    font-family: 'Manrope', serif;
+    font-family: 'NueneMontrealBold', serif;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Manrope', serif;
+    font-family: 'NueneMontrealBold', serif;
   }
 
   .font-body {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'NueneMontreal', sans-serif;
   }
 
   .text-gold {

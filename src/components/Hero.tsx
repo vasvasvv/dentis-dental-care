@@ -64,7 +64,7 @@ export default function Hero() {
             </a>
             <button
               onClick={() => handleScroll("#services")}
-              className="flex items-center justify-center gap-2 border border-gold-light/50 text-gold-light/90 hover:bg-gold hover:border-gold hover:text-secondary px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              className="flex items-center justify-center gap-2 border border-gold-light/80 text-gold-light hover:bg-gold hover:border-gold hover:text-secondary px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
             >
               Наші послуги
             </button>

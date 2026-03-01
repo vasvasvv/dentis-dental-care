@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Phone, Menu, X } from "lucide-react";
 import logo from "@assets/Dentis_with_Text.avif"
+import logogold from "@assets/Dentis_with_Textg.webp"
 
 const navLinks = [
 { label: "Про нас", href: "#about" },
@@ -36,25 +37,46 @@ export default function Header() {
       }>
 
       <div className="container mx-auto px-4 flex items-center justify-between">
+       <div className="h-20 rounded-2xl shadow-2xl">
         <a
-          href="#"
-          className="flex items-center leading-none"
+          href="https://dentis.pp.ua/"
+          className="group flex items-center leading-none"
           onClick={(e) => {e.preventDefault();window.scrollTo({ top: 0, behavior: "smooth" });}}>
-          <img
-            rel="preload"
-            src={logo}
-            alt="Dentis Logo"
-            className="h-20 w-auto brightness-100 opacity-90 hover:opacity-100 transition-opacity duration-200"
-          />
+        <div className="relative">
+    {/* Білий логотип — видно за замовчуванням */}
+    <img
+      src={logo}          // твій білий логотип
+      alt="Dentis Logo White"
+      className="
+        h-20 w-auto block
+        transition-opacity duration-300 ease-out
+        group-hover:opacity-0
+      "
+    />
+
+    {/* Золотий логотип — ховається за замовчуванням, з'являється на hover */}
+    <img
+      src={logogold}
+      alt="Dentis Logo Gold"
+      className="
+        h-20 w-auto block
+        absolute top-0 left-0
+        transition-opacity duration-300 ease-out
+        opacity-0
+        group-hover:opacity-100
+      "
+    />
+  </div>
         </a>
+        </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-9">
+        <nav className="hidden md:flex  items-center gap-9">
           {navLinks.map((link) =>
           <button
             key={link.href}
             onClick={() => handleNav(link.href)}
-            className="text-primary-foreground hover:text-gold text-xl font-body font-sans-serif tracking-wide transition-colors duration-200">
+            className="text-primary-foreground hover:text-gold text-2xl font-body font-sans-serif tracking-wide transition-colors duration-200">
 
               {link.label}
             </button>
@@ -62,6 +84,7 @@ export default function Header() {
         </nav>
 
         {/* CTA phone */}
+       
         <a
           href="tel:+380504800825"
           className="hidden md:flex items-center gap-2 gradient-gold hover:bg-gold-dark text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium transition-all duration-200 shadow-gold-custom">
@@ -78,6 +101,7 @@ export default function Header() {
 
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
+        
       </div>
 
       {/* Mobile menu */}

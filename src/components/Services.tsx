@@ -62,7 +62,13 @@ export default function Services() {
   return (
     <section id="services" className="py-24 bg-secondary">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-14">
+        <motion.div
+          variants={cardVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="text-center mb-14"
+        >
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Послуги</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-3 gold-line-center">
             Повний спектр<br />стоматологічних послуг
@@ -114,6 +120,6 @@ export default function Services() {
           </motion.a>
         </motion.div>
       </div>
-    </motion.section>
+    </section>
   );
 }
