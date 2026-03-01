@@ -60,7 +60,7 @@ const cardVariants: Variants = {
 };
 export default function Services() {
   return (
-    <section id="services" className="py-24 bg-secondary">
+    <section id="services" className="py-24">
       <div className="container mx-auto px-4">
         <motion.div
           variants={cardVariants}
@@ -70,7 +70,7 @@ export default function Services() {
           className="text-center mb-14"
         >
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Послуги</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-3 gold-line-center">
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary mb-3 gold-line-center">
             Повний спектр<br />стоматологічних послуг
           </h2>
         </motion.div>
@@ -113,8 +113,8 @@ export default function Services() {
           className="text-center mt-10"
         >
           <motion.a
-            href="tel:+380504800825"
-            className="inline-flex items-center gap-2 border-2 border-navy text-custom-dark hover:bg-navy hover:text-primary-foreground px-8 py-3.5 rounded-full font-body font-semibold text-sm transition-all duration-200"
+          href="tel:+380504800825"
+                  className="mt-5 inline-flex items-center gap-2 gradient-gold text-accent-foreground px-5 py-2.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
           >
             Записатися на консультацію
           </motion.a>

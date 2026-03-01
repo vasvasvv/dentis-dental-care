@@ -1,0 +1,11 @@
+ <motion.div
+          variants={cardVariants}
+          className="text-center mt-10"
+        >
+          <motion.a
+            href="tel:+380504800825"
+            className="inline-flex items-center gap-2 border-2 border-navy text-custom-dark hover:bg-navy hover:text-primary-foreground px-8 py-3.5 rounded-full font-body font-semibold text-sm transition-all duration-200"
+          >
+            Записатися на консультацію
+          </motion.a>
+        </motion.div>
