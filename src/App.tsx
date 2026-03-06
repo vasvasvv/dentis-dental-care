@@ -16,6 +16,7 @@ export default function App() {
     <HelmetProvider>
     <BrowserRouter>
       <ScrollToTop />
+      <Suspense fallback={<div>Loading...</div>}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/implantaciya" element={<Implantaciya />} />
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
         <Route path="/contacts" element={<Contacts />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
     </HelmetProvider>
   );
