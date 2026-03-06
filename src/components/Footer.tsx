@@ -1,30 +1,51 @@
 import { Phone, Mail, MapPin } from "lucide-react";
-import logo from "@assets/Dentis_with_Text.webp"
+import { useNavigate, useLocation } from "react-router-dom";
+import logo from "@assets/Dentis_with_Text.webp";
 
 export default function Footer() {
-  const handleNav = (href: string) => {
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNav = (href: string, isHash: boolean) => {
+    if (!isHash) {
+      navigate(href);
+      return;
+    }
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        const el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else {
+      const el = document.querySelector(href);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  return (    
+  return (
     <footer className="border-t border-primary-foreground/10">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-3 gap-10 items-start">
           {/* Brand */}
           <div>
-           <a
-          href="#"
-          className="flex items-center leading-none"
-          onClick={(e) => {e.preventDefault();window.scrollTo({ top: 0, behavior: "smooth" });}}>
-          <img
-            src={logo}
-            alt="Dentis Logo"
-            className="h-24 w-auto brightness-125 opacity-80 hover:opacity-100 transition-opacity duration-500"
-          />
-        </a>
+            <a
+              href="/"
+              className="flex items-center leading-none"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
+              <img
+                src={logo}
+                alt="Dentis Logo"
+                className="h-24 w-auto brightness-125 opacity-80 hover:opacity-100 transition-opacity duration-500"
+              />
+            </a>
             <p className="font-body text-primary-foreground/50 text-sm leading-relaxed">
-             Стоматологічна клініка у Кропивницькому. Ваша посмішка — наша гордість.
+              Стоматологічна клініка у Кропивницькому. Ваша посмішка — наша гордість.
             </p>
           </div>
 
@@ -33,16 +54,16 @@ export default function Footer() {
             <p className="font-body text-primary-foreground/40 text-xs tracking-widest uppercase mb-4">Навігація</p>
             <nav className="flex flex-col gap-2.5">
               {[
-                ["#about", "Про нас"],
-                ["#services", "Послуги"],
-                ["#doctors", "Лікарі"],
-                ["#news", "Новини та акції"],
-                ["#reviews", "Відгуки"],
-                ["#contacts", "Контакти"],
-              ].map(([href, label]) => (
+                { href: "#about", label: "Про нас", isHash: true },
+                { href: "#services", label: "Послуги", isHash: true },
+                { href: "#doctors", label: "Лікарі", isHash: true },
+                { href: "#news", label: "Новини та акції", isHash: true },
+                { href: "#reviews", label: "Відгуки", isHash: true },
+                { href: "/contacts", label: "Контакти", isHash: false },
+              ].map(({ href, label, isHash }) => (
                 <button
                   key={href}
-                  onClick={() => handleNav(href)}
+                  onClick={() => handleNav(href, isHash)}
                   className="font-body text-primary-foreground/60 hover:text-gold text-sm text-left transition-colors"
                 >
                   {label}
