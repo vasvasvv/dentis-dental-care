@@ -27,19 +27,19 @@ const services = [
     icon: Zap,
     title: "Хірургічна стоматологія",
     desc: "Видалення зубів, імплантація, синус-ліфтинг. Робота з максимальним комфортом.",
-    link: "/implantation",
+    link: "/implantaciya",
   },
   {
     icon: HeartPulse,
     title: "Професійне очищення",
     desc: "Професійна гігієна зубів спрямована на видалення зубного каменю.",
-    link: "/professional-cleaning",
+    link: "/profesijne-ochischennya",
   },
   {
     icon: ScanLine,
     title: "Діагностика та рентген",
     desc: "Цифрова рентгенографія, КЛКТ, фотопротокол.",
-    link: "/diagnostyka-renthen",
+    link: "/diagnostika-zubiv",
   },
 ];
 
