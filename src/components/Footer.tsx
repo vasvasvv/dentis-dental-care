@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin } from "lucide-react";
-import logo from "@assets/Dentis_with_Text.avif"
+import logo from "@assets/Dentis_with_Text.webp"
 
 export default function Footer() {
   const handleNav = (href: string) => {

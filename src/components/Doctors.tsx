@@ -1,5 +1,5 @@
-import doctorVerhovsky from "@/assets/doctor-verhovsky.avif";
-import doctorFemale from "@/assets/doctor-female.avif";
+import doctorVerhovsky from "@/assets/doctor-verhovsky.webp";
+import doctorFemale from "@/assets/doctor-female.webp";
 
 const doctors = [
   {

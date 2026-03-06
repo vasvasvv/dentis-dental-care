@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Phone, Menu, X } from "lucide-react";
-import logo from "@assets/Dentis_with_Text.avif"
+import logo from "@assets/Dentis_with_Text.webp"
 import logogold from "@assets/Dentis_with_Textg.webp"
 
 const navLinks = [
