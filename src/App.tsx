@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import ScrollToTop from "@/components/ScrollToTop";
-import Index from "@/pages/Index";
-import Implantaciya from "@/pages/Implantaciya";
-import Protezuvannya from "@/pages/Protezuvannya";
-import LikuvannyaKariesu from "@/pages/LikuvannyaKariesu";
-import ProfesijneOchischennya from "@/pages/ProfesijneOchischennya";
-import EstetychnaStomatologiya from "@/pages/EstetychnaStomatologiya";
-import DiagnostikaZubiv from "@/pages/DiagnostikaZubiv";
-import Contacts from "@/pages/Contacts";
+const Index = lazy(() => import("./pages/Index"));
+const Implantaciya = lazy(() =>  import("./pages/Implantaciya"));
+const Protezuvannya = lazy(() =>  import("./pages/Protezuvannya"));
+const LikuvannyaKariesu = lazy(() =>  import("./pages/LikuvannyaKariesu"));
+const ProfesijneOchischennya = lazy(() =>  import("./pages/ProfesijneOchischennya"));
+const EstetychnaStomatologiya = lazy(() =>  import("./pages/EstetychnaStomatologiya"));
+const DiagnostikaZubiv = lazy(() =>  import("./pages/DiagnostikaZubiv"));
+const Contacts = lazy(() =>  import("./pages/Contacts"));
 
 export default function App() {
   return (
