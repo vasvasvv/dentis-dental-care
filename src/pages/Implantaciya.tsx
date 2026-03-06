@@ -4,7 +4,7 @@ import { Phone, CheckCircle, Clock, Shield, Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 const steps = [
-  { num: "01", title: "Консультація та діагностика", desc: "КТ-знімок, оцінка стану кістки, планування імплантації в 3D." },
+  { num: "01", title: "Консультація та діагностика", desc: "Оцінка стану кістки, планування імплантації." },
   { num: "02", title: "Підготовка", desc: "Санація порожнини рота, за потреби — нарощування кістки (синус-ліфтинг)." },
   { num: "03", title: "Встановлення імпланту", desc: "Хірургічний етап під місцевою анестезією. Займає 30–60 хвилин." },
   { num: "04", title: "Остеоінтеграція", desc: "Імплант зростається з кісткою протягом 2–6 місяців." },
@@ -15,7 +15,7 @@ const benefits = [
   "Імпланти від провідних світових виробників",
   "19+ років досвіду імплантолога",
   "Гарантія на імплант та роботу",
-  "Сучасна цифрова діагностика (КЛКТ)",
+  "Сучасна  діагностика",
   "Безболісна анестезія",
   "Індивідуальний план лікування",
 ];
@@ -26,10 +26,10 @@ export default function Implantation() {
       <Helmet>
         <title>Імплантація зубів — Дентіс Кропивницький</title>
         <meta name="description" content="Імплантація зубів у Кропивницькому. 19+ років досвіду, імпланти преміум-класу, приживлюваність 98%. Безкоштовна консультація." />
-        <link rel="canonical" href="https://dentis.pp.ua/implantation" />
+        <link rel="canonical" href="https://dentis.pp.ua/implantaciya" />
         <meta property="og:title" content="Імплантація зубів — Дентіс Кропивницький" />
         <meta property="og:description" content="Повноцінне відновлення зуба. Приживлюваність 98%, гарантія 5 років, досвідчений імплантолог." />
-        <meta property="og:url" content="https://dentis.pp.ua/implantation" />
+        <meta property="og:url" content="https://dentis.pp.ua/implantaciya" />
         <meta property="og:type" content="website" />
       </Helmet>
       <Header />

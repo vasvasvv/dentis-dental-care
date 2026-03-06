@@ -26,10 +26,10 @@ export default function ProfessionalCleaning() {
       <Helmet>
         <title>Професійна гігієна зубів — Дентіс Кропивницький</title>
         <meta name="description" content="Професійна чистка зубів у Кропивницькому: ультразвук, Air Flow, полірування, фторування. Акція — знижка 15% до 31 березня 2026." />
-        <link rel="canonical" href="https://dentis.pp.ua/professional-cleaning" />
+        <link rel="canonical" href="https://dentis.pp.ua/profesijne-ochischennya" />
         <meta property="og:title" content="Професійна гігієна зубів — Дентіс Кропивницький" />
         <meta property="og:description" content="Комплексне очищення зубів. Видалення каменю, Air Flow, полірування, фторування. Результат помітний відразу." />
-        <meta property="og:url" content="https://dentis.pp.ua/professional-cleaning" />
+        <meta property="og:url" content="https://dentis.pp.ua/profesijne-ochischennya" />
         <meta property="og:type" content="website" />
       </Helmet>
       <Header />
