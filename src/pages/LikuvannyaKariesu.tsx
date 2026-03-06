@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle, AlertCircle } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
 
 const stages = [
   {
@@ -36,6 +38,15 @@ const steps = [
 export default function LikuvannyaKariesu() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Лікування карієсу — Дентіс Кропивницький</title>
+        <meta name="description" content="Безболісне лікування карієсу будь-якої стадії у Кропивницькому. Сучасна анестезія, фотополімерні матеріали, мінімально інвазивний підхід." />
+        <link rel="canonical" href="https://dentis.pp.ua/likuvannya-kariesu" />
+        <meta property="og:title" content="Лікування карієсу — Дентіс Кропивницький" />
+        <meta property="og:description" content="Сучасне безболісне лікування карієсу. Зберігаємо максимум природних тканин зуба." />
+        <meta property="og:url" content="https://dentis.pp.ua/likuvannya-kariesu" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
 
       {/* Hero */}
@@ -145,10 +156,10 @@ export default function LikuvannyaKariesu() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-navy text-center">
+      <section className="py-20 bg-background text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-secondary mb-4">Зуб болить? Не зволікайте!</h2>
-          <p className="font-body text-primary-foreground/60 mb-8 max-w-md mx-auto">
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Зуб болить? Не зволікайте!</h2>
+          <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
             Приймаємо пацієнтів у зручний час. Зателефонуйте та запишіться вже сьогодні.
           </p>
           <a
@@ -161,7 +172,9 @@ export default function LikuvannyaKariesu() {
         </div>
       </section>
 
+<section className="bg-primary">
       <Footer />
+</section>
 
       <a
         href="tel:+380504800825"

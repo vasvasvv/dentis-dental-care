@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const types = [
   {
@@ -43,6 +44,15 @@ const steps = [
 export default function Protezuvannya() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Протезування зубів — Дентіс Кропивницький</title>
+        <meta name="description" content="Протезування зубів у Кропивницькому: коронки, мости, знімні протези, протезування на імплантах. Цирконій, металокераміка, безметалова кераміка." />
+        <link rel="canonical" href="https://dentis.pp.ua/protezuvannya" />
+        <meta property="og:title" content="Протезування зубів — Дентіс Кропивницький" />
+        <meta property="og:description" content="Відновлюємо функцію та красу зубів. Коронки, мости, знімні та незнімні протези від досвідчених фахівців." />
+        <meta property="og:url" content="https://dentis.pp.ua/protezuvannya" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
 
       {/* Hero */}
@@ -149,10 +159,10 @@ export default function Protezuvannya() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-navy text-center">
+      <section className="py-20 bg-background text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-secondary mb-4">Відновіть посмішку сьогодні</h2>
-          <p className="font-body text-primary-foreground/60 mb-8 max-w-md mx-auto">
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Відновіть посмішку сьогодні</h2>
+          <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
             Безкоштовна консультація — оберіть найкращий варіант протезування разом з лікарем.
           </p>
           <a
@@ -165,7 +175,9 @@ export default function Protezuvannya() {
         </div>
       </section>
 
+<section className="bg-primary">
       <Footer />
+</section>
 
       <a
         href="tel:+380504800825"

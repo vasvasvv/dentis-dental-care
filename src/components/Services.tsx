@@ -15,7 +15,7 @@ const services = [
     icon: Sparkles,
     title: "Естетична стоматологія",
     desc: "Відбілювання зубів, вініри, естетичні реставрації. Створення ідеальної посмішки.",
-    link: null,
+    link: "/estetychna-stomatolohiya",
   },
   {
     icon: Layers,
@@ -39,7 +39,7 @@ const services = [
     icon: ScanLine,
     title: "Діагностика та рентген",
     desc: "Цифрова рентгенографія, КЛКТ, фотопротокол.",
-    link: null,
+    link: "/diagnostyka-renthen",
   },
 ];
 

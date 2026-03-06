@@ -9,10 +9,20 @@ import Faq from "@/components/Faq";
 import ContactsSection from "@/components/Contacts";
 import Footer from "@/components/Footer";
 import { Phone } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Дентіс — Стоматологічна клініка у Кропивницькому</title>
+        <meta name="description" content="Сучасна стоматологія з індивідуальним підходом. Імплантація, протезування, лікування карієсу, професійна гігієна. Кропивницький." />
+        <link rel="canonical" href="https://dentis.pp.ua/" />
+        <meta property="og:title" content="Дентіс — Стоматологічна клініка у Кропивницькому" />
+        <meta property="og:description" content="Сучасна стоматологія з індивідуальним підходом. Комфорт, безпека та бездоганний результат." />
+        <meta property="og:url" content="https://dentis.pp.ua/" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
       <main>
         <Hero />

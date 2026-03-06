@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle, Clock, Star } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const steps = [
   { num: "01", title: "Огляд", desc: "Стоматолог оцінює стан ясен та зубів, наявність каменю та нальоту." },
@@ -22,6 +23,15 @@ const benefits = [
 export default function ProfessionalCleaning() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Професійна гігієна зубів — Дентіс Кропивницький</title>
+        <meta name="description" content="Професійна чистка зубів у Кропивницькому: ультразвук, Air Flow, полірування, фторування. Акція — знижка 15% до 31 березня 2026." />
+        <link rel="canonical" href="https://dentis.pp.ua/professional-cleaning" />
+        <meta property="og:title" content="Професійна гігієна зубів — Дентіс Кропивницький" />
+        <meta property="og:description" content="Комплексне очищення зубів. Видалення каменю, Air Flow, полірування, фторування. Результат помітний відразу." />
+        <meta property="og:url" content="https://dentis.pp.ua/professional-cleaning" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
 
       {/* Hero */}
@@ -97,6 +107,23 @@ export default function ProfessionalCleaning() {
         </div>
       </section>
 
+            {/* Promo banner */}
+      <section className="py-12 bg-gold/10 border-y border-gold/20">
+        <div className="container mx-auto px-4 max-w-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="font-display text-2xl font-bold text-custom-dark mb-1">Акція: знижка 15% на гігієну</p>
+            <p className="font-body text-muted-foreground text-sm">Діє до 31 березня 2026. Не пропустіть!</p>
+          </div>
+          <a
+            href="tel:+380504800825"
+            className="shrink-0 inline-flex items-center gap-2 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
+          >
+            <Phone size={16} />
+            Записатися зі знижкою
+          </a>
+        </div>
+      </section>
+
       {/* Benefits */}
       <section className="py-20 bg-cream-dark">
         <div className="container mx-auto px-4 max-w-3xl">
@@ -113,6 +140,8 @@ export default function ProfessionalCleaning() {
           </div>
         </div>
       </section>
+
+
 
       {/* Who needs */}
       <section className="py-20 bg-background">
@@ -136,28 +165,13 @@ export default function ProfessionalCleaning() {
         </div>
       </section>
 
-      {/* Promo banner */}
-      <section className="py-12 bg-gold/10 border-y border-gold/20">
-        <div className="container mx-auto px-4 max-w-3xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="font-display text-2xl font-bold text-custom-dark mb-1">Акція: знижка 15% на гігієну</p>
-            <p className="font-body text-muted-foreground text-sm">Діє до 31 березня 2026. Не пропустіть!</p>
-          </div>
-          <a
-            href="tel:+380504800825"
-            className="shrink-0 inline-flex items-center gap-2 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
-          >
-            <Phone size={16} />
-            Записатися зі знижкою
-          </a>
-        </div>
-      </section>
+
 
       {/* CTA */}
-      <section className="py-20 bg-navy text-center">
+      <section className="py-20 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-secondary mb-4">Подбайте про здоров'я ясен</h2>
-          <p className="font-body text-primary-foreground/60 mb-8 max-w-md mx-auto">
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Подбайте про здоров'я ясен</h2>
+          <p className="font-body text-custom-dark/60 mb-8 max-w-md mx-auto">
             Зателефонуйте та запишіться на зручний час. Процедура займає лише годину.
           </p>
           <a
@@ -169,9 +183,9 @@ export default function ProfessionalCleaning() {
           </a>
         </div>
       </section>
-
+<section className="bg-primary">
       <Footer />
-
+</section>
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle, Clock, Shield, Star } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const steps = [
   { num: "01", title: "Консультація та діагностика", desc: "КТ-знімок, оцінка стану кістки, планування імплантації в 3D." },
@@ -22,6 +23,15 @@ const benefits = [
 export default function Implantation() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Імплантація зубів — Дентіс Кропивницький</title>
+        <meta name="description" content="Імплантація зубів у Кропивницькому. 19+ років досвіду, імпланти преміум-класу, приживлюваність 98%. Безкоштовна консультація." />
+        <link rel="canonical" href="https://dentis.pp.ua/implantation" />
+        <meta property="og:title" content="Імплантація зубів — Дентіс Кропивницький" />
+        <meta property="og:description" content="Повноцінне відновлення зуба. Приживлюваність 98%, гарантія 5 років, досвідчений імплантолог." />
+        <meta property="og:url" content="https://dentis.pp.ua/implantation" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
 
       {/* Hero */}
@@ -114,10 +124,10 @@ export default function Implantation() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-navy text-center">
+      <section className="py-20 bg-bg-cream-dark text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-secondary mb-4">Готові відновити посмішку?</h2>
-          <p className="font-body text-primary-foreground/60 mb-8 max-w-md mx-auto">
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Готові відновити посмішку?</h2>
+          <p className="font-body text-primary-text-custom-dark/60 mb-8 max-w-md mx-auto">
             Запишіться на безкоштовну консультацію та дізнайтесь план лікування для вашого випадку.
           </p>
           <a
@@ -130,7 +140,9 @@ export default function Implantation() {
         </div>
       </section>
 
+<section className="bg-primary">
       <Footer />
+</section>
 
       <a
         href="tel:+380504800825"
