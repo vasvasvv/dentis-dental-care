@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { HelmetProvider } from "react-helmet-async";
-import ScrollToTop from "@/components/ScrollToTop";
+const ScrollToTop = lazy(() => import("./components/ScrollToTop"));
 const Index = lazy(() => import("./pages/Index"));
 const Implantaciya = lazy(() =>  import("./pages/Implantaciya"));
 const Protezuvannya = lazy(() =>  import("./pages/Protezuvannya"));
