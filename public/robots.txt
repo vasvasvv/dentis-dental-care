@@ -13,4 +13,6 @@ Allow: /
 User-agent: *
 Allow: /
 
+Host: dentis.pp.ua
+
 Sitemap: https://dentis.pp.ua/sitemap.xml
