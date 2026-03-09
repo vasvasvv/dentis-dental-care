@@ -38,7 +38,7 @@ const services = [
   {
     icon: ScanLine,
     title: "Діагностика та рентген",
-    desc: "Цифрова рентгенографія.",
+    desc: "Цифрова рентгенографія та професійна діагностика.",
     link: "/diagnostika-zubiv",
   },
 ];
