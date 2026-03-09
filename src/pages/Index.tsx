@@ -22,6 +22,9 @@ const Index = () => {
         <meta property="og:description" content="Сучасна стоматологія з індивідуальним підходом. Комфорт, безпека та бездоганний результат." />
         <meta property="og:url" content="https://dentis.pp.ua/" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <Header />
       <main>

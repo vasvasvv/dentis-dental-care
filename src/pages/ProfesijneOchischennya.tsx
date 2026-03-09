@@ -31,6 +31,9 @@ export default function ProfessionalCleaning() {
         <meta property="og:description" content="Комплексне очищення зубів. Видалення каменю, Air Flow, полірування, фторування. Результат помітний відразу." />
         <meta property="og:url" content="https://dentis.pp.ua/profesijne-ochischennya" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <Header />
 

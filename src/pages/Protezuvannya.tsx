@@ -52,6 +52,9 @@ export default function Protezuvannya() {
         <meta property="og:description" content="Відновлюємо функцію та красу зубів. Коронки, мости, знімні та незнімні протези від досвідчених фахівців." />
         <meta property="og:url" content="https://dentis.pp.ua/protezuvannya" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <Header />
 

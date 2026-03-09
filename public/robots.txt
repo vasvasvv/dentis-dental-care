@@ -1,18 +1,5 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
 
 Host: dentis.pp.ua
-
 Sitemap: https://dentis.pp.ua/sitemap.xml

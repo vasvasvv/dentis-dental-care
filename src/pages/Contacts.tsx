@@ -15,6 +15,9 @@ export default function ContactsPage() {
         <meta property="og:description" content="Знайдіть нас за адресою: вул. Героїв-рятувальників, 9/2, Кропивницький. Телефон: +38 050 480 0825." />
         <meta property="og:url" content="https://dentis.pp.ua/contacts" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <Header />
       <main className="pt-28">

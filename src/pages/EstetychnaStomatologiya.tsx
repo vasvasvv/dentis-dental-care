@@ -58,6 +58,9 @@ export default function EstetychnaStomat() {
         <meta property="og:description" content="Вініри, відбілювання, художня реставрація. Ваша ідеальна посмішка — наша робота." />
         <meta property="og:url" content="https://dentis.pp.ua/estetychna-stomatolohiya" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Helmet>
       <Header />
 
