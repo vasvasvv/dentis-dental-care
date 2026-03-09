@@ -44,6 +44,8 @@ export default function Doctors() {
                 <img
                   src={doc.img}
                   alt={doc.name}
+                  width={800}
+                  height={843}
                   loading="lazy"
                   className="w-full h-full object-cover object-top"
                 />
