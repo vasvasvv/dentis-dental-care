@@ -29,8 +29,8 @@ export default function Hero() {
           muted
           loop
           playsInline
-          preload="auto"
-          poster="/fallback.jpg"
+          preload="none"
+          poster="/hero-poster.jpg"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 gradient-hero opacity-70" />
