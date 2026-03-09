@@ -44,6 +44,7 @@ export default function Doctors() {
                 <img
                   src={doc.img}
                   alt={doc.name}
+                  loading="lazy"
                   className="w-full h-full object-cover object-top"
                 />
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-card to-transparent" />

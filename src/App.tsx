@@ -10,6 +10,7 @@ const ProfesijneOchischennya = lazy(() =>  import("./pages/ProfesijneOchischenny
 const EstetychnaStomatologiya = lazy(() =>  import("./pages/EstetychnaStomatologiya"));
 const DiagnostikaZubiv = lazy(() =>  import("./pages/DiagnostikaZubiv"));
 const Contacts = lazy(() =>  import("./pages/Contacts"));
+const NotFound = lazy(() =>  import("./pages/NotFound"));
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/estetychna-stomatolohiya" element={<EstetychnaStomatologiya />} />
         <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
         <Route path="/contacts" element={<Contacts />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
     </BrowserRouter>
