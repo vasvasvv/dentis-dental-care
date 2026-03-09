@@ -16,17 +16,27 @@ async function run() {
   const critters = new Critters({
     path: distDir,
     publicPath: "/",
-    // Inline critical CSS, load rest async via preload
     pruneSource: false,
     preload: "swap",
-    // Keep font-face rules in the inline CSS
-    fonts: true,
-    // Don't compress inline styles
+    fonts: false, // ми самі керуємо preload шрифтів
     compress: false,
     logLevel: "warn",
   });
 
-  const processed = await critters.process(html);
+  let processed = await critters.process(html);
+
+  // Виправити: Critters залишає rel="stylesheet" з onload, але може дублювати.
+  // Замінюємо на правильний non-blocking патерн: preload + noscript fallback
+  const cssFile = processed.match(/href="(\/assets\/index-[^"]+\.css)"/)?.[1];
+  if (cssFile) {
+    // Видаляємо всі stylesheet лінки та noscript блоки для CSS
+    processed = processed.replace(/<link[^>]*stylesheet[^>]*>/g, "");
+    processed = processed.replace(/<noscript>[\s\S]*?<\/noscript>/g, "");
+    // Вставляємо правильний async CSS + noscript fallback перед </head>
+    const asyncCss = `<link rel="preload" as="style" href="${cssFile}" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="${cssFile}"></noscript>`;
+    processed = processed.replace("</head>", `${asyncCss}\n</head>`);
+  }
+
   fs.writeFileSync(indexPath, processed);
 
   const before = html.length;
