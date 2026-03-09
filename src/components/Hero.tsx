@@ -30,7 +30,7 @@ export default function Hero() {
           loop
           playsInline
           preload="none"
-          poster="/hero-poster.jpg"
+          poster="/hero-poster.webp"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 gradient-hero opacity-70" />
