@@ -35,6 +35,15 @@ export default defineConfig(({ mode }) => ({
           if (name.includes("Dentis_with_Textg")) {
             return "assets/logo-gold.webp";
           }
+          // Фіксовані назви для шрифтів (preload)
+          if (name.includes("NeueMontreal-Bold") && name.endsWith(".woff2")) return "assets/font-bold.woff2";
+          if (name.includes("NeueMontreal-Bold") && name.endsWith(".woff")) return "assets/font-bold.woff";
+          if (name.includes("NeueMontreal-Medium") && name.endsWith(".woff2")) return "assets/font-medium.woff2";
+          if (name.includes("NeueMontreal-Medium") && name.endsWith(".woff")) return "assets/font-medium.woff";
+          if (name.includes("NeueMontreal-Regular") && name.endsWith(".woff2")) return "assets/font-regular.woff2";
+          if (name.includes("NeueMontreal-Regular") && name.endsWith(".woff")) return "assets/font-regular.woff";
+          if (name.includes("NeueMontreal-Light") && name.endsWith(".woff2")) return "assets/font-light.woff2";
+          if (name.includes("NeueMontreal-Light") && name.endsWith(".woff")) return "assets/font-light.woff";
           return "assets/[name]-[hash][extname]";
         },
       },
