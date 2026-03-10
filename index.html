@@ -142,6 +142,22 @@
   </head>
 
   <body>
+    <!-- LCP placeholder: shown immediately, hidden once React mounts -->
+    <div id="lcp-header-placeholder" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:10px 16px;background:transparent;pointer-events:none;">
+      <img
+        src="/assets/logo-white.webp"
+        alt="Dentis Logo"
+        width="400"
+        height="140"
+        fetchpriority="high"
+        style="height:80px;width:auto;display:block;"
+      />
+    </div>
+    <style>
+      #lcp-header-placeholder { opacity: 1; }
+      #root:not(:empty) ~ * #lcp-header-placeholder,
+      body.react-ready #lcp-header-placeholder { display: none; }
+    </style>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
