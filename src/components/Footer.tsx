@@ -87,7 +87,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-2.5 text-primary-foreground/70 text-sm font-body">
                 <MapPin size={14} className="mt-0.5 shrink-0" />
-                <span>вул. Героїв-рятувальників, 9/2, Кропивницький</span>
+                <span>вул. Героїв-рятувальників, 9 к.2, Кропивницький</span>
               </div>
             </div>
           </div>
