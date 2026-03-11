@@ -1,8 +1,2 @@
-# Статичні файли — НЕ перенаправляти на index.html
-/sitemap.xml /sitemap.xml 200
-/robots.txt /robots.txt 200
-/manifest.json /manifest.json 200
-/sw.js /sw.js 200
-
 # SPA fallback — всі інші маршрути
 /* /index.html 200
