@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
+# Забороняємо індексацію адміністративних і тестових сторінок
+Disallow: /admin/
+Disallow: /test/
+Disallow: /private/
+Disallow: /login/
+
+# Вказуємо пошуковикам на sitemap
 Sitemap: https://dentis.pp.ua/sitemap.xml
+
+# Рекомендація для ботів щодо швидкості обходу
+Crawl-delay: 1
