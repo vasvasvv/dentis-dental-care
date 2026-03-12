@@ -5,7 +5,7 @@ const path = require("path");
 const baseUrl = "https://dentis.kr.ua";
 
 // Шлях до головного компонента з маршрутизатором
-const appPath = path.join(__dirname, "../src/App.jsx"); // або App.tsx
+const appPath = path.join(__dirname, "../src/App.tsx"); // або App.tsx
 
 // Зчитуємо файл App.jsx як текст
 const appContent = fs.readFileSync(appPath, "utf-8");
