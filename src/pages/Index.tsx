@@ -10,6 +10,7 @@ import ContactsSection from "@/components/Contacts";
 import Footer from "@/components/Footer";
 import { Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import AwardsSection from "@/components/AwardsSection";
 
 const Index = () => {
   return (
@@ -35,6 +36,7 @@ const Index = () => {
         <NewsSection />
         <Reviews />
         <Faq />
+        <AwardsSection />
         <ContactsSection />
       </main>
       <Footer />
