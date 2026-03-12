@@ -66,7 +66,7 @@ export default function AwardsSection() {
               className="flex flex-col items-center bg-white rounded-2xl px-10 pt-8 pb-7 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
               {/* Award image / placeholder */}
-              <div className="w-44 h-44 rounded-xl overflow-hidden mb-6 shadow">
+              <div className="w-44 h-55 rounded-xl overflow-hidden mb-6 shadow">
                 <img src={award.image} alt={award.title} className="w-full h-full object-cover" />
 
               </div>
