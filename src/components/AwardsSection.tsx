@@ -49,16 +49,13 @@ export default function AwardsSection() {
 
         {/* Section header */}
         <div className="text-center mb-14">
-          <span className="inline-block text-xs font-semibold tracking-widest uppercase text-indigo-500 bg-indigo-50 px-4 py-1.5 rounded-full mb-4">
-            Визнання
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-4">
+        <div className="text-center mb-14">
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Визнання</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
             Нагороди та сертифікати
           </h2>
-          <p className="text-slate-500 text-base md:text-lg max-w-md mx-auto leading-relaxed">
-            Ми підтверджуємо якість роботи визнаними нагородами та відповідністю
-            міжнародним стандартам стоматологічної допомоги.
-          </p>
+        </div>
+
         </div>
 
         {/* Cards grid */}
@@ -66,7 +63,7 @@ export default function AwardsSection() {
           {awards.map((award, i) => (
             <div
               key={award.id}
-              className="flex flex-col items-center bg-white rounded-2xl px-8 pt-8 pb-7 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="flex flex-col items-center bg-white rounded-2xl px-10 pt-8 pb-7 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
               {/* Award image / placeholder */}
               <div className="w-44 h-44 rounded-xl overflow-hidden mb-6 shadow">
