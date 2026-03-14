@@ -136,7 +136,7 @@ export default function PWAInstallBanner() {
                     style={{ color: 'hsl(40 30% 92%)', fontSize: '15px' }}
                     className="font-medium leading-tight"
                   >
-                    Додати на головний екран
+                    Додаток на головний екран
                   </p>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default function PWAInstallBanner() {
                   </li>
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">2.</span>
-                    <span className="text-xs">Оберіть <span style={{ color: 'hsl(40 30% 88%)' }}>«На екран "Додому"»</span></span>
+                    <span className="text-xs">Оберіть <span style={{ color: 'hsl(40 30% 88%)' }}>«На Початковий екран»</span></span>
                   </li>
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">3.</span>
@@ -188,7 +188,7 @@ export default function PWAInstallBanner() {
                 style={{ color: 'hsl(180 15% 65%)', fontSize: '13px' }}
                 className="mb-3 leading-relaxed"
               >
-                Швидкий доступ до клініки, запис на прийом та нагадування — без браузера.
+                Швидкий доступ до клініки — без браузера.
               </p>
             )}
 
