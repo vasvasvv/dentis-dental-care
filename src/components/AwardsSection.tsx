@@ -1,11 +1,7 @@
-// src/components/sections/AwardsSection.tsx
-//
-// Коли будуть готові реальні фото — замінити placeholder на реальні img:
-  import award1 from '@/assets/award1.png'
-  import award2 from '@/assets/award2.png'
-  import award3 from '@/assets/award3.png'
-// і замінити <AwardPlaceholder> на:
-//   <img src={award.image} alt={award.title} className="w-full h-full object-cover" />
+  import award1 from '@/assets/award1.webp'
+  import award2 from '@/assets/award2.webp'
+  import award3 from '@/assets/award3.webp'
+
 
 const awards = [
   {
@@ -63,22 +59,22 @@ export default function AwardsSection() {
           {awards.map((award, i) => (
             <div
               key={award.id}
-              className="flex flex-col items-center bg-white rounded-2xl px-10 pt-8 pb-7 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="flex flex-col items-center bg-cream-dark rounded-2xl px-10 pt-8 pb-7 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
               {/* Award image / placeholder */}
-              <div className="w-44 h-55 rounded-xl overflow-hidden mb-6 shadow">
+              <div className="w-55 h-66 rounded-xl overflow-hidden mb-6 shadow">
                 <img src={award.image} alt={award.title} className="w-full h-full object-cover" />
 
               </div>
 
               {/* Text */}
-              <span className="text-xs font-bold tracking-widest uppercase text-indigo-500 mb-2">
+              <span className="text-[18px] uppercase bg-gold/10 text-gold px-2.5 py-1 rounded-full">
                 {award.year}
               </span>
-              <h3 className="text-[15px] font-semibold text-slate-800 text-center mb-1 leading-snug">
+              <h3 className="text-[18px] font-bolt text-center mb-1 leading-snug gold-line-center">
                 {award.title}
               </h3>
-              <p className="text-sm text-slate-400 text-center leading-relaxed">
+              <p className="text-[14px] text-foreground text-center leading-relaxed">
                 {award.issuer}
               </p>
             </div>

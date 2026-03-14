@@ -24,7 +24,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="border-t border-primary-foreground/10">
+    <footer className="border-t bg-navy border-primary-foreground/10">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-3 gap-10 items-start">
           {/* Brand */}
