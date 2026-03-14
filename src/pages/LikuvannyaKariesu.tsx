@@ -2,7 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import { motion } from "framer-motion";
+import heroVideo from "@/assets/hero-video.mp4";
+import { useEffect, useRef } from "react";
 
 const stages = [
   {
@@ -36,8 +37,17 @@ const steps = [
 ];
 
 export default function LikuvannyaKariesu() {
+      const videoRef = useRef<HTMLVideoElement>(null);
+  
+    useEffect(() => {
+      const video = videoRef.current;
+      if (video) {
+        video.play().catch(() => {});
+        video.playbackRate = 0.6;
+      }
+    }, []);
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Helmet>
         <title>Лікування карієсу — Дентіс Кропивницький</title>
         <meta name="description" content="Безболісне лікування карієсу будь-якої стадії у Кропивницькому. Сучасна анестезія, фотополімерні матеріали, мінімально інвазивний підхід." />
@@ -53,7 +63,22 @@ export default function LikuvannyaKariesu() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-24 bg-navy overflow-hidden">
+      <section className="relative pt-36 pb-24 overflow-hidden">
+                      {/* Фіксований фон з відео */}
+      <div className="fixed inset-0 -z-10">
+        <video
+          ref={videoRef}
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/hero-poster.webp"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 gradient-hero opacity-70" />
+      </div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
@@ -83,8 +108,8 @@ export default function LikuvannyaKariesu() {
           </div>
         </div>
       </section>
-
-      {/* Warning */}
+            {/* Warning */}
+            <div className="bg-background">
       <section className="py-12 bg-gold/5 border-y border-gold/20">
         <div className="container mx-auto px-4 max-w-3xl flex gap-4 items-start">
           <AlertCircle size={22} className="text-gold shrink-0 mt-0.5" />
@@ -93,6 +118,7 @@ export default function LikuvannyaKariesu() {
           </p>
         </div>
       </section>
+</div>
 
       {/* Stages */}
       <section className="py-20 bg-background">
@@ -111,6 +137,7 @@ export default function LikuvannyaKariesu() {
             ))}
           </div>
         </div>
+        
       </section>
 
       {/* Steps */}
@@ -159,7 +186,7 @@ export default function LikuvannyaKariesu() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-background text-center">
+      <section className="py-20 bg-cream-dark text-center">
         <div className="container mx-auto px-4">
           <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Зуб болить? Не зволікайте!</h2>
           <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
@@ -175,9 +202,8 @@ export default function LikuvannyaKariesu() {
         </div>
       </section>
 
-<section className="bg-primary">
       <Footer />
-</section>
+
 
       <a
         href="tel:+380504800825"

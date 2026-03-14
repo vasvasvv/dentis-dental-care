@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import heroVideo from "@/assets/hero-video.mp4";
+import { useEffect, useRef } from "react";
 
 const types = [
   {
@@ -42,8 +44,17 @@ const steps = [
 ];
 
 export default function Protezuvannya() {
+        const videoRef = useRef<HTMLVideoElement>(null);
+    
+      useEffect(() => {
+        const video = videoRef.current;
+        if (video) {
+          video.play().catch(() => {});
+          video.playbackRate = 0.6;
+        }
+      }, []);
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Helmet>
         <title>Протезування зубів — Дентіс Кропивницький</title>
         <meta name="description" content="Протезування зубів у Кропивницькому: коронки, мости, знімні протези, протезування на імплантах. Цирконій, металокераміка, безметалова кераміка." />
@@ -59,7 +70,22 @@ export default function Protezuvannya() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-24 bg-navy overflow-hidden">
+      <section className="relative pt-36 pb-24 overflow-hidden">
+                              {/* Фіксований фон з відео */}
+      <div className="fixed inset-0 -z-10">
+        <video
+          ref={videoRef}
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/hero-poster.webp"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 gradient-hero opacity-70" />
+      </div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
@@ -162,7 +188,7 @@ export default function Protezuvannya() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-background text-center">
+      <section className="py-20 bg-cream-dark text-center">
         <div className="container mx-auto px-4">
           <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Відновіть посмішку сьогодні</h2>
           <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
@@ -178,9 +204,9 @@ export default function Protezuvannya() {
         </div>
       </section>
 
-<section className="bg-primary">
+
       <Footer />
-</section>
+
 
       <a
         href="tel:+380504800825"

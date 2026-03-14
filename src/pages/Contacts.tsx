@@ -19,8 +19,10 @@ export default function ContactsPage() {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>
+      
       <Header />
-      <main className="pt-28">
+      <div className="h-28 bg-navy opacity-95"></div>
+      <main>        
         <ContactsSection />
       </main>
       <section className="bg-navy">

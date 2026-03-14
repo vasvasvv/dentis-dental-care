@@ -39,8 +39,9 @@ const Index = () => {
         <ContactsSection />
         <AwardsSection />
       </main>
+      <section className="bg-primary">
       <Footer />
-
+</section>
       {/* Floating phone CTA */}
       <a
         href="tel:+380504800825"

@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Phone, CheckCircle, Sparkles, Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import heroVideo from "@/assets/hero-video.mp4";
+import { useEffect, useRef } from "react";
 
 const services = [
   {
@@ -48,8 +50,17 @@ const results = [
 ];
 
 export default function EstetychnaStomat() {
+      const videoRef = useRef<HTMLVideoElement>(null);
+  
+    useEffect(() => {
+      const video = videoRef.current;
+      if (video) {
+        video.play().catch(() => {});
+        video.playbackRate = 0.6;
+      }
+    }, []);
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Helmet>
         <title>Естетична стоматологія — Дентіс Кропивницький</title>
         <meta name="description" content="Вініри, відбілювання Zoom 4, художня реставрація та дизайн посмішки у Кропивницькому. Створюємо ідеальну посмішку з індивідуальним підходом." />
@@ -65,7 +76,22 @@ export default function EstetychnaStomat() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-36 pb-24 bg-navy overflow-hidden">
+      <section className="relative pt-36 pb-24 overflow-hidden">
+                      {/* Фіксований фон з відео */}
+      <div className="fixed inset-0 -z-10">
+        <video
+          ref={videoRef}
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster="/hero-poster.webp"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 gradient-hero opacity-70" />
+      </div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
@@ -202,9 +228,9 @@ export default function EstetychnaStomat() {
         </div>
       </section>
 
-<section className="bg-primary">
+
       <Footer />
-</section>
+
 
       <a
         href="tel:+380504800825"
