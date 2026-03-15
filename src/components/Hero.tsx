@@ -14,7 +14,7 @@ export default function Hero() {
     const video = videoRef.current;
     if (video) {
       video.play().catch(() => {});
-      video.playbackRate = 0.8;
+      video.playbackRate = 0.99;
     }
   }, []);
 

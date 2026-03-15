@@ -105,7 +105,7 @@ export default function NewsSection() {
         <div className="text-center mt-10">
           <button
             onClick={() => navigate("/blog")}
-            className="inline-flex items-center gap-2 font-body text-sm font-medium text-navy hover:text-gold transition-colors duration-200 group"
+            className="inline-flex items-center gap-2 bg-gold border-gold-light/80 text-secondary hover:border hover:border-navy  px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200 group"
           >
             <span>Всі новини та статті</span>
             <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />

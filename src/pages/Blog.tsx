@@ -121,7 +121,7 @@ export default function Blog() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
             <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Зараз</p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">
               Акції та пропозиції
             </h2>
           </div>
@@ -168,7 +168,7 @@ export default function Blog() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-14">
               <div>
                 <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Корисно знати</p>
-                <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary mb-5 leading-tight">
+                <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-5 leading-tight">
                   Пам'ятка з догляду за порожниною рота
                 </h2>
                 <p className="font-body text-muted-foreground text-base leading-relaxed mb-8">
