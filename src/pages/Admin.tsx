@@ -74,10 +74,11 @@ function FieldInput({ label, value, onChange, placeholder }: {
 function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-4 sm:pb-0">
-      <div className="rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{
-        background: "border: "1px solid hsl(38 62% 52% / 0.25)",
+      <div className="rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+       style={{
+        border: '1px solid hsl(38 62% 52% / 0.25)',
         boxShadow: "0 24px 80px hsl(180 60% 5% / 0.7)",
-      }}>
+      }} >
         <div className="h-[2px] gradient-gold rounded-t-2xl" />
         <div className="p-5">
           <div className="flex items-center justify-between mb-5">
