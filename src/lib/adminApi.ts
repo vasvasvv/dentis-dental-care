@@ -1,7 +1,7 @@
 // src/lib/adminApi.ts
 // Клієнт для Admin панелі — звертається до dentis-site-api Worker
 
-const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.vasvasvv.workers.dev'
+const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev'
 
 export type NewsItem = {
   id: number

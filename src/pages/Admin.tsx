@@ -478,7 +478,7 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
     if (!password.trim()) return;
     setChecking(true);
     try {
-      const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.vasvasvv.workers.dev';
+      const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
       const res = await fetch(`${BASE}/api/push/count`, { headers: { Authorization: `Bearer ${password}` } });
       if (res.ok) { onLogin(password); }
       else { setError(true); setPassword(""); setTimeout(() => setError(false), 2000); }
