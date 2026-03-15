@@ -38,7 +38,7 @@ function ConfirmDialog({ message, onConfirm, onCancel }: {
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="rounded-2xl p-6 max-w-sm w-full" style={{ background: "hsl(180 60% 14%)", border: "1px solid hsl(38 62% 52% / 0.2)" }}>
+      <div className="rounded-2xl p-6 max-w-sm w-full" style={{ border: "1px solid hsl(38 62% 52% / 0.2)" }}>
         <div className="flex items-start gap-3 mb-5">
           <AlertTriangle size={20} className="text-[hsl(38_74%_58%)] flex-shrink-0 mt-0.5" />
           <p className="text-[hsl(40_20%_85%)] text-sm leading-relaxed" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{message}</p>
@@ -53,7 +53,7 @@ function ConfirmDialog({ message, onConfirm, onCancel }: {
 }
 
 const inputStyle = {
-  background: "hsl(180 60% 15%)", border: "1px solid hsl(180 40% 25%)",
+  border: "1px solid hsl(180 40% 25%)",
   color: "hsl(40 30% 88%)", fontFamily: '"NueneMontreal", system-ui, sans-serif',
 };
 
@@ -73,7 +73,7 @@ function ModalShell({ title, onClose, children }: { title: string; onClose: () =
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4 pb-4 sm:pb-0">
       <div className="rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{
-        background: "hsl(180 60% 11%)", border: "1px solid hsl(38 62% 52% / 0.25)",
+        background: "border: "1px solid hsl(38 62% 52% / 0.25)",
         boxShadow: "0 24px 80px hsl(180 60% 5% / 0.7)",
       }}>
         <div className="h-[2px] gradient-gold rounded-t-2xl" />
@@ -152,7 +152,7 @@ function NewsTab({ secret }: { secret: string }) {
         <div className="space-y-3">
           {items.map((item) => (
             <div key={item.id} className="rounded-2xl overflow-hidden" style={{
-              background: "hsl(180 60% 12%)",
+              
               border: normalizeHot(item.hot) ? "1px solid hsl(38 62% 52% / 0.4)" : "1px solid hsl(180 40% 22% / 0.5)",
             }}>
               {normalizeHot(item.hot) && (
