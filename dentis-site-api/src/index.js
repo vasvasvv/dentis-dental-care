@@ -1,43 +1,44 @@
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+// ── CORS & Security Headers ───────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  'https://dentis.pp.ua',
+  'https://www.dentis.pp.ua',
+]
+
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Content-Security-Policy':
+    "default-src 'none'; frame-ancestors 'none'",
 }
 
-function json(data, status = 200) {
+function getCorsHeaders(origin) {
+  const allowed = ALLOWED_ORIGINS.includes(origin)
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Vary': 'Origin',
+  }
+}
+
+function json(data, status = 200, origin = '') {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS },
+    headers: {
+      'Content-Type': 'application/json',
+      ...getCorsHeaders(origin),
+      ...SECURITY_HEADERS,
+    },
   })
 }
 
-function isAdmin(env, req) {
-  return req.headers.get('Authorization') === `Bearer ${env.ADMIN_SECRET}`
-}
+// ── JWT auth (replaces plain Bearer-token) ────────────────────────────────────
+// Admin sends password → Worker issues short-lived JWT → Admin sends JWT on each request
+// JWT is HS256, signed with env.JWT_SECRET (set once in Cloudflare dashboard)
 
-function idFrom(path) {
-  return path.split('/').pop()
-}
-
-// Нормалізація телефону → завжди +380XXXXXXXXX або null
-function normalizePhone(raw) {
-  if (!raw) return null
-  const digits = raw.replace(/\D/g, '')
-  // 0XXXXXXXXX → 380XXXXXXXXX
-  // 380XXXXXXXXX → 380XXXXXXXXX
-  // 38XXXXXXXXX (без нуля) → помилка
-  let normalized
-  if (digits.startsWith('380') && digits.length === 12) {
-    normalized = digits
-  } else if (digits.startsWith('0') && digits.length === 10) {
-    normalized = '38' + digits
-  } else {
-    return null // невалідний формат
-  }
-  return '+' + normalized
-}
-
-// ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
 function b64u(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
@@ -47,6 +48,115 @@ function fromb64u(s) {
   while (s.length % 4) s += '='
   return Uint8Array.from(atob(s), c => c.charCodeAt(0))
 }
+
+async function signJwt(payload, secret) {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const header = b64u(enc.encode(JSON.stringify({ alg: 'HS256', typ: 'JWT' })))
+  const body = b64u(enc.encode(JSON.stringify(payload)))
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(`${header}.${body}`))
+  return `${header}.${body}.${b64u(sig)}`
+}
+
+async function verifyJwt(token, secret) {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const enc = new TextEncoder()
+    const key = await crypto.subtle.importKey(
+      'raw', enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
+    )
+    const ok = await crypto.subtle.verify(
+      'HMAC', key,
+      fromb64u(parts[2]),
+      enc.encode(`${parts[0]}.${parts[1]}`)
+    )
+    if (!ok) return null
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    if (payload.exp < Math.floor(Date.now() / 1000)) return null // expired
+    return payload
+  } catch {
+    return null
+  }
+}
+
+// Check Authorization header: supports both legacy Bearer (ADMIN_SECRET) for
+// backwards compat during migration AND new JWT tokens
+async function isAdmin(env, req) {
+  const auth = req.headers.get('Authorization') || ''
+  if (!auth.startsWith('Bearer ')) return false
+  const token = auth.slice(7)
+
+  // New path: verify JWT
+  if (env.JWT_SECRET) {
+    const payload = await verifyJwt(token, env.JWT_SECRET)
+    if (payload?.role === 'admin') return true
+  }
+
+  // Legacy path: plain ADMIN_SECRET (kept for transition period)
+  return token === env.ADMIN_SECRET
+}
+
+// ── Rate Limiter (IP + endpoint based, stored in D1) ─────────────────────────
+async function checkRateLimit(db, ip, endpoint, maxAttempts = 10, windowSecs = 60) {
+  const key = `rl:${endpoint}:${ip}`
+  const now = Math.floor(Date.now() / 1000)
+  const windowStart = now - windowSecs
+
+  try {
+    // Clean old entries and count recent ones atomically
+    await db.prepare(
+      'DELETE FROM rate_limit WHERE key=? AND ts<?'
+    ).bind(key, windowStart).run()
+
+    const { count } = await db.prepare(
+      'SELECT COUNT(*) as count FROM rate_limit WHERE key=?'
+    ).bind(key).first() ?? { count: 0 }
+
+    if (count >= maxAttempts) {
+      return { limited: true, remaining: 0 }
+    }
+
+    await db.prepare(
+      'INSERT INTO rate_limit (key,ts) VALUES (?,?)'
+    ).bind(key, now).run()
+
+    return { limited: false, remaining: maxAttempts - count - 1 }
+  } catch {
+    // If rate_limit table doesn't exist yet, allow the request
+    return { limited: false, remaining: maxAttempts }
+  }
+}
+
+function getClientIp(req) {
+  return req.headers.get('CF-Connecting-IP') ||
+    req.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+    'unknown'
+}
+
+function idFrom(path) {
+  return path.split('/').pop()
+}
+
+function normalizePhone(raw) {
+  if (!raw) return null
+  const digits = raw.replace(/\D/g, '')
+  let normalized
+  if (digits.startsWith('380') && digits.length === 12) {
+    normalized = digits
+  } else if (digits.startsWith('0') && digits.length === 10) {
+    normalized = '38' + digits
+  } else {
+    return null
+  }
+  return '+' + normalized
+}
+
+// ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
 function concat(...arrays) {
   const total = arrays.reduce((n, a) => n + a.length, 0)
   const out = new Uint8Array(total)
@@ -122,7 +232,6 @@ async function sendPush(sub, payload, env) {
   return res.status
 }
 
-// Надіслати push конкретному номеру телефону
 async function pushToPhone(db, phone, payload, env) {
   const { results } = await db.prepare(
     'SELECT endpoint,p256dh,auth FROM push_subscriptions WHERE phone=?'
@@ -145,7 +254,6 @@ async function pushToPhone(db, phone, payload, env) {
   return { sent }
 }
 
-// Broadcast усім
 async function broadcast(db, payload, env) {
   const { results } = await db.prepare('SELECT endpoint,p256dh,auth FROM push_subscriptions').all()
   if (!results?.length) return { sent: 0, failed: 0 }
@@ -167,7 +275,6 @@ async function broadcast(db, payload, env) {
   return { sent, failed }
 }
 
-// Форматування дати для сповіщення
 function formatDt(dt) {
   const d = new Date(dt)
   const day = d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })
@@ -180,9 +287,8 @@ async function runReminders(db, env) {
   const now = Date.now()
   const in24h = new Date(now + 24 * 60 * 60 * 1000)
   const in1h  = new Date(now +      60 * 60 * 1000)
-  const window = 30 * 60 * 1000 // ±30 хв вікно
+  const window = 30 * 60 * 1000
 
-  // Нагадування за 24 години
   const { results: remind24 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_24h=0
@@ -197,15 +303,12 @@ async function runReminders(db, env) {
     await pushToPhone(db, appt.phone, {
       title: '📅 Нагадування про прийом',
       body: `${appt.patient_name}, завтра о ${time} — ${appt.doctor || 'Дентіс'}`,
-      url: '/',
-      icon: '/icon-192.png',
+      url: '/', icon: '/icon-192.png',
     }, env)
     await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
-    console.log(`Reminded 24h: appt ${appt.id} for ${appt.phone}`)
     void day
   }
 
-  // Нагадування за 1 годину
   const { results: remind1 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_1h=0
@@ -220,33 +323,99 @@ async function runReminders(db, env) {
     await pushToPhone(db, appt.phone, {
       title: '⏰ Прийом через годину',
       body: `${appt.patient_name}, сьогодні о ${time} — ${appt.doctor || 'Дентіс'}`,
-      url: '/',
-      icon: '/icon-192.png',
+      url: '/', icon: '/icon-192.png',
     }, env)
     await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
-    console.log(`Reminded 1h: appt ${appt.id} for ${appt.phone}`)
   }
 }
 
+// ── MAIN HANDLER ──────────────────────────────────────────────────────────────
 export default {
-  // ── HTTP handler ────────────────────────────────────────────────────────────
   async fetch(request, env) {
     const { pathname: p } = new URL(request.url)
     const m = request.method
+    const origin = request.headers.get('Origin') || ''
 
-    if (m === 'OPTIONS') return new Response(null, { headers: CORS })
-
-    if (p === '/api/vapid-public-key' && m === 'GET') {
-      return json({ key: env.VAPID_PUBLIC_KEY })
+    if (m === 'OPTIONS') {
+      return new Response(null, {
+        headers: { ...getCorsHeaders(origin), ...SECURITY_HEADERS }
+      })
     }
 
-    // ── NEWS ────────────────────────────────────────────────────────────────
+    // ── AUTH: Issue JWT token ────────────────────────────────────────────────
+    // POST /api/auth/login  { password: "..." }  → { token: "...", expiresIn: 3600 }
+    if (p === '/api/auth/login' && m === 'POST') {
+      const ip = getClientIp(request)
+
+      // Rate limit: 5 attempts per 60s per IP on login endpoint
+      const rl = await checkRateLimit(env.DB, ip, 'login', 5, 60)
+      if (rl.limited) {
+        return json({ error: 'Too many attempts. Try again in 60 seconds.' }, 429, origin)
+      }
+
+      let body
+      try { body = await request.json() } catch { return json({ error: 'Invalid JSON' }, 400, origin) }
+
+      if (body.password !== env.ADMIN_SECRET) {
+        return json({ error: 'Invalid credentials' }, 401, origin)
+      }
+
+      if (!env.JWT_SECRET) {
+        return json({ error: 'JWT_SECRET not configured' }, 500, origin)
+      }
+
+      const token = await signJwt(
+        { role: 'admin', iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 3600 },
+        env.JWT_SECRET
+      )
+      return json({ token, expiresIn: 3600 }, 200, origin)
+    }
+
+    // ── PUSH SUBSCRIBE (public) ──────────────────────────────────────────────
+    if (p === '/api/push/subscribe' && m === 'POST') {
+      const b = await request.json()
+      const phone = b.phone ? normalizePhone(b.phone) : null
+      await env.DB.prepare(
+        'INSERT OR REPLACE INTO push_subscriptions (endpoint,p256dh,auth,phone) VALUES (?,?,?,?)'
+      ).bind(b.endpoint, b.keys.p256dh, b.keys.auth, phone).run()
+      return json({ ok: true }, 200, origin)
+    }
+    if (p === '/api/push/unsubscribe' && m === 'POST') {
+      const b = await request.json()
+      await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(b.endpoint).run()
+      return json({ ok: true }, 200, origin)
+    }
+
+    // ── VAPID public key (public) ────────────────────────────────────────────
+    if (p === '/api/vapid-public-key' && m === 'GET') {
+      return json({ key: env.VAPID_PUBLIC_KEY }, 200, origin)
+    }
+
+    // ── HEALTH (public) ──────────────────────────────────────────────────────
+    if (p === '/api/health') return json({ ok: true, ts: Date.now() }, 200, origin)
+
+    // ── Rate limit on push/count — used by admin login screen ───────────────
+    // This endpoint verifies the admin password — limit brute-force attempts
+    if (p === '/api/push/count' && m === 'GET') {
+      const ip = getClientIp(request)
+      const rl = await checkRateLimit(env.DB, ip, 'push-count', 10, 60)
+      if (rl.limited) {
+        return json({ error: 'Too many requests' }, 429, origin)
+      }
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const row = await env.DB.prepare('SELECT COUNT(*) as count FROM push_subscriptions').first()
+      return json({ count: row?.count ?? 0 }, 200, origin)
+    }
+
+    // ── All remaining routes require admin auth ──────────────────────────────
+    if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+
+    // ── NEWS ─────────────────────────────────────────────────────────────────
     if (p === '/api/news' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM news ORDER BY hot DESC, created_at DESC').all()
-      return json(results)
+      return json(results, 200, origin)
     }
     if (p === '/api/news' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       const { meta } = await env.DB.prepare(
         'INSERT INTO news (type,badge,title,desc,date,hot) VALUES (?,?,?,?,?,?)'
@@ -254,125 +423,107 @@ export default {
       if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
         broadcast(env.DB, { title: b.badge || 'Дентіс', body: b.title, url: '/#news', icon: '/icon-192.png' }, env).catch(() => {})
       }
-      return json({ id: meta.last_row_id }, 201)
+      return json({ id: meta.last_row_id }, 201, origin)
     }
     if (p.match(/^\/api\/news\/\d+$/) && m === 'PUT') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       await env.DB.prepare("UPDATE news SET type=?,badge=?,title=?,desc=?,date=?,hot=?,updated_at=datetime('now') WHERE id=?")
         .bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0, idFrom(p)).run()
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
     if (p.match(/^\/api\/news\/\d+$/) && m === 'DELETE') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       await env.DB.prepare('DELETE FROM news WHERE id=?').bind(idFrom(p)).run()
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
 
-    // ── DOCTORS ─────────────────────────────────────────────────────────────
+    // ── DOCTORS ──────────────────────────────────────────────────────────────
     if (p === '/api/doctors' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM doctors ORDER BY sort_order ASC').all()
-      return json(results)
+      return json(results, 200, origin)
     }
     if (p === '/api/doctors' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       const { meta } = await env.DB.prepare(
         'INSERT INTO doctors (name,title,speciality,experience,desc,img_url,sort_order) VALUES (?,?,?,?,?,?,?)'
       ).bind(b.name, b.title, b.speciality, b.experience, b.desc, b.img_url ?? '', b.sort_order ?? 99).run()
-      return json({ id: meta.last_row_id }, 201)
+      return json({ id: meta.last_row_id }, 201, origin)
     }
     if (p.match(/^\/api\/doctors\/\d+$/) && m === 'PUT') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       await env.DB.prepare("UPDATE doctors SET name=?,title=?,speciality=?,experience=?,desc=?,img_url=?,sort_order=?,updated_at=datetime('now') WHERE id=?")
         .bind(b.name, b.title, b.speciality, b.experience, b.desc, b.img_url ?? '', b.sort_order ?? 99, idFrom(p)).run()
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
     if (p.match(/^\/api\/doctors\/\d+$/) && m === 'DELETE') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const doc = await env.DB.prepare('SELECT img_url FROM doctors WHERE id=?').bind(idFrom(p)).first()
       if (doc?.img_url?.includes('/api/doctors/photo/')) {
         await env.DOCTORS_BUCKET.delete(doc.img_url.split('/api/doctors/photo/')[1]).catch(() => {})
       }
       await env.DB.prepare('DELETE FROM doctors WHERE id=?').bind(idFrom(p)).run()
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
     if (p === '/api/doctors/photo' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const ct = request.headers.get('Content-Type') || ''
-      if (!ct.startsWith('image/')) return json({ error: 'Only images allowed' }, 400)
+      if (!ct.startsWith('image/')) return json({ error: 'Only images allowed' }, 400, origin)
       const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg'
       const key = `doctor-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const body = await request.arrayBuffer()
-      if (body.byteLength > 5 * 1024 * 1024) return json({ error: 'File too large' }, 413)
+      if (body.byteLength > 5 * 1024 * 1024) return json({ error: 'File too large' }, 413, origin)
       await env.DOCTORS_BUCKET.put(key, body, { httpMetadata: { contentType: ct } })
-      return json({ url: `${new URL(request.url).origin}/api/doctors/photo/${key}` }, 201)
+      return json({ url: `${new URL(request.url).origin}/api/doctors/photo/${key}` }, 201, origin)
     }
     if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
       const obj = await env.DOCTORS_BUCKET.get(p.replace('/api/doctors/photo/', ''))
-      if (!obj) return new Response('Not Found', { status: 404 })
+      if (!obj) return new Response('Not Found', { status: 404, headers: SECURITY_HEADERS })
       return new Response(obj.body, {
-        headers: { 'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable', 'Access-Control-Allow-Origin': '*' },
+        headers: {
+          'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Access-Control-Allow-Origin': '*',
+          ...SECURITY_HEADERS,
+        },
       })
     }
 
     // ── APPOINTMENTS ─────────────────────────────────────────────────────────
     if (p === '/api/appointments' && m === 'GET') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const url = new URL(request.url)
-      const date = url.searchParams.get('date') // фільтр по даті YYYY-MM-DD
+      const date = url.searchParams.get('date')
       let query = 'SELECT * FROM appointments'
       const args = []
       if (date) { query += ' WHERE appointment_dt LIKE ?'; args.push(`${date}%`) }
       query += ' ORDER BY appointment_dt ASC'
       const { results } = await env.DB.prepare(query).bind(...args).all()
-      return json(results)
+      return json(results, 200, origin)
     }
-
     if (p === '/api/appointments' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       const { patient_name, phone, appointment_dt, doctor, notes } = b
-
-      // Нормалізуємо телефон
       const normalPhone = normalizePhone(phone)
-      if (!normalPhone) return json({ error: 'Невалідний номер телефону. Введіть у форматі +380XXXXXXXXX або 0XXXXXXXXX' }, 400)
-
+      if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
       const { meta } = await env.DB.prepare(
         'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes) VALUES (?,?,?,?,?)'
       ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null).run()
-
       const id = meta.last_row_id
-
-      // Перевіряємо чи є push-підписка для цього телефону
       const sub = await env.DB.prepare('SELECT endpoint FROM push_subscriptions WHERE phone=? LIMIT 1').bind(normalPhone).first()
       const { day, time } = formatDt(appointment_dt)
-
-      // Надсилаємо підтвердження якщо є підписка
       if (sub && env.VAPID_PUBLIC_KEY) {
         pushToPhone(env.DB, normalPhone, {
           title: '✅ Запис підтверджено',
           body: `${patient_name}, ваш прийом ${day} о ${time}${doctor ? ` — ${doctor}` : ''}`,
-          url: '/',
-          icon: '/icon-192.png',
+          url: '/', icon: '/icon-192.png',
         }, env).catch(() => {})
       }
-
-      return json({ id, hasPush: !!sub }, 201)
+      return json({ id, hasPush: !!sub }, 201, origin)
     }
-
     if (p.match(/^\/api\/appointments\/\d+$/) && m === 'PUT') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
       const id = idFrom(p)
       const old = await env.DB.prepare('SELECT * FROM appointments WHERE id=?').bind(id).first()
-      if (!old) return json({ error: 'Not found' }, 404)
-
+      if (!old) return json({ error: 'Not found' }, 404, origin)
       const { patient_name, phone, appointment_dt, doctor, notes, status } = b
       const normalPhone = normalizePhone(phone || old.phone)
-      if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400)
-
+      if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
       await env.DB.prepare(`
         UPDATE appointments SET patient_name=?,phone=?,appointment_dt=?,doctor=?,notes=?,status=?,
         reminded_24h=CASE WHEN appointment_dt!=? THEN 0 ELSE reminded_24h END,
@@ -380,32 +531,25 @@ export default {
         updated_at=datetime('now') WHERE id=?
       `).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null, status || old.status,
         appointment_dt, appointment_dt, id).run()
-
-      // Сповіщення про зміни
       if (env.VAPID_PUBLIC_KEY) {
         const { day, time } = formatDt(appointment_dt)
         if (status === 'cancelled' && old.status !== 'cancelled') {
           pushToPhone(env.DB, normalPhone, {
             title: '❌ Запис скасовано',
-            body: `${patient_name}, ваш прийом ${day} о ${time} скасовано. Зателефонуйте нам для перезапису.`,
-            url: '/',
-            icon: '/icon-192.png',
+            body: `${patient_name}, ваш прийом ${day} о ${time} скасовано.`,
+            url: '/', icon: '/icon-192.png',
           }, env).catch(() => {})
         } else if (appointment_dt !== old.appointment_dt) {
           pushToPhone(env.DB, normalPhone, {
             title: '🔄 Час прийому змінено',
             body: `${patient_name}, ваш прийом перенесено на ${day} о ${time}`,
-            url: '/',
-            icon: '/icon-192.png',
+            url: '/', icon: '/icon-192.png',
           }, env).catch(() => {})
         }
       }
-
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
-
     if (p.match(/^\/api\/appointments\/\d+$/) && m === 'DELETE') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const appt = await env.DB.prepare('SELECT * FROM appointments WHERE id=?').bind(idFrom(p)).first()
       if (appt && env.VAPID_PUBLIC_KEY) {
         const { day, time } = formatDt(appt.appointment_dt)
@@ -416,58 +560,31 @@ export default {
         }, env).catch(() => {})
       }
       await env.DB.prepare('DELETE FROM appointments WHERE id=?').bind(idFrom(p)).run()
-      return json({ ok: true })
+      return json({ ok: true }, 200, origin)
     }
 
-    // ── PUSH ─────────────────────────────────────────────────────────────────
-    if (p === '/api/push/subscribe' && m === 'POST') {
-      const b = await request.json()
-      // phone опціональний — передається якщо є
-      const phone = b.phone ? normalizePhone(b.phone) : null
-      await env.DB.prepare(
-        'INSERT OR REPLACE INTO push_subscriptions (endpoint,p256dh,auth,phone) VALUES (?,?,?,?)'
-      ).bind(b.endpoint, b.keys.p256dh, b.keys.auth, phone).run()
-      return json({ ok: true })
-    }
-    if (p === '/api/push/unsubscribe' && m === 'POST') {
-      const b = await request.json()
-      await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(b.endpoint).run()
-      return json({ ok: true })
-    }
+    // ── PUSH (admin) ─────────────────────────────────────────────────────────
     if (p === '/api/push/send-to' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
-      if (!b.phone) return json({ error: 'phone required' }, 400)
+      if (!b.phone) return json({ error: 'phone required' }, 400, origin)
       const phone = normalizePhone(b.phone)
-      if (!phone) return json({ error: 'Invalid phone' }, 400)
+      if (!phone) return json({ error: 'Invalid phone' }, 400, origin)
       const result = await pushToPhone(env.DB, phone, {
-        title: b.title || 'Дентіс',
-        body: b.body || '',
-        url: b.url || '/',
-        icon: '/icon-192.png',
+        title: b.title || 'Дентіс', body: b.body || '', url: b.url || '/', icon: '/icon-192.png',
       }, env)
-      return json(result)
+      return json(result, 200, origin)
     }
-
     if (p === '/api/push/send' && m === 'POST') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
-      const result = await broadcast(env.DB, { title: b.title || 'Дентіс', body: b.body || '', url: b.url || '/', icon: '/icon-192.png' }, env)
-      return json(result)
-    }
-    if (p === '/api/push/count' && m === 'GET') {
-      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
-      const row = await env.DB.prepare('SELECT COUNT(*) as count FROM push_subscriptions').first()
-      return json({ count: row?.count ?? 0 })
+      const result = await broadcast(env.DB, {
+        title: b.title || 'Дентіс', body: b.body || '', url: b.url || '/', icon: '/icon-192.png',
+      }, env)
+      return json(result, 200, origin)
     }
 
-    // ── HEALTH ───────────────────────────────────────────────────────────────
-    if (p === '/api/health') return json({ ok: true, ts: Date.now() })
-
-    return json({ error: 'Not found' }, 404)
+    return json({ error: 'Not found' }, 404, origin)
   },
 
-  // ── CRON handler ────────────────────────────────────────────────────────────
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runReminders(env.DB, env))
   },

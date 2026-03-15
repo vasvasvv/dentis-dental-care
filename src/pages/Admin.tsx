@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
@@ -8,7 +9,7 @@ import {
 import {
   getNews, createNews, updateNews, deleteNews,
   getDoctors, createDoctor, updateDoctor, deleteDoctor,
-  sendPush, getPushCount,
+  sendPush, getPushCount, loginForToken,
   type NewsItem, type Doctor,
 } from "@/lib/adminApi.ts";
 
@@ -110,7 +111,7 @@ function ModalShell({ title, onClose, children }: { title: string; onClose: () =
 
 // ─── News Tab ─────────────────────────────────────────────────────────────────
 
-function NewsTab({ secret }: { secret: string }) {
+function NewsTab({ token }: { token: string }) {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -134,15 +135,15 @@ function NewsTab({ secret }: { secret: string }) {
     setSaving(true); setError(null);
     try {
       const p = { type: editing.type, badge: editing.badge, title: editing.title, desc: editing.desc, date: editing.date, hot: editing.hot };
-      isNew ? await createNews(p, secret) : await updateNews(editing.id!, p, secret);
+      isNew ? await createNews(p, token) : await updateNews(editing.id!, p, token);
       await load(); setEditing(null);
     } catch (e: unknown) {
-      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Невірний пароль адміна' : 'Помилка збереження');
+      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Сесія закінчилась — увійдіть знову' : 'Помилка збереження');
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: number) => {
-    try { await deleteNews(id, secret); setItems((p) => p.filter((i) => i.id !== id)); }
+    try { await deleteNews(id, token); setItems((p) => p.filter((i) => i.id !== id)); }
     catch { setError("Помилка видалення"); }
     setDeleteId(null);
   };
@@ -261,7 +262,7 @@ function NewsTab({ secret }: { secret: string }) {
 
 // ─── Doctors Tab ──────────────────────────────────────────────────────────────
 
-function DoctorsTab({ secret }: { secret: string }) {
+function DoctorsTab({ token }: { token: string }) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -300,7 +301,7 @@ function DoctorsTab({ secret }: { secret: string }) {
         setUploading(true);
         const res = await fetch(`${BASE}/api/doctors/photo`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${secret}`, 'Content-Type': pendingFile.type },
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': pendingFile.type },
           body: pendingFile,
         });
         setUploading(false);
@@ -310,19 +311,19 @@ function DoctorsTab({ secret }: { secret: string }) {
       }
 
       const p = { name: editing.name, title: editing.title, speciality: editing.speciality, experience: editing.experience, desc: editing.desc, img_url, sort_order: editing.sort_order };
-      isNew ? await createDoctor(p, secret) : await updateDoctor(editing.id!, p, secret);
+      isNew ? await createDoctor(p, token) : await updateDoctor(editing.id!, p, token);
       await load();
       setEditing(null);
       setPendingFile(null);
       setPreviewUrl(null);
     } catch (e: unknown) {
       setUploading(false);
-      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Невірний пароль адміна' : (e instanceof Error ? e.message : 'Помилка збереження'));
+      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Сесія закінчилась — увійдіть знову' : (e instanceof Error ? e.message : 'Помилка збереження'));
     } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: number) => {
-    try { await deleteDoctor(id, secret); setDoctors((p) => p.filter((d) => d.id !== id)); }
+    try { await deleteDoctor(id, token); setDoctors((p) => p.filter((d) => d.id !== id)); }
     catch { setError("Помилка видалення"); }
     setDeleteId(null);
   };
@@ -416,9 +417,9 @@ function DoctorsTab({ secret }: { secret: string }) {
   );
 }
 
-function ManualPushModal({ appt, secret, onClose, onSent }: {
+function ManualPushModal({ appt, token, onClose, onSent }: {
   appt: Appointment;
-  secret: string;
+  token: string;
   onClose: () => void;
   onSent: () => void;
 }) {
@@ -433,7 +434,7 @@ function ManualPushModal({ appt, secret, onClose, onSent }: {
     try {
       const res = await fetch(`${BASE}/api/push/send-to`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: appt.phone, title, body, url: '/' }),
       });
       const data = await res.json() as { sent: number; noSub?: boolean };
@@ -586,7 +587,7 @@ function ApptForm({
   );
 }
 
-function AppointmentsTab({ secret }: { secret: string }) {
+function AppointmentsTab({ token }: { token: string }) {
   const [items, setItems] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -603,7 +604,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
     setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/appointments?date=${filterDate}`, {
-        headers: { Authorization: `Bearer ${secret}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error();
       setItems(await res.json() as Appointment[]);
@@ -619,7 +620,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
       const url = isNew ? `${BASE}/api/appointments` : `${BASE}/api/appointments/${editing?.id}`;
       const res = await fetch(url, {
         method: isNew ? 'POST' : 'PUT',
-        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error();
@@ -632,7 +633,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
   const handleDelete = async (id: number) => {
     try {
       await fetch(`${BASE}/api/appointments/${id}`, {
-        method: 'DELETE', headers: { Authorization: `Bearer ${secret}` },
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
       });
       setItems(p => p.filter(i => i.id !== id));
     } catch { setError('Помилка видалення'); }
@@ -731,7 +732,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
       {pushModal && (
         <ManualPushModal
           appt={pushModal}
-          secret={secret}
+          token={token}
           onClose={() => setPushModal(null)}
           onSent={() => { setSentId(pushModal.id); setTimeout(() => setSentId(null), 3000); setPushModal(null); }}
         />
@@ -742,7 +743,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
 
 // ─── Push Tab ─────────────────────────────────────────────────────────────────
 
-function PushTab({ secret }: { secret: string }) {
+function PushTab({ token }: { token: string }) {
   const [pushTab, setPushTab] = useState<'all' | 'phone'>('all');
 
   // ── Broadcast ──
@@ -762,13 +763,13 @@ function PushTab({ secret }: { secret: string }) {
   const [pResult, setPResult] = useState<{ sent: number; noSub?: boolean } | null>(null);
   const [pError, setPError] = useState<string | null>(null);
 
-  useEffect(() => { getPushCount(secret).then(setSubCount); }, [secret]);
+  useEffect(() => { getPushCount(token).then(setSubCount); }, [token]);
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) return;
     setSending(true); setError(null); setSent(null);
-    try { const r = await sendPush({ title, body, url }, secret); setSent(r.sent); setTitle(""); setBody(""); setUrl("/"); }
-    catch (e: unknown) { setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Невірний пароль адміна' : 'Помилка надсилання'); }
+    try { const r = await sendPush({ title, body, url }, token); setSent(r.sent); setTitle(""); setBody(""); setUrl("/"); }
+    catch (e: unknown) { setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Сесія закінчилась — увійдіть знову' : 'Помилка надсилання'); }
     finally { setSending(false); }
   };
 
@@ -778,7 +779,7 @@ function PushTab({ secret }: { secret: string }) {
     try {
       const res = await fetch(`${BASE}/api/push/send-to`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: pPhone, title: pTitle, body: pBody, url: '/' }),
       });
       const data = await res.json() as { sent: number; noSub?: boolean };
@@ -921,35 +922,38 @@ function PushTab({ secret }: { secret: string }) {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
-function LoginScreen({ onLogin }: { onLogin: (s: string) => Promise<void> }) {
+function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
-  const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const attemptsRef = React.useRef(0);
 
   const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
   const lockSecondsLeft = isLocked ? Math.ceil((lockedUntil! - Date.now()) / 1000) : 0;
 
   const handleSubmit = async () => {
     if (!password.trim() || isLocked) return;
-    setChecking(true);
+    setChecking(true); setErrorMsg(null);
     try {
-      const res = await fetch(`${BASE}/api/push/count`, { headers: { Authorization: `Bearer ${password}` } });
-      if (res.ok) {
-        setAttempts(0);
-        await onLogin(password);
+      const token = await loginForToken(password);
+      attemptsRef.current = 0;
+      onLogin(token);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg === 'TOO_MANY_ATTEMPTS') {
+        setLockedUntil(Date.now() + 60_000);
+        setErrorMsg('Забагато спроб. Зачекайте 60 секунд.');
       } else {
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        if (newAttempts >= 5) {
-          setLockedUntil(Date.now() + 30_000); // 30s lockout after 5 fails
-          setAttempts(0);
+        attemptsRef.current += 1;
+        if (attemptsRef.current >= 5) {
+          setLockedUntil(Date.now() + 30_000);
+          attemptsRef.current = 0;
         }
-        setError(true); setPassword(""); setTimeout(() => setError(false), 2000);
+        setErrorMsg('Невірний пароль');
+        setTimeout(() => setErrorMsg(null), 2500);
       }
-    } catch {
-      setError(true); setPassword(""); setTimeout(() => setError(false), 2000);
+      setPassword("");
     } finally { setChecking(false); }
   };
 
@@ -971,9 +975,9 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => Promise<void> }) {
               placeholder="Пароль" className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
               autoComplete="new-password"
               disabled={isLocked}
-              style={{ background: "hsl(180 60% 15%)", border: `1px solid ${error ? "hsl(0 70% 50%)" : "hsl(180 40% 25%)"}`, color: "hsl(40 30% 88%)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }} />
-            {error && <p className="text-red-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Невірний пароль</p>}
-            {isLocked && <p className="text-amber-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Забагато спроб. Зачекайте {lockSecondsLeft}с</p>}
+              style={{ background: "hsl(180 60% 15%)", border: `1px solid ${errorMsg ? "hsl(0 70% 50%)" : "hsl(180 40% 25%)"}`, color: "hsl(40 30% 88%)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }} />
+            {errorMsg && <p className="text-red-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{errorMsg}</p>}
+            {isLocked && !errorMsg && <p className="text-amber-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Забагато спроб. Зачекайте {lockSecondsLeft}с</p>}
             <button onClick={handleSubmit} disabled={checking || isLocked}
               className="w-full py-3 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
               style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
@@ -988,34 +992,31 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => Promise<void> }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-const SESSION_KEY = 'dentis-admin-token'
-
-async function hashSecret(s: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
-}
+const SESSION_KEY = 'dentis-admin-logged-in'
 
 export default function Admin() {
-  const [secret, setSecret] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
+  // Store only a flag in sessionStorage — raw JWT lives only in React state (memory)
+  const [token, setToken] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
-  const handleLogin = async (s: string) => {
-    // Store only a hash so the raw password isn't readable in sessionStorage
-    const hash = await hashSecret(s);
-    sessionStorage.setItem(SESSION_KEY, hash);
-    // Keep the raw secret in React state only (memory) for API calls
-    setSecret(s);
+  const handleLogin = (jwtToken: string) => {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    setToken(jwtToken);
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem(SESSION_KEY);
-    setSecret(null);
+    setToken(null);
   };
 
-  // If we have a hash token in sessionStorage but no in-memory secret (page reload),
-  // we can't recover the raw password — force re-login for security.
-  if (!secret) return <LoginScreen onLogin={handleLogin} />;
+  // Handle JWT expiry gracefully — any 401 from child tabs triggers re-login
+  const handleTokenExpired = () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    setToken(null);
+  };
+
+  if (!token) return <LoginScreen onLogin={handleLogin} />;
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(180 60% 8%)" }}>
@@ -1045,10 +1046,10 @@ export default function Admin() {
           <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
           <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
         </div>
-        {tab === "news" && <NewsTab secret={secret} />}
-        {tab === "doctors" && <DoctorsTab secret={secret} />}
-        {tab === "appointments" && <AppointmentsTab secret={secret} />}
-        {tab === "push" && <PushTab secret={secret} />}
+        {tab === "news" && <NewsTab token={token} />}
+        {tab === "doctors" && <DoctorsTab token={token} />}
+        {tab === "appointments" && <AppointmentsTab token={token} />}
+        {tab === "push" && <PushTab token={token} />}
       </div>
     </div>
   );

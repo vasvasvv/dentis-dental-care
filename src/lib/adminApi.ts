@@ -1,5 +1,6 @@
 // src/lib/adminApi.ts
 // Клієнт для Admin панелі — звертається до dentis-site-api Worker
+// Auth: JWT (HS256) — отримується через POST /api/auth/login, зберігається в пам'яті
 
 const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev'
 
@@ -24,8 +25,34 @@ export type Doctor = {
   sort_order: number
 }
 
-function authHeader(secret: string) {
-  return { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' }
+// ─── JWT Auth ─────────────────────────────────────────────────────────────────
+
+/** Exchange password for a short-lived JWT token (1h). */
+export async function loginForToken(password: string): Promise<string> {
+  const res = await fetch(`${BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  if (res.status === 429) throw new Error('TOO_MANY_ATTEMPTS')
+  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  if (!res.ok) throw new Error('LOGIN_FAILED')
+  const data = await res.json() as { token: string }
+  return data.token
+}
+
+function authHeader(token: string, contentType = 'application/json') {
+  return { Authorization: `Bearer ${token}`, 'Content-Type': contentType }
+}
+
+async function apiFetch(url: string, init: RequestInit, token: string): Promise<Response> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { ...authHeader(token), ...(init.headers ?? {}) },
+  })
+  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  if (res.status === 429) throw new Error('TOO_MANY_ATTEMPTS')
+  return res
 }
 
 // ─── News ─────────────────────────────────────────────────────────────────────
@@ -36,33 +63,25 @@ export async function getNews(): Promise<NewsItem[]> {
   return res.json()
 }
 
-export async function createNews(item: Omit<NewsItem, 'id'>, secret: string) {
-  const res = await fetch(`${BASE}/api/news`, {
+export async function createNews(item: Omit<NewsItem, 'id'>, token: string) {
+  const res = await apiFetch(`${BASE}/api/news`, {
     method: 'POST',
-    headers: authHeader(secret),
     body: JSON.stringify(item),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  }, token)
   if (!res.ok) throw new Error('Failed to create')
   return res.json()
 }
 
-export async function updateNews(id: number, item: Omit<NewsItem, 'id'>, secret: string) {
-  const res = await fetch(`${BASE}/api/news/${id}`, {
+export async function updateNews(id: number, item: Omit<NewsItem, 'id'>, token: string) {
+  const res = await apiFetch(`${BASE}/api/news/${id}`, {
     method: 'PUT',
-    headers: authHeader(secret),
     body: JSON.stringify(item),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  }, token)
   if (!res.ok) throw new Error('Failed to update')
 }
 
-export async function deleteNews(id: number, secret: string) {
-  const res = await fetch(`${BASE}/api/news/${id}`, {
-    method: 'DELETE',
-    headers: authHeader(secret),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+export async function deleteNews(id: number, token: string) {
+  const res = await apiFetch(`${BASE}/api/news/${id}`, { method: 'DELETE' }, token)
   if (!res.ok) throw new Error('Failed to delete')
 }
 
@@ -74,33 +93,25 @@ export async function getDoctors(): Promise<Doctor[]> {
   return res.json()
 }
 
-export async function createDoctor(doc: Omit<Doctor, 'id'>, secret: string) {
-  const res = await fetch(`${BASE}/api/doctors`, {
+export async function createDoctor(doc: Omit<Doctor, 'id'>, token: string) {
+  const res = await apiFetch(`${BASE}/api/doctors`, {
     method: 'POST',
-    headers: authHeader(secret),
     body: JSON.stringify(doc),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  }, token)
   if (!res.ok) throw new Error('Failed to create')
   return res.json()
 }
 
-export async function updateDoctor(id: number, doc: Omit<Doctor, 'id'>, secret: string) {
-  const res = await fetch(`${BASE}/api/doctors/${id}`, {
+export async function updateDoctor(id: number, doc: Omit<Doctor, 'id'>, token: string) {
+  const res = await apiFetch(`${BASE}/api/doctors/${id}`, {
     method: 'PUT',
-    headers: authHeader(secret),
     body: JSON.stringify(doc),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  }, token)
   if (!res.ok) throw new Error('Failed to update')
 }
 
-export async function deleteDoctor(id: number, secret: string) {
-  const res = await fetch(`${BASE}/api/doctors/${id}`, {
-    method: 'DELETE',
-    headers: authHeader(secret),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+export async function deleteDoctor(id: number, token: string) {
+  const res = await apiFetch(`${BASE}/api/doctors/${id}`, { method: 'DELETE' }, token)
   if (!res.ok) throw new Error('Failed to delete')
 }
 
@@ -108,22 +119,18 @@ export async function deleteDoctor(id: number, secret: string) {
 
 export async function sendPush(
   payload: { title: string; body: string; url: string },
-  secret: string
+  token: string
 ): Promise<{ sent: number }> {
-  const res = await fetch(`${BASE}/api/push/send`, {
+  const res = await apiFetch(`${BASE}/api/push/send`, {
     method: 'POST',
-    headers: authHeader(secret),
     body: JSON.stringify(payload),
-  })
-  if (res.status === 401) throw new Error('UNAUTHORIZED')
+  }, token)
   if (!res.ok) throw new Error('Failed to send')
   return res.json()
 }
 
-export async function getPushCount(secret: string): Promise<number> {
-  const res = await fetch(`${BASE}/api/push/count`, {
-    headers: authHeader(secret),
-  })
+export async function getPushCount(token: string): Promise<number> {
+  const res = await apiFetch(`${BASE}/api/push/count`, {}, token)
   if (!res.ok) return 0
   const data = await res.json() as { count: number }
   return data.count
