@@ -434,6 +434,21 @@ export default {
       await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(b.endpoint).run()
       return json({ ok: true })
     }
+    if (p === '/api/push/send-to' && m === 'POST') {
+      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
+      const b = await request.json()
+      if (!b.phone) return json({ error: 'phone required' }, 400)
+      const phone = normalizePhone(b.phone)
+      if (!phone) return json({ error: 'Invalid phone' }, 400)
+      const result = await pushToPhone(env.DB, phone, {
+        title: b.title || 'Дентіс',
+        body: b.body || '',
+        url: b.url || '/',
+        icon: '/icon-192.png',
+      }, env)
+      return json(result)
+    }
+
     if (p === '/api/push/send' && m === 'POST') {
       if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()

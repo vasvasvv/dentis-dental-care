@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
-  Newspaper, Stethoscope, Bell, Tag, ChevronDown, ChevronUp,
+  Newspaper, Stethoscope, Bell, BellRing, Tag, ChevronDown, ChevronUp,
   Image, AlertTriangle, Loader2, RefreshCw, Users, CalendarDays, Phone, Clock,
 } from "lucide-react";
 import {
@@ -416,6 +416,75 @@ function DoctorsTab({ secret }: { secret: string }) {
   );
 }
 
+function ManualPushModal({ appt, secret, onClose, onSent }: {
+  appt: Appointment;
+  secret: string;
+  onClose: () => void;
+  onSent: () => void;
+}) {
+  const { date, time } = formatApptDt(appt.appointment_dt);
+  const [title, setTitle] = useState('📋 Нагадування про прийом');
+  const [body, setBody] = useState(`${appt.patient_name}, ваш прийом ${date} о ${time}`);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ sent: number; noSub?: boolean } | null>(null);
+
+  const handleSend = async () => {
+    setSending(true);
+    try {
+      const res = await fetch(`${BASE}/api/push/send-to`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: appt.phone, title, body, url: '/' }),
+      });
+      const data = await res.json() as { sent: number; noSub?: boolean };
+      setResult(data);
+      if (data.sent > 0) setTimeout(onSent, 1200);
+    } catch {
+      setResult({ sent: 0 });
+    } finally { setSending(false); }
+  };
+
+  return (
+    <ModalShell title="Надіслати сповіщення" onClose={onClose}>
+      <div className="space-y-4">
+        {/* Пацієнт */}
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: 'hsl(180 50% 15%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+          <BellRing size={16} className="text-[hsl(38_62%_52%)] flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[hsl(40_30%_90%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{appt.patient_name}</p>
+            <p className="text-[hsl(180_20%_50%)] text-xs">{appt.phone} · {date} {time}</p>
+          </div>
+        </div>
+
+        <FieldInput label="Заголовок" value={title} onChange={setTitle} placeholder="Заголовок сповіщення" />
+        <div>
+          <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Текст</label>
+          <textarea value={body} onChange={e => setBody(e.target.value)} rows={3}
+            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none"
+            style={{ ...inputStyle, background: 'hsl(180 50% 15%)' }} />
+        </div>
+
+        {result && (
+          <div className={`rounded-xl px-3 py-2.5 text-sm text-center ${result.sent > 0 ? 'text-green-400' : 'text-[hsl(38_62%_52%)]'}`}
+            style={{ background: result.sent > 0 ? 'hsl(150 50% 12%)' : 'hsl(38 50% 15%)', border: `1px solid ${result.sent > 0 ? 'hsl(150 50% 25%)' : 'hsl(38 50% 30%)'}` }}>
+            {result.sent > 0 ? '✓ Сповіщення надіслано' : result.noSub ? '— Пацієнт не підписаний на сповіщення' : '✗ Помилка надсилання'}
+          </div>
+        )}
+
+        <div className="flex gap-2 pt-1">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]"
+            style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Закрити</button>
+          <button onClick={handleSend} disabled={!title.trim() || !body.trim() || sending || !!result}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+            style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+            {sending ? <><Loader2 size={15} className="animate-spin" />Надсилання...</> : <><Send size={15} />Надіслати</>}
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
+
 // ─── Appointments Tab ─────────────────────────────────────────────────────────
 
 type Appointment = {
@@ -526,6 +595,9 @@ function AppointmentsTab({ secret }: { secret: string }) {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filterDate, setFilterDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [sendingId, setSendingId] = useState<number | null>(null);
+  const [sentId, setSentId] = useState<number | null>(null);
+  const [pushModal, setPushModal] = useState<Appointment | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -637,6 +709,10 @@ function AppointmentsTab({ secret }: { secret: string }) {
                 </div>
                 {/* Дії */}
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => setPushModal(appt)} title="Надіслати сповіщення"
+                    className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all">
+                    {sentId === appt.id ? <Check size={15} className="text-green-400" /> : <BellRing size={15} />}
+                  </button>
                   <button onClick={() => { setEditing(appt); setIsNew(false); }} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all"><Pencil size={15} /></button>
                   <button onClick={() => setDeleteId(appt.id)} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 size={15} /></button>
                 </div>
@@ -652,6 +728,14 @@ function AppointmentsTab({ secret }: { secret: string }) {
         </ModalShell>
       )}
       {deleteId !== null && <ConfirmDialog message="Скасувати та видалити цей запис? Пацієнт отримає сповіщення." onConfirm={() => handleDelete(deleteId!)} onCancel={() => setDeleteId(null)} />}
+      {pushModal && (
+        <ManualPushModal
+          appt={pushModal}
+          secret={secret}
+          onClose={() => setPushModal(null)}
+          onSent={() => { setSentId(pushModal.id); setTimeout(() => setSentId(null), 3000); setPushModal(null); }}
+        />
+      )}
     </div>
   );
 }
