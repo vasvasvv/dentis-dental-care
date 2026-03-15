@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
   Newspaper, Stethoscope, Bell, Tag, ChevronDown, ChevronUp,
-  Image, AlertTriangle, Loader2, RefreshCw, Users,
+  Image, AlertTriangle, Loader2, RefreshCw, Users, CalendarDays, Phone, Clock,
 } from "lucide-react";
 import {
   getNews, createNews, updateNews, deleteNews,
@@ -12,7 +12,7 @@ import {
   type NewsItem, type Doctor,
 } from "@/lib/adminApi.ts";
 
-type Tab = "news" | "doctors" | "push";
+type Tab = "news" | "doctors" | "push" | "appointments";
 
 const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
 
@@ -400,6 +400,244 @@ function DoctorsTab({ secret }: { secret: string }) {
   );
 }
 
+// ─── Appointments Tab ─────────────────────────────────────────────────────────
+
+type Appointment = {
+  id: number;
+  patient_name: string;
+  phone: string;
+  appointment_dt: string;
+  doctor: string | null;
+  notes: string | null;
+  status: 'scheduled' | 'cancelled' | 'changed';
+  reminded_24h: number;
+  reminded_1h: number;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  scheduled: 'Заплановано',
+  cancelled: 'Скасовано',
+  changed: 'Змінено',
+};
+const STATUS_COLOR: Record<string, string> = {
+  scheduled: 'hsl(150 60% 40%)',
+  cancelled: 'hsl(0 60% 50%)',
+  changed: 'hsl(38 70% 55%)',
+};
+
+function formatApptDt(dt: string) {
+  const d = new Date(dt);
+  return {
+    date: d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' }),
+    time: d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+    full: d.toLocaleDateString('uk-UA', { weekday: 'short', day: 'numeric', month: 'long' }),
+  };
+}
+
+function ApptForm({
+  initial, onSave, onCancel, saving, error,
+}: {
+  initial: Partial<Appointment>;
+  onSave: (data: Omit<Appointment, 'id' | 'reminded_24h' | 'reminded_1h'>) => void;
+  onCancel: () => void;
+  saving: boolean;
+  error: string | null;
+}) {
+  const [form, setForm] = useState({
+    patient_name: initial.patient_name ?? '',
+    phone: initial.phone ?? '',
+    appointment_dt: initial.appointment_dt ?? '',
+    doctor: initial.doctor ?? '',
+    notes: initial.notes ?? '',
+    status: initial.status ?? 'scheduled' as const,
+  });
+  const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
+
+  return (
+    <div className="space-y-3">
+      <FieldInput label="ПІБ пацієнта" value={form.patient_name} onChange={v => set('patient_name', v)} placeholder="Іванченко Марія Василівна" />
+      <div>
+        <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Телефон</label>
+        <div className="relative">
+          <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(180_20%_45%)]" />
+          <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+380501234567"
+            className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
+        </div>
+      </div>
+      <div>
+        <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Дата та час</label>
+        <input type="datetime-local" value={form.appointment_dt} onChange={e => set('appointment_dt', e.target.value)}
+          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
+      </div>
+      <FieldInput label="Лікар" value={form.doctor} onChange={v => set('doctor', v)} placeholder="Лікар-стоматолог" />
+      <div>
+        <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Примітки</label>
+        <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2}
+          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={inputStyle} placeholder="Додаткова інформація..." />
+      </div>
+      {initial.id && (
+        <div>
+          <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Статус</label>
+          <select value={form.status} onChange={e => set('status', e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle}>
+            <option value="scheduled">Заплановано</option>
+            <option value="cancelled">Скасовано</option>
+            <option value="changed">Змінено</option>
+          </select>
+        </div>
+      )}
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      <div className="flex gap-2 mt-4">
+        <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Скасувати</button>
+        <button onClick={() => onSave(form)} disabled={!form.patient_name.trim() || !form.phone.trim() || !form.appointment_dt || saving}
+          className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+          style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+          {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}Зберегти
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AppointmentsTab({ secret }: { secret: string }) {
+  const [items, setItems] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<Partial<Appointment> | null>(null);
+  const [isNew, setIsNew] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [filterDate, setFilterDate] = useState(() => new Date().toISOString().slice(0, 10));
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/appointments?date=${filterDate}`, {
+        headers: { Authorization: `Bearer ${secret}` },
+      });
+      if (!res.ok) throw new Error();
+      setItems(await res.json() as Appointment[]);
+    } catch { setError('Не вдалося завантажити записи'); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(); }, [filterDate]);
+
+  const handleSave = async (data: Omit<Appointment, 'id' | 'reminded_24h' | 'reminded_1h'>) => {
+    setSaving(true); setError(null);
+    try {
+      const url = isNew ? `${BASE}/api/appointments` : `${BASE}/api/appointments/${editing?.id}`;
+      const res = await fetch(url, {
+        method: isNew ? 'POST' : 'PUT',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      await load();
+      setEditing(null);
+    } catch { setError('Помилка збереження'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await fetch(`${BASE}/api/appointments/${id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${secret}` },
+      });
+      setItems(p => p.filter(i => i.id !== id));
+    } catch { setError('Помилка видалення'); }
+    setDeleteId(null);
+  };
+
+  const scheduled = items.filter(i => i.status === 'scheduled');
+  const others = items.filter(i => i.status !== 'scheduled');
+
+  return (
+    <div>
+      {/* Заголовок */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
+            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={inputStyle} />
+          <button onClick={load} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+        <button onClick={() => { setEditing({}); setIsNew(true); }}
+          className="flex items-center gap-2 gradient-gold text-[hsl(220_40%_10%)] px-4 py-2 rounded-xl text-sm font-semibold shadow-gold-custom hover:brightness-110 transition-all active:scale-95"
+          style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+          <Plus size={16} />Новий запис
+        </button>
+      </div>
+
+      {error && <div className="mb-4 flex items-center gap-2 text-red-400 text-sm"><AlertTriangle size={14} />{error}</div>}
+
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-[hsl(38_62%_52%)]" /></div>
+      ) : (
+        <div className="space-y-2">
+          {items.length === 0 && (
+            <p className="text-center text-[hsl(180_20%_45%)] text-sm py-10" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              Записів на {filterDate} немає
+            </p>
+          )}
+          {[...scheduled, ...others].map(appt => {
+            const { date, time } = formatApptDt(appt.appointment_dt);
+            const hasPush = false; // placeholder
+            return (
+              <div key={appt.id} className="rounded-2xl p-4 flex items-center gap-3"
+                style={{ background: 'hsl(180 60% 12%)', border: `1px solid ${appt.status === 'cancelled' ? 'hsl(0 60% 35% / 0.4)' : 'hsl(180 40% 22% / 0.5)'}`, opacity: appt.status === 'cancelled' ? 0.6 : 1 }}>
+                {/* Час */}
+                <div className="flex-shrink-0 w-14 text-center rounded-xl py-2" style={{ background: 'hsl(180 50% 18%)' }}>
+                  <p className="text-[hsl(38_62%_52%)] text-xs font-medium">{date}</p>
+                  <p className="text-[hsl(40_30%_92%)] text-base font-semibold leading-tight">{time}</p>
+                </div>
+                {/* Інфо */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[hsl(40_30%_92%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{appt.patient_name}</p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ background: STATUS_COLOR[appt.status] + '22', color: STATUS_COLOR[appt.status], border: `1px solid ${STATUS_COLOR[appt.status]}44` }}>
+                      {STATUS_LABEL[appt.status]}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <p className="text-[hsl(180_20%_50%)] text-xs flex items-center gap-1"><Phone size={10} />{appt.phone}</p>
+                    {appt.doctor && <p className="text-[hsl(38_50%_55%)] text-xs truncate">{appt.doctor}</p>}
+                  </div>
+                  {/* Індикатори нагадувань */}
+                  {appt.status === 'scheduled' && (
+                    <div className="flex gap-1.5 mt-1">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: appt.reminded_24h ? 'hsl(150 50% 20%)' : 'hsl(180 50% 15%)', color: appt.reminded_24h ? 'hsl(150 60% 55%)' : 'hsl(180 20% 45%)' }}>
+                        24г {appt.reminded_24h ? '✓' : '○'}
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: appt.reminded_1h ? 'hsl(150 50% 20%)' : 'hsl(180 50% 15%)', color: appt.reminded_1h ? 'hsl(150 60% 55%)' : 'hsl(180 20% 45%)' }}>
+                        1г {appt.reminded_1h ? '✓' : '○'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {/* Дії */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => { setEditing(appt); setIsNew(false); }} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all"><Pencil size={15} /></button>
+                  <button onClick={() => setDeleteId(appt.id)} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 size={15} /></button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {editing !== null && (
+        <ModalShell title={isNew ? 'Новий запис' : 'Редагувати запис'} onClose={() => setEditing(null)}>
+          <ApptForm initial={editing} onSave={handleSave} onCancel={() => setEditing(null)} saving={saving} error={error} />
+        </ModalShell>
+      )}
+      {deleteId !== null && <ConfirmDialog message="Скасувати та видалити цей запис? Пацієнт отримає сповіщення." onConfirm={() => handleDelete(deleteId!)} onCancel={() => setDeleteId(null)} />}
+    </div>
+  );
+}
+
 // ─── Push Tab ─────────────────────────────────────────────────────────────────
 
 function PushTab({ secret }: { secret: string }) {
@@ -585,10 +823,12 @@ export default function Admin() {
         <div className="flex gap-1 p-1 rounded-2xl mb-6" style={{ background: "hsl(180 60% 10%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
           <TabButton active={tab === "news"} onClick={() => setTab("news")} icon={<Newspaper size={15} />} label="Новини" />
           <TabButton active={tab === "doctors"} onClick={() => setTab("doctors")} icon={<Stethoscope size={15} />} label="Лікарі" />
+          <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
           <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
         </div>
         {tab === "news" && <NewsTab secret={secret} />}
         {tab === "doctors" && <DoctorsTab secret={secret} />}
+        {tab === "appointments" && <AppointmentsTab secret={secret} />}
         {tab === "push" && <PushTab secret={secret} />}
       </div>
     </div>
