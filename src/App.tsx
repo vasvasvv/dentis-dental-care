@@ -12,6 +12,7 @@ const DiagnostikaZubiv = lazy(() =>  import("./pages/DiagnostikaZubiv"));
 const Contacts = lazy(() =>  import("./pages/Contacts"));
 const NotFound = lazy(() =>  import("./pages/NotFound"));
 const PWAInstallBanner = lazy(() => import("./components/Pwainstallbanner"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/estetychna-stomatolohiya" element={<EstetychnaStomatologiya />} />
         <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
         <Route path="/contacts" element={<Contacts />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
