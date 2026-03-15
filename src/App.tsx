@@ -30,7 +30,7 @@ export default function App() {
         <Route path="/estetychna-stomatolohiya" element={<EstetychnaStomatologiya />} />
         <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
         <Route path="/contacts" element={<Contacts />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/d-panel" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>

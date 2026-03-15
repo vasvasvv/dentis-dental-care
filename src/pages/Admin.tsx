@@ -921,22 +921,35 @@ function PushTab({ secret }: { secret: string }) {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
-function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
+function LoginScreen({ onLogin }: { onLogin: (s: string) => Promise<void> }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+  const lockSecondsLeft = isLocked ? Math.ceil((lockedUntil! - Date.now()) / 1000) : 0;
 
   const handleSubmit = async () => {
-    if (!password.trim()) return;
+    if (!password.trim() || isLocked) return;
     setChecking(true);
     try {
       const res = await fetch(`${BASE}/api/push/count`, { headers: { Authorization: `Bearer ${password}` } });
-      if (res.ok) { onLogin(password); }
-      else { setError(true); setPassword(""); setTimeout(() => setError(false), 2000); }
+      if (res.ok) {
+        setAttempts(0);
+        await onLogin(password);
+      } else {
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= 5) {
+          setLockedUntil(Date.now() + 30_000); // 30s lockout after 5 fails
+          setAttempts(0);
+        }
+        setError(true); setPassword(""); setTimeout(() => setError(false), 2000);
+      }
     } catch {
-      // Worker ще не задеплоєно — fallback
-      if (password === "dentis2026") { onLogin(password); }
-      else { setError(true); setPassword(""); setTimeout(() => setError(false), 2000); }
+      setError(true); setPassword(""); setTimeout(() => setError(false), 2000);
     } finally { setChecking(false); }
   };
 
@@ -956,9 +969,12 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
           <div className="space-y-3">
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               placeholder="Пароль" className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              autoComplete="new-password"
+              disabled={isLocked}
               style={{ background: "hsl(180 60% 15%)", border: `1px solid ${error ? "hsl(0 70% 50%)" : "hsl(180 40% 25%)"}`, color: "hsl(40 30% 88%)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }} />
             {error && <p className="text-red-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Невірний пароль</p>}
-            <button onClick={handleSubmit} disabled={checking}
+            {isLocked && <p className="text-amber-400 text-xs text-center" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Забагато спроб. Зачекайте {lockSecondsLeft}с</p>}
+            <button onClick={handleSubmit} disabled={checking || isLocked}
               className="w-full py-3 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
               style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
               {checking ? <><Loader2 size={15} className="animate-spin" />Перевірка...</> : "Увійти"}
@@ -972,15 +988,23 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-const SESSION_KEY = 'dentis-admin-secret'
+const SESSION_KEY = 'dentis-admin-token'
+
+async function hashSecret(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 export default function Admin() {
   const [secret, setSecret] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
-  const handleLogin = (s: string) => {
-    sessionStorage.setItem(SESSION_KEY, s);
+  const handleLogin = async (s: string) => {
+    // Store only a hash so the raw password isn't readable in sessionStorage
+    const hash = await hashSecret(s);
+    sessionStorage.setItem(SESSION_KEY, hash);
+    // Keep the raw secret in React state only (memory) for API calls
     setSecret(s);
   };
 
@@ -989,6 +1013,8 @@ export default function Admin() {
     setSecret(null);
   };
 
+  // If we have a hash token in sessionStorage but no in-memory secret (page reload),
+  // we can't recover the raw password — force re-login for security.
   if (!secret) return <LoginScreen onLogin={handleLogin} />;
 
   return (
