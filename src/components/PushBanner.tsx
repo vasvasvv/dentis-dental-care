@@ -73,7 +73,7 @@ export function PushBanner() {
               className="px-3 py-1.5 rounded-lg text-xs font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all"
               style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}
             >
-              Підписатись
+              Отримувати
             </button>
           </div>
         </div>
