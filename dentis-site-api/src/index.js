@@ -329,6 +329,60 @@ async function runReminders(db, env) {
   }
 }
 
+// ── CRON: автопублікація запланованих статей ──────────────────────────────────
+async function publishScheduledArticles(db, env) {
+  const now = new Date().toISOString().slice(0, 19) // 'YYYY-MM-DDTHH:MM:SS'
+
+  const { results } = await db.prepare(`
+    SELECT * FROM scheduled_articles
+    WHERE published = 0 AND publish_at <= ?
+    ORDER BY publish_at ASC
+  `).bind(now).all()
+
+  if (!results?.length) return { published: 0 }
+
+  let published = 0
+  for (const article of results) {
+    try {
+      const today = new Date().toLocaleDateString('uk-UA', {
+        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Kiev'
+      })
+
+      const { meta } = await db.prepare(
+        'INSERT INTO news (type, badge, title, desc, date, hot) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(
+        article.type || 'blog',
+        article.badge || 'Стаття',
+        article.title,
+        article.desc,
+        today,
+        article.hot ?? 0
+      ).run()
+
+      await db.prepare(
+        "UPDATE scheduled_articles SET published = 1 WHERE id = ?"
+      ).bind(article.id).run()
+
+      // Push-сповіщення всім підписникам
+      if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
+        broadcast(db, {
+          title: article.badge || 'Дентіс',
+          body: article.title,
+          url: '/#news',
+          icon: '/icon-192.png',
+        }, env).catch(() => {})
+      }
+
+      published++
+      void meta
+    } catch (e) {
+      console.error('publishScheduledArticles error:', e?.message)
+    }
+  }
+
+  return { published }
+}
+
 // ── MAIN HANDLER ──────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -451,6 +505,40 @@ export default {
     }
     if (p.match(/^\/api\/news\/\d+$/) && m === 'DELETE') {
       await env.DB.prepare('DELETE FROM news WHERE id=?').bind(idFrom(p)).run()
+      return json({ ok: true }, 200, origin)
+    }
+
+    // ── SCHEDULED ARTICLES ───────────────────────────────────────────────────
+    // GET  /api/scheduled-articles          — список (admin)
+    // POST /api/scheduled-articles          — додати в чергу (admin)
+    // DELETE /api/scheduled-articles/:id    — видалити зі черги (admin)
+    if (p === '/api/scheduled-articles' && m === 'GET') {
+      const { results } = await env.DB.prepare(
+        'SELECT * FROM scheduled_articles ORDER BY publish_at ASC'
+      ).all()
+      return json(results, 200, origin)
+    }
+    if (p === '/api/scheduled-articles' && m === 'POST') {
+      const b = await request.json()
+      if (!b.title || !b.desc || !b.publish_at) {
+        return json({ error: 'title, desc, publish_at — обовʼязкові поля' }, 400, origin)
+      }
+      const { meta } = await env.DB.prepare(
+        'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(
+        b.type   || 'blog',
+        b.badge  || 'Стаття',
+        b.title,
+        b.desc,
+        b.hot ? 1 : 0,
+        b.publish_at
+      ).run()
+      return json({ id: meta.last_row_id }, 201, origin)
+    }
+    if (p.match(/^\/api\/scheduled-articles\/\d+$/) && m === 'DELETE') {
+      await env.DB.prepare(
+        'DELETE FROM scheduled_articles WHERE id = ?'
+      ).bind(idFrom(p)).run()
       return json({ ok: true }, 200, origin)
     }
 
@@ -587,6 +675,9 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(runReminders(env.DB, env))
+    ctx.waitUntil(Promise.all([
+      runReminders(env.DB, env),
+      publishScheduledArticles(env.DB, env),
+    ]))
   },
 }
