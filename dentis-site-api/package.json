@@ -2,8 +2,13 @@
   "name": "dentis-api-worker",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy --no-bundle --keep-vars"
+    "deploy": "wrangler deploy --no-bundle",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "wrangler": "3.78.12"

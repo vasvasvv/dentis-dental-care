@@ -19,116 +19,122 @@ function idFrom(path) {
   return path.split('/').pop()
 }
 
-// ── WEB PUSH ──────────────────────────────────────────────────────────────────
-function base64urlToUint8(str) {
-  str = str.replace(/-/g, '+').replace(/_/g, '/')
-  while (str.length % 4) str += '='
-  const bin = atob(str)
-  return Uint8Array.from(bin, c => c.charCodeAt(0))
-}
-
-function uint8ToBase64url(buf) {
+// ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
+function b64u(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
-async function importVapidPrivateKey(pkcs8Base64url) {
-  const keyData = base64urlToUint8(pkcs8Base64url)
-  return crypto.subtle.importKey(
-    'pkcs8', keyData,
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    false, ['sign']
-  )
+function fromb64u(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/')
+  while (s.length % 4) s += '='
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0))
 }
 
-async function makeVapidJwt(audience, vapidPublicKey, vapidPrivateKey, subject) {
+function concat(...arrays) {
+  const total = arrays.reduce((n, a) => n + a.length, 0)
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const a of arrays) { out.set(a, offset); offset += a.length }
+  return out
+}
+
+async function hkdfExtract(salt, ikm) {
+  const key = await crypto.subtle.importKey('raw', salt, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  return new Uint8Array(await crypto.subtle.sign('HMAC', key, ikm))
+}
+
+async function hkdfExpand(prk, info, length) {
+  const key = await crypto.subtle.importKey('raw', prk, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const blocks = []
+  let prev = new Uint8Array(0)
+  let remaining = length
+  let counter = 1
+  while (remaining > 0) {
+    const data = concat(prev, info, new Uint8Array([counter++]))
+    prev = new Uint8Array(await crypto.subtle.sign('HMAC', key, data))
+    blocks.push(prev)
+    remaining -= prev.length
+  }
+  return concat(...blocks).subarray(0, length)
+}
+
+async function makeVapidJwt(audience, privateKeyB64u, publicKeyB64u) {
   const now = Math.floor(Date.now() / 1000)
-  const header = uint8ToBase64url(new TextEncoder().encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })))
-  const payload = uint8ToBase64url(new TextEncoder().encode(JSON.stringify({
-    aud: audience, exp: now + 43200, sub: subject
+  const enc = new TextEncoder()
+  const header = b64u(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })))
+  const payload = b64u(enc.encode(JSON.stringify({
+    aud: audience,
+    exp: now + 43200,
+    sub: 'mailto:nesterenkovasil9@gmail.com',
   })))
-  const signingInput = `${header}.${payload}`
-  const privKey = await importVapidPrivateKey(vapidPrivateKey)
-  const sig = await crypto.subtle.sign(
-    { name: 'ECDSA', hash: 'SHA-256' },
-    privKey,
-    new TextEncoder().encode(signingInput)
+  const sigInput = `${header}.${payload}`
+  const privKey = await crypto.subtle.importKey(
+    'pkcs8', fromb64u(privateKeyB64u),
+    { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
   )
-  return `${signingInput}.${uint8ToBase64url(sig)}`
+  const sig = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' }, privKey, enc.encode(sigInput)
+  )
+  return `${sigInput}.${b64u(sig)}`
 }
 
-async function sendPushNotification(subscription, payload, env) {
-  const { endpoint, p256dh, auth } = subscription
-  const url = new URL(endpoint)
-  const audience = `${url.protocol}//${url.host}`
+async function encryptPush(plaintext, p256dhB64u, authB64u) {
+  const enc = new TextEncoder()
+  const receiverPubRaw = fromb64u(p256dhB64u)
+  const authSecret = fromb64u(authB64u)
 
-  const jwt = await makeVapidJwt(
-    audience,
-    env.VAPID_PUBLIC_KEY,
-    env.VAPID_PRIVATE_KEY,
-    'mailto:nesterenkovasil9@gmail.com'
-  )
-
-  // Encrypt payload using Web Push encryption (RFC 8291)
-  const authSecret = base64urlToUint8(auth)
-  const receiverPublicKey = base64urlToUint8(p256dh)
-
-  // Generate ephemeral key pair
-  const ephemeralKeyPair = await crypto.subtle.generateKey(
-    { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']
-  )
-  const ephemeralPublicKeyRaw = await crypto.subtle.exportKey('raw', ephemeralKeyPair.publicKey)
+  // Ephemeral sender key pair
+  const senderPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits'])
+  const senderPubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', senderPair.publicKey))
 
   // Import receiver public key
-  const receiverKey = await crypto.subtle.importKey(
-    'raw', receiverPublicKey, { name: 'ECDH', namedCurve: 'P-256' }, false, []
+  const receiverPub = await crypto.subtle.importKey(
+    'raw', receiverPubRaw, { name: 'ECDH', namedCurve: 'P-256' }, false, []
   )
 
-  // Derive shared secret
-  const sharedBits = await crypto.subtle.deriveBits(
-    { name: 'ECDH', public: receiverKey }, ephemeralKeyPair.privateKey, 256
-  )
+  // ECDH shared secret
+  const ikm = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: 'ECDH', public: receiverPub }, senderPair.privateKey, 256
+  ))
 
-  // HKDF to derive encryption key and nonce
-  const encoder = new TextEncoder()
+  // PRK via HKDF-Extract with info = "WebPush: info\0" + receiverPub + senderPub
   const salt = crypto.getRandomValues(new Uint8Array(16))
+  const prkInfo = concat(enc.encode('WebPush: info\x00'), receiverPubRaw, senderPubRaw)
+  const prk = await hkdfExtract(authSecret, ikm)
+  const ikm2 = await hkdfExpand(prk, prkInfo, 32)
+  const prk2 = await hkdfExtract(salt, ikm2)
 
-  async function hkdf(ikm, salt, info, length) {
-    const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits'])
-    return crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, key, length * 8)
-  }
+  // Content encryption key (16 bytes) and nonce (12 bytes)
+  const cekInfo = enc.encode('Content-Encoding: aes128gcm\x00')
+  const nonceInfo = enc.encode('Content-Encoding: nonce\x00')
+  const cek = await hkdfExpand(prk2, cekInfo, 16)
+  const nonce = await hkdfExpand(prk2, nonceInfo, 12)
 
-  const prk = await hkdf(sharedBits, authSecret, encoder.encode('WebPush: info\x00' +
-    String.fromCharCode(...new Uint8Array(receiverPublicKey)) +
-    String.fromCharCode(...new Uint8Array(ephemeralPublicKeyRaw))), 32)
+  // Import CEK
+  const aesKey = await crypto.subtle.importKey('raw', cek, { name: 'AES-GCM' }, false, ['encrypt'])
 
-  const encKey = await crypto.subtle.importKey('raw',
-    await hkdf(prk, salt, encoder.encode('Content-Encoding: aes128gcm\x00'), 16),
-    { name: 'AES-GCM' }, false, ['encrypt'])
+  // Plaintext + padding delimiter byte (0x02)
+  const data = concat(enc.encode(plaintext), new Uint8Array([2]))
+  const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, data))
 
-  const nonce = await hkdf(prk, salt, encoder.encode('Content-Encoding: nonce\x00'), 12)
+  // aes128gcm header: salt(16) + rs(4 BE) + idlen(1) + keyid(senderPub)
+  const rs = new Uint8Array(4)
+  new DataView(rs.buffer).setUint32(0, 4096, false)
+  const header = concat(salt, rs, new Uint8Array([senderPubRaw.length]), senderPubRaw)
 
-  // Encrypt
-  const payloadBytes = encoder.encode(JSON.stringify(payload))
-  const paddedPayload = new Uint8Array(payloadBytes.length + 1)
-  paddedPayload.set(payloadBytes)
-  paddedPayload[payloadBytes.length] = 2 // record delimiter
+  return concat(header, encrypted)
+}
 
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: nonce }, encKey, paddedPayload
-  )
+async function sendPush(sub, payload, env) {
+  const { endpoint, p256dh, auth } = sub
+  const origin = new URL(endpoint)
+  const audience = `${origin.protocol}//${origin.host}`
 
-  // Build record header: salt(16) + rs(4) + keyid_len(1) + keyid
-  const ephPubRaw = new Uint8Array(ephemeralPublicKeyRaw)
-  const header = new Uint8Array(16 + 4 + 1 + ephPubRaw.length)
-  header.set(salt, 0)
-  new DataView(header.buffer).setUint32(16, 4096 + paddedPayload.length + 16, false) // rs
-  header[20] = ephPubRaw.length
-  header.set(ephPubRaw, 21)
-
-  const body = new Uint8Array(header.length + encrypted.byteLength)
-  body.set(header)
-  body.set(new Uint8Array(encrypted), header.length)
+  const [jwt, body] = await Promise.all([
+    makeVapidJwt(audience, env.VAPID_PRIVATE_KEY, env.VAPID_PUBLIC_KEY),
+    encryptPush(JSON.stringify(payload), p256dh, auth),
+  ])
 
   const res = await fetch(endpoint, {
     method: 'POST',
@@ -140,33 +146,30 @@ async function sendPushNotification(subscription, payload, env) {
     },
     body,
   })
-
   return res.status
 }
 
-async function broadcastPush(db, payload, env) {
-  const { results } = await db.prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions').all()
+async function broadcast(db, payload, env) {
+  const { results } = await db.prepare('SELECT endpoint,p256dh,auth FROM push_subscriptions').all()
   if (!results?.length) return { sent: 0, failed: 0 }
-
   let sent = 0, failed = 0
   const expired = []
-
-  await Promise.allSettled(results.map(async (sub) => {
+  await Promise.allSettled(results.map(async sub => {
     try {
-      const status = await sendPushNotification(sub, payload, env)
-      if (status === 201 || status === 200) { sent++ }
+      const status = await sendPush(sub, payload, env)
+      if (status === 201 || status === 200 || status === 202) sent++
       else if (status === 404 || status === 410) { expired.push(sub.endpoint); failed++ }
-      else { failed++ }
-    } catch { failed++ }
+      else failed++
+    } catch (e) {
+      console.error('push error', sub.endpoint, e?.message)
+      failed++
+    }
   }))
-
-  // Cleanup expired subscriptions
   if (expired.length) {
     await Promise.allSettled(expired.map(ep =>
       db.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(ep).run()
     ))
   }
-
   return { sent, failed }
 }
 
@@ -177,7 +180,6 @@ export default {
 
     if (m === 'OPTIONS') return new Response(null, { headers: CORS })
 
-    // ── VAPID PUBLIC KEY ───────────────────────────────────────────────────────
     if (p === '/api/vapid-public-key' && m === 'GET') {
       return json({ key: env.VAPID_PUBLIC_KEY })
     }
@@ -196,17 +198,9 @@ export default {
       const { meta } = await env.DB.prepare(
         'INSERT INTO news (type,badge,title,desc,date,hot) VALUES (?,?,?,?,?,?)'
       ).bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0).run()
-
-      // Автоматичний push при додаванні новини
       if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
-        broadcastPush(env.DB, {
-          title: b.badge || 'Дентіс',
-          body: b.title,
-          url: '/#news',
-          icon: '/icon-192.png',
-        }, env).catch(() => {})
+        broadcast(env.DB, { title: b.badge || 'Дентіс', body: b.title, url: '/#news', icon: '/icon-192.png' }, env).catch(() => {})
       }
-
       return json({ id: meta.last_row_id }, 201)
     }
 
@@ -227,9 +221,7 @@ export default {
 
     // ── DOCTORS ───────────────────────────────────────────────────────────────
     if (p === '/api/doctors' && m === 'GET') {
-      const { results } = await env.DB.prepare(
-        'SELECT * FROM doctors ORDER BY sort_order ASC'
-      ).all()
+      const { results } = await env.DB.prepare('SELECT * FROM doctors ORDER BY sort_order ASC').all()
       return json(results)
     }
 
@@ -254,9 +246,8 @@ export default {
     if (p.match(/^\/api\/doctors\/\d+$/) && m === 'DELETE') {
       if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const doc = await env.DB.prepare('SELECT img_url FROM doctors WHERE id=?').bind(idFrom(p)).first()
-      if (doc?.img_url && doc.img_url.includes('/api/doctors/photo/')) {
-        const key = doc.img_url.split('/api/doctors/photo/')[1]
-        await env.DOCTORS_BUCKET.delete(key).catch(() => {})
+      if (doc?.img_url?.includes('/api/doctors/photo/')) {
+        await env.DOCTORS_BUCKET.delete(doc.img_url.split('/api/doctors/photo/')[1]).catch(() => {})
       }
       await env.DB.prepare('DELETE FROM doctors WHERE id=?').bind(idFrom(p)).run()
       return json({ ok: true })
@@ -270,15 +261,13 @@ export default {
       const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg'
       const key = `doctor-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const body = await request.arrayBuffer()
-      if (body.byteLength > 5 * 1024 * 1024) return json({ error: 'File too large (max 5MB)' }, 413)
+      if (body.byteLength > 5 * 1024 * 1024) return json({ error: 'File too large' }, 413)
       await env.DOCTORS_BUCKET.put(key, body, { httpMetadata: { contentType: ct } })
-      const url = `${new URL(request.url).origin}/api/doctors/photo/${key}`
-      return json({ url }, 201)
+      return json({ url: `${new URL(request.url).origin}/api/doctors/photo/${key}` }, 201)
     }
 
     if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
-      const key = p.replace('/api/doctors/photo/', '')
-      const obj = await env.DOCTORS_BUCKET.get(key)
+      const obj = await env.DOCTORS_BUCKET.get(p.replace('/api/doctors/photo/', ''))
       if (!obj) return new Response('Not Found', { status: 404 })
       return new Response(obj.body, {
         headers: {
@@ -307,7 +296,7 @@ export default {
     if (p === '/api/push/send' && m === 'POST') {
       if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
       const b = await request.json()
-      const result = await broadcastPush(env.DB, {
+      const result = await broadcast(env.DB, {
         title: b.title || 'Дентіс',
         body: b.body || '',
         url: b.url || '/',
