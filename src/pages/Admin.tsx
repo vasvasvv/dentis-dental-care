@@ -992,26 +992,20 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-const SESSION_KEY = 'dentis-admin-logged-in'
+const SESSION_KEY = 'dentis-admin-jwt'
 
 export default function Admin() {
-  // Store only a flag in sessionStorage — raw JWT lives only in React state (memory)
-  const [token, setToken] = useState<string | null>(null);
+  // Store JWT in sessionStorage — valid for 1h, cleared on tab close
+  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
   const handleLogin = (jwtToken: string) => {
-    sessionStorage.setItem(SESSION_KEY, '1');
+    sessionStorage.setItem(SESSION_KEY, jwtToken);
     setToken(jwtToken);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
-    setToken(null);
-  };
-
-  // Handle JWT expiry gracefully — any 401 from child tabs triggers re-login
-  const handleTokenExpired = () => {
     sessionStorage.removeItem(SESSION_KEY);
     setToken(null);
   };

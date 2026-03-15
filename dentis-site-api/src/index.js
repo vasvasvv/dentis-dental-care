@@ -361,7 +361,7 @@ export default {
       }
 
       if (!env.JWT_SECRET) {
-        return json({ error: 'JWT_SECRET not configured' }, 500, origin)
+        return json({ error: 'Server misconfigured: JWT_SECRET not set' }, 500, origin)
       }
 
       const token = await signJwt(
@@ -407,14 +407,32 @@ export default {
       return json({ count: row?.count ?? 0 }, 200, origin)
     }
 
-    // ── All remaining routes require admin auth ──────────────────────────────
-    if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
-
-    // ── NEWS ─────────────────────────────────────────────────────────────────
+    // ── PUBLIC: News and Doctors (read-only, no auth) ─────────────────────────
     if (p === '/api/news' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM news ORDER BY hot DESC, created_at DESC').all()
       return json(results, 200, origin)
     }
+    if (p === '/api/doctors' && m === 'GET') {
+      const { results } = await env.DB.prepare('SELECT * FROM doctors ORDER BY sort_order ASC').all()
+      return json(results, 200, origin)
+    }
+    if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
+      const obj = await env.DOCTORS_BUCKET.get(p.replace('/api/doctors/photo/', ''))
+      if (!obj) return new Response('Not Found', { status: 404, headers: SECURITY_HEADERS })
+      return new Response(obj.body, {
+        headers: {
+          'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Access-Control-Allow-Origin': '*',
+          ...SECURITY_HEADERS,
+        },
+      })
+    }
+
+    // ── All remaining routes require admin auth ──────────────────────────────
+    if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+
+    // ── NEWS ─────────────────────────────────────────────────────────────────
     if (p === '/api/news' && m === 'POST') {
       const b = await request.json()
       const { meta } = await env.DB.prepare(
@@ -437,10 +455,6 @@ export default {
     }
 
     // ── DOCTORS ──────────────────────────────────────────────────────────────
-    if (p === '/api/doctors' && m === 'GET') {
-      const { results } = await env.DB.prepare('SELECT * FROM doctors ORDER BY sort_order ASC').all()
-      return json(results, 200, origin)
-    }
     if (p === '/api/doctors' && m === 'POST') {
       const b = await request.json()
       const { meta } = await env.DB.prepare(
@@ -472,19 +486,6 @@ export default {
       await env.DOCTORS_BUCKET.put(key, body, { httpMetadata: { contentType: ct } })
       return json({ url: `${new URL(request.url).origin}/api/doctors/photo/${key}` }, 201, origin)
     }
-    if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
-      const obj = await env.DOCTORS_BUCKET.get(p.replace('/api/doctors/photo/', ''))
-      if (!obj) return new Response('Not Found', { status: 404, headers: SECURITY_HEADERS })
-      return new Response(obj.body, {
-        headers: {
-          'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg',
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'Access-Control-Allow-Origin': '*',
-          ...SECURITY_HEADERS,
-        },
-      })
-    }
-
     // ── APPOINTMENTS ─────────────────────────────────────────────────────────
     if (p === '/api/appointments' && m === 'GET') {
       const url = new URL(request.url)
