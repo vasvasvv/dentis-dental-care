@@ -1,22 +1,41 @@
 #!/bin/bash
-# Run this from your Codespaces terminal to finish the security setup
-
+# Run from: cd dentis-dental-care/dentis-site-api && bash deploy.sh
 set -e
-echo "=== Dentis Worker Security Deploy ==="
 
-# 1. Generate JWT secret if not set
-JWT_SECRET="${JWT_SECRET:-$(openssl rand -base64 48)}"
-echo "JWT_SECRET generated: ${JWT_SECRET:0:10}..."
-
-# 2. Set secrets in Cloudflare
-echo "$JWT_SECRET" | npx wrangler secret put JWT_SECRET
-echo "✓ JWT_SECRET set in Cloudflare"
-
-# 3. Deploy the worker
-npx wrangler deploy
-echo "✓ Worker deployed"
-
+echo "=== Dentis Worker Security Deploy (wrangler 3.x) ==="
 echo ""
-echo "=== Done! ==="
-echo "JWT_SECRET (save this somewhere safe):"
-echo "$JWT_SECRET"
+
+# Check wrangler version
+WRANGLER="./node_modules/.bin/wrangler"
+if [ ! -f "$WRANGLER" ]; then
+  echo "Installing wrangler..."
+  npm install --legacy-peer-deps
+fi
+echo "Wrangler: $($WRANGLER --version)"
+echo ""
+
+# 1. Generate JWT_SECRET if not already set
+echo "Step 1: Setting JWT_SECRET..."
+JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
+echo "$JWT_SECRET" | $WRANGLER secret put JWT_SECRET
+echo "✓ JWT_SECRET set"
+echo ""
+
+# 2. Deploy worker
+echo "Step 2: Deploying worker..."
+$WRANGLER deploy --no-bundle
+echo "✓ Worker deployed"
+echo ""
+
+# 3. Run D1 migration for rate_limit table
+echo "Step 3: Applying D1 migration..."
+$WRANGLER d1 execute site_news_docs_pwa \
+  --file=migrations/0002_rate_limit.sql \
+  --remote 2>/dev/null || echo "(migration already applied, skipping)"
+echo ""
+
+echo "=== All done! ==="
+echo ""
+echo "Test endpoints:"
+echo "  POST https://dentis-site-api.nesterenkovasil9.workers.dev/api/auth/login"
+echo "  Body: { \"password\": \"<your ADMIN_SECRET>\" }"
