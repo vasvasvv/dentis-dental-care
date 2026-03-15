@@ -3,6 +3,7 @@ import { Phone, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@assets/Dentis_with_Text.webp";
 import logogold from "@assets/Dentis_with_Textg.webp";
+import { PushButton } from "./PushBanner";
 
 const navLinks = [
   { label: "Про нас", href: "#about", isHash: true },
@@ -96,13 +97,16 @@ export default function Header() {
         </nav>
 
         {/* CTA phone */}
-        <a
-          href="tel:+380504800825"
-          className="hidden md:flex items-center gap-2 gradient-gold hover:bg-gold-dark text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium transition-all duration-200 shadow-gold-custom"
-        >
-          <Phone size={14} />
-          <span>+38 050 480 0825</span>
-        </a>
+        <div className="hidden md:flex items-center gap-3">
+          <PushButton className="w-9 h-9" />
+          <a
+            href="tel:+380504800825"
+            className="flex items-center gap-2 gradient-gold hover:bg-gold-dark text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium transition-all duration-200 shadow-gold-custom"
+          >
+            <Phone size={14} />
+            <span>+38 050 480 0825</span>
+          </a>
+        </div>
 
         {/* Mobile toggle */}
         <button

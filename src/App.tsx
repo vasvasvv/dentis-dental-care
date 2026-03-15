@@ -13,6 +13,7 @@ const Contacts = lazy(() =>  import("./pages/Contacts"));
 const NotFound = lazy(() =>  import("./pages/NotFound"));
 const PWAInstallBanner = lazy(() => import("./components/Pwainstallbanner"));
 const Admin = lazy(() => import("./pages/Admin"));
+import { PushBanner } from "./components/PushBanner";
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
       </Routes>
       </Suspense>
        <PWAInstallBanner />
+       <PushBanner />
     </BrowserRouter>
     </HelmetProvider>
   );

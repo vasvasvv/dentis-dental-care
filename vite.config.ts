@@ -13,6 +13,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       includeAssets: ["favicon.ico", "favicon.png", "apple-touch-icon.png"],
       manifest: {
         name: "Дентіс — стоматологія у Кропивницькому",
@@ -32,32 +35,12 @@ export default defineConfig(({ mode }) => ({
           { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png}"],
         globIgnores: ["**/*.{webp,svg,woff,woff2}", "**/workbox-*.js"],
         maximumFileSizeToCacheInBytes: 500_000,
-        navigateFallback: "index.html",
-        navigateFallbackDenylist: [/^\/api\//],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\/api\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              expiration: { maxEntries: 50, maxAgeSeconds: 86400 },
-            },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|webp|svg)$/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "images-cache",
-              expiration: { maxEntries: 100, maxAgeSeconds: 2592000 },
-            },
-          },
-        ],
       },
-      devOptions: { enabled: mode === "development" },
+      devOptions: { enabled: mode === "development", type: "module" },
     }),
   ],
   resolve: {
