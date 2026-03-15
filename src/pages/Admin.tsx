@@ -55,6 +55,13 @@ function ConfirmDialog({ message, onConfirm, onCancel }: {
 }
 
 const inputStyle = {
+  background: "hsl(180 50% 15%)",
+  border: "1px solid hsl(180 40% 25%)",
+  color: "hsl(40 30% 88%)",
+  fontFamily: '"NueneMontreal", system-ui, sans-serif',
+};
+
+const lightInputStyle = {
   background: "hsl(180 30% 92%)",
   border: "1px solid hsl(180 40% 70%)",
   color: "#111",
@@ -462,24 +469,24 @@ function ApptForm({
         <div className="relative">
           <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(180_20%_45%)]" />
           <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+380501234567"
-            className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
+            className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
         </div>
       </div>
       <div>
         <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Дата та час</label>
         <input type="datetime-local" value={form.appointment_dt} onChange={e => set('appointment_dt', e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
+          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
       </div>
       <div>
         <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Примітки</label>
         <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2}
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={inputStyle} placeholder="Додаткова інформація..." />
+          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={lightInputStyle} placeholder="Додаткова інформація..." />
       </div>
       {initial.id && (
         <div>
           <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Статус</label>
           <select value={form.status} onChange={e => set('status', e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle}>
+            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle}>
             <option value="scheduled">Заплановано</option>
             <option value="cancelled">Скасовано</option>
             <option value="changed">Змінено</option>
@@ -558,7 +565,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
-            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, minWidth: 140 }} />
+            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={{ ...lightInputStyle, minWidth: 140 }} />
           <button onClick={load} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
