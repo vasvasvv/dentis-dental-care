@@ -98,7 +98,6 @@ export default function Header() {
 
         {/* CTA phone */}
         <div className="hidden md:flex items-center gap-3">
-          <PushButton className="w-9 h-9" />
           <a
             href="tel:+380504800825"
             className="flex items-center gap-2 gradient-gold hover:bg-gold-dark text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium transition-all duration-200 shadow-gold-custom"

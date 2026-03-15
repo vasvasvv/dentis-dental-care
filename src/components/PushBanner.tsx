@@ -99,7 +99,7 @@ export function PushBanner() {
 
   return (
     <div
-      className="fixed bottom-6 left-4 right-4 z-50 max-w-sm mx-auto rounded-2xl shadow-2xl overflow-hidden"
+      className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:max-w-sm z-50 rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden"
       style={{
         background: 'linear-gradient(145deg, hsl(180 60% 11%) 0%, hsl(180 55% 14%) 100%)',
         border: '1px solid hsl(38 62% 52% / 0.25)',
@@ -112,7 +112,7 @@ export function PushBanner() {
       {/* Gold accent line */}
       <div style={{ height: 2, background: 'linear-gradient(90deg, hsl(38 74% 52%), hsl(38 80% 68%), hsl(38 74% 52%))' }} />
 
-      <div className="p-4">
+      <div className="p-5 md:p-4">
         {/* Close */}
         <button onClick={handleDismiss} className="absolute top-4 right-4 text-[hsl(180_20%_45%)] hover:text-[hsl(40_30%_75%)] transition-colors">
           <X size={15} />
@@ -122,12 +122,12 @@ export function PushBanner() {
           /* ── PWA крок ── */
           <>
             <div className="flex items-center gap-3 mb-3 pr-5">
-              <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: 'hsl(38 62% 52% / 0.12)', border: '1px solid hsl(38 62% 52% / 0.25)' }}>
-                <img src="/favicon.png" alt="" className="w-7 h-7 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              <div className="w-12 h-12 md:w-10 md:h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: 'hsl(38 62% 52% / 0.12)', border: '1px solid hsl(38 62% 52% / 0.25)' }}>
+                <img src="/favicon.png" alt="" className="w-8 h-8 md:w-7 md:h-7 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-[hsl(38_70%_60%)] mb-0.5">Дентіс</p>
-                <p className="text-[hsl(40_30%_92%)] text-sm font-medium leading-snug">Додайте на головний екран</p>
+                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">Додайте на головний екран</p>
               </div>
             </div>
 
@@ -152,14 +152,14 @@ export function PushBanner() {
             <div className="flex gap-2">
               {!isIOS && deferredPrompt && (
                 <button onClick={handleInstall}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 md:py-2.5 text-sm md:text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
                   style={{ background: 'linear-gradient(135deg, hsl(38 74% 52%), hsl(38 80% 62%))', color: 'hsl(220 40% 10%)', boxShadow: '0 4px 14px hsl(38 62% 52% / 0.3)' }}>
-                  <Download size={13} />Встановити
+                  <Download size={14} />Встановити
                 </button>
               )}
               <button onClick={isIOS ? handlePushAccept : handlePwaSkip}
-                className="flex items-center justify-center gap-1 rounded-xl py-2.5 text-xs transition-all hover:brightness-125 active:scale-95"
-                style={{ flex: (!isIOS && deferredPrompt) ? '0 0 auto' : 1, paddingLeft: 14, paddingRight: 14, color: 'hsl(180 20% 55%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
+                className="flex items-center justify-center gap-1 rounded-xl py-3 md:py-2.5 text-sm md:text-xs transition-all hover:brightness-125 active:scale-95"
+                style={{ flex: (!isIOS && deferredPrompt) ? '0 0 auto' : 1, paddingLeft: 16, paddingRight: 16, color: 'hsl(180 20% 55%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
                 {isIOS ? 'Зрозуміло' : <><span>Пізніше</span><ChevronRight size={12} /></>}
               </button>
             </div>
@@ -167,25 +167,25 @@ export function PushBanner() {
         ) : (
           /* ── Push крок ── */
           <>
-            <div className="flex items-center gap-3 mb-3 pr-5">
-              <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: 'hsl(38 62% 52% / 0.12)', border: '1px solid hsl(38 62% 52% / 0.25)' }}>
-                <Bell size={19} className="text-[hsl(38_62%_52%)]" />
+            <div className="flex items-center gap-3 mb-4 pr-5">
+              <div className="w-12 h-12 md:w-10 md:h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: 'hsl(38 62% 52% / 0.12)', border: '1px solid hsl(38 62% 52% / 0.25)' }}>
+                <Bell size={22} className="text-[hsl(38_62%_52%)]" />
               </div>
               <div>
-                <p className="text-[hsl(40_30%_92%)] text-sm font-medium leading-snug">Отримуйте сповіщення</p>
-                <p className="text-[hsl(180_20%_55%)] text-xs mt-0.5">Акції, новини та важлива інформація</p>
+                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">Отримуйте сповіщення</p>
+                <p className="text-[hsl(180_20%_55%)] text-sm md:text-xs mt-0.5">Акції, новини та важлива інформація</p>
               </div>
             </div>
             <div className="flex gap-2">
               <button onClick={handleDismiss}
-                className="px-4 py-2.5 rounded-xl text-xs transition-all hover:brightness-125"
-                style={{ color: 'hsl(180 20%_50%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
+                className="px-4 py-3 md:py-2.5 rounded-xl text-sm md:text-xs transition-all hover:brightness-125"
+                style={{ color: 'hsl(180 20% 50%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
                 Не зараз
               </button>
               <button onClick={handlePushAccept}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
+                className="flex-1 py-3 md:py-2.5 rounded-xl text-sm md:text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
                 style={{ background: 'linear-gradient(135deg, hsl(38 74% 52%), hsl(38 80% 62%))', color: 'hsl(220 40% 10%)', boxShadow: '0 4px 14px hsl(38 62% 52% / 0.3)' }}>
-                Підписатись
+                Отримувати
               </button>
             </div>
           </>
