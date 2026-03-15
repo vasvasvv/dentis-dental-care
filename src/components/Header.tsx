@@ -10,7 +10,7 @@ const navLinks = [
   { label: "Послуги", href: "#services", isHash: true },
   { label: "Лікарі", href: "#doctors", isHash: true },
   { label: "Акції", href: "#news", isHash: true },
-  { label: "Відгуки", href: "#reviews", isHash: true },
+  { label: "Блог", href: "/blog", isHash: false },
   { label: "Контакти", href: "/contacts", isHash: false },
 ];
 

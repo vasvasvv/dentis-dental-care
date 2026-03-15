@@ -1,55 +1,38 @@
-import { Tag, CalendarDays } from "lucide-react";
+import { Tag, CalendarDays, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const news = [
-     {
-    type: "promo",
+const promos = [
+  {
     badge: "Акція",
-    title: "Знижка 15% на професійну чистку",
+    title: "Знижка 20% на професійну чистку",
     desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.",
     date: "До 31 березня 2026",
     hot: true,
   },
   {
-    type: "promo",
     badge: "Акція",
     title: "Відбілювання зубів — 20% знижка",
     desc: "Отримайте сяючу посмішку зі знижкою 20% на процедуру відбілювання Zoom4 у березні–квітні.",
     date: "Березень — Квітень 2026",
     hot: false,
   },
-
-  {
-    type: "news",
-    badge: "Новини",
-    title: "Нові імплантаційні системи преміум-класу",
-    desc: "У клініці зʼявилися нові імплантаційні системи від провідних світових виробників. Вони забезпечують високу приживлюваність, надійність та природний естетичний результат навіть у складних клінічних випадках.",
-    date: "Січень 2026",
-    hot: false,
-  },
-
-    {
-    type: "news",
-    badge: "Інформація",
-    title: "Чому важливо регулярно відвідувати стоматолога",
-    desc: "Регулярні профілактичні огляди допомагають уникнути серйозних стоматологічних проблем. Наші лікарі рекомендують проходити огляд щонайменше двічі на рік.",
-    date: "Січень 2026",
-    hot: false,
-  },
 ];
 
 export default function NewsSection() {
+  const navigate = useNavigate();
+
   return (
     <section id="news" className="py-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Актуальне</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
-            Новини та пропозиції
+            Акції та пропозиції
           </h2>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {news.map((item) => (
+          {promos.map((item) => (
             <div
               key={item.title}
               className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 ${
@@ -63,17 +46,11 @@ export default function NewsSection() {
                 </div>
               )}
               <div className="p-6">
-                <span
-                  className={`inline-block font-body text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full mb-4 ${
-                    item.type === "promo"
-                      ? "bg-gold/15 text-gold"
-                        : "bg-navy/8 text-custom-dark"
-                  }`}
-                >
+                <span className="inline-block font-body text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full mb-4 bg-gold/15 text-gold">
                   {item.badge}
                 </span>
-                  <h3 className="font-display font-bold text-custom-dark text-xl mb-3">{item.title}</h3>
-                  <p className="font-body text-muted-foreground text-sm leading-relaxed mb-4">{item.desc}</p>
+                <h3 className="font-display font-bold text-custom-dark text-xl mb-3">{item.title}</h3>
+                <p className="font-body text-muted-foreground text-sm leading-relaxed mb-4">{item.desc}</p>
                 <div className="flex items-center gap-2 text-muted-foreground text-xs font-body">
                   <CalendarDays size={13} />
                   <span>{item.date}</span>
@@ -81,6 +58,16 @@ export default function NewsSection() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="text-center mt-10">
+          <button
+            onClick={() => navigate("/blog")}
+            className="inline-flex items-center gap-2 font-body text-sm font-medium text-navy hover:text-gold transition-colors duration-200 group"
+          >
+            <span>Всі новини та статті</span>
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />
+          </button>
         </div>
       </div>
     </section>

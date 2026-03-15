@@ -12,6 +12,7 @@ const DiagnostikaZubiv = lazy(() =>  import("./pages/DiagnostikaZubiv"));
 const Contacts = lazy(() =>  import("./pages/Contacts"));
 const NotFound = lazy(() =>  import("./pages/NotFound"));
 const PWAInstallBanner = lazy(() => import("./components/Pwainstallbanner"));
+const Blog = lazy(() => import("./pages/Blog"));
 const Admin = lazy(() => import("./pages/Admin"));
 import { PushBanner } from "./components/PushBanner";
 
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/estetychna-stomatolohiya" element={<EstetychnaStomatologiya />} />
         <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
         <Route path="/contacts" element={<Contacts />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/d-panel" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
