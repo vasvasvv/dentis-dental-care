@@ -791,12 +791,24 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
+const SESSION_KEY = 'dentis-admin-secret'
+
 export default function Admin() {
-  const [secret, setSecret] = useState<string | null>(null);
+  const [secret, setSecret] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
-  if (!secret) return <LoginScreen onLogin={setSecret} />;
+  const handleLogin = (s: string) => {
+    sessionStorage.setItem(SESSION_KEY, s);
+    setSecret(s);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    setSecret(null);
+  };
+
+  if (!secret) return <LoginScreen onLogin={handleLogin} />;
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(180 60% 8%)" }}>
@@ -814,7 +826,7 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => navigate("/")} className="text-xs text-[hsl(180_20%_50%)] hover:text-[hsl(40_30%_80%)] px-3 py-1.5 rounded-lg hover:bg-[hsl(180_50%_15%)] transition-colors" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>На сайт</button>
-            <button onClick={() => setSecret(null)} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><LogOut size={15} /></button>
+            <button onClick={handleLogout} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><LogOut size={15} /></button>
           </div>
         </div>
       </div>
