@@ -1,7 +1,2 @@
-# Статичні файли — не перенаправляти
-/manifest.json /manifest.json 200
-/sw.js /sw.js 200
-/workbox-*.js /workbox-:splat.js 200
-
 # SPA fallback — всі інші маршрути
 /* /index.html 200
