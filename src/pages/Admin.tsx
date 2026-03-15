@@ -469,6 +469,7 @@ function ApptForm({
         <div className="relative">
           <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(180_20%_45%)]" />
           <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+380501234567"
+            type="tel" autoComplete="tel"
             className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
         </div>
       </div>

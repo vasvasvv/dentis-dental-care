@@ -180,6 +180,7 @@ export function PushBanner() {
             <div className="mb-3">
               <input
                 type="tel"
+                autoComplete="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="Ваш номер (необов'язково)"
