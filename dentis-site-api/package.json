@@ -1,9 +1,9 @@
 {
-  "name": "dentis-site-api",
+  "name": "dentis-api-worker",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy --no-bundle --keep-vars"
   },
   "devDependencies": {
     "wrangler": "^3.114.4"

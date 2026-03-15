@@ -2,9 +2,7 @@ name = "dentis-site-api"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
 workers_dev = true
-
-[build]
-command = ""
+no_bundle = true
 
 [[d1_databases]]
 binding = "DB"
