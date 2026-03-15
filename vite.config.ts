@@ -1,21 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
- 
-// https://vitejs.dev/config/
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    hmr: {
-      overlay: false,
-    },
+    hmr: { overlay: false },
   },
   plugins: [
     react(),
-    mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "favicon.png", "apple-touch-icon.png"],
@@ -27,7 +22,7 @@ export default defineConfig(({ mode }) => ({
         scope: "/",
         display: "standalone",
         orientation: "portrait",
-        background_color: "#80b3b3",
+        background_color: "#0a3333",
         theme_color: "#c1a676",
         lang: "uk",
         categories: ["medical", "health"],
@@ -62,11 +57,9 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      devOptions: {
-        enabled: mode === "development",
-      },
+      devOptions: { enabled: mode === "development" },
     }),
-  ].filter(Boolean),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -82,14 +75,8 @@ export default defineConfig(({ mode }) => ({
         },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names?.[0] ?? "";
-          // Фіксовані назви для логотипів (LCP preload)
-          if (name.includes("Dentis_with_Text") && !name.includes("g.")) {
-            return "assets/logo-white.webp";
-          }
-          if (name.includes("Dentis_with_Textg")) {
-            return "assets/logo-gold.webp";
-          }
-          // Фіксовані назви для шрифтів (preload)
+          if (name.includes("Dentis_with_Text") && !name.includes("g.")) return "assets/logo-white.webp";
+          if (name.includes("Dentis_with_Textg")) return "assets/logo-gold.webp";
           if (name.includes("NeueMontreal-Bold") && name.endsWith(".woff2")) return "assets/font-bold.woff2";
           if (name.includes("NeueMontreal-Bold") && name.endsWith(".woff")) return "assets/font-bold.woff";
           if (name.includes("NeueMontreal-Medium") && name.endsWith(".woff2")) return "assets/font-medium.woff2";
@@ -106,4 +93,3 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 600,
   },
 }));
- 
