@@ -86,8 +86,42 @@ export default {
 
     if (p.match(/^\/api\/doctors\/\d+$/) && m === 'DELETE') {
       if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
+      // Видаляємо фото з R2 якщо є
+      const doc = await env.DB.prepare('SELECT img_url FROM doctors WHERE id=?').bind(idFrom(p)).first()
+      if (doc?.img_url && doc.img_url.includes('/api/doctors/photo/')) {
+        const key = doc.img_url.split('/api/doctors/photo/')[1]
+        await env.DOCTORS_BUCKET.delete(key).catch(() => {})
+      }
       await env.DB.prepare('DELETE FROM doctors WHERE id=?').bind(idFrom(p)).run()
       return json({ ok: true })
+    }
+
+    // ── DOCTOR PHOTO UPLOAD ───────────────────────────────────────────────────
+    if (p === '/api/doctors/photo' && m === 'POST') {
+      if (!isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401)
+      const ct = request.headers.get('Content-Type') || ''
+      if (!ct.startsWith('image/')) return json({ error: 'Only images allowed' }, 400)
+      const ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : 'jpg'
+      const key = `doctor-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const body = await request.arrayBuffer()
+      if (body.byteLength > 5 * 1024 * 1024) return json({ error: 'File too large (max 5MB)' }, 413)
+      await env.DOCTORS_BUCKET.put(key, body, { httpMetadata: { contentType: ct } })
+      const url = `${new URL(request.url).origin}/api/doctors/photo/${key}`
+      return json({ url }, 201)
+    }
+
+    // ── DOCTOR PHOTO SERVE ────────────────────────────────────────────────────
+    if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
+      const key = p.replace('/api/doctors/photo/', '')
+      const obj = await env.DOCTORS_BUCKET.get(key)
+      if (!obj) return new Response('Not Found', { status: 404 })
+      return new Response(obj.body, {
+        headers: {
+          'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
     }
 
     // ── PUSH ──────────────────────────────────────────────────────────────────

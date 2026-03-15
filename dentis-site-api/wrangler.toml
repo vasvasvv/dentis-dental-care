@@ -7,3 +7,7 @@ workers_dev = true
 binding = "DB"
 database_name = "site_news_docs_pwa"
 database_id = "707f01aa-a2d9-4cd8-be17-84f37a8d4c8b"
+
+[[r2_buckets]]
+binding = "DOCTORS_BUCKET"
+bucket_name = "dentis-doctors"

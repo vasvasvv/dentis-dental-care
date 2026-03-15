@@ -14,6 +14,8 @@ import {
 
 type Tab = "news" | "doctors" | "push";
 
+const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
+
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function normalizeHot(v: boolean | number): boolean { return v === true || v === 1; }
 
@@ -246,7 +248,10 @@ function DoctorsTab({ secret }: { secret: string }) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState<(Omit<Doctor, 'id'> & { id?: number }) | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -260,15 +265,42 @@ function DoctorsTab({ secret }: { secret: string }) {
 
   const emptyForm = { name: '', title: '', speciality: '', experience: '', desc: '', img_url: '', sort_order: 99 };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPendingFile(f);
+    setPreviewUrl(URL.createObjectURL(f));
+  };
+
   const handleSave = async () => {
     if (!editing) return;
     setSaving(true); setError(null);
     try {
-      const p = { name: editing.name, title: editing.title, speciality: editing.speciality, experience: editing.experience, desc: editing.desc, img_url: editing.img_url, sort_order: editing.sort_order };
+      let img_url = editing.img_url;
+
+      // Якщо є новий файл — завантажуємо в R2
+      if (pendingFile) {
+        setUploading(true);
+        const res = await fetch(`${BASE}/api/doctors/photo`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${secret}`, 'Content-Type': pendingFile.type },
+          body: pendingFile,
+        });
+        setUploading(false);
+        if (!res.ok) throw new Error('Помилка завантаження фото');
+        const data = await res.json() as { url: string };
+        img_url = data.url;
+      }
+
+      const p = { name: editing.name, title: editing.title, speciality: editing.speciality, experience: editing.experience, desc: editing.desc, img_url, sort_order: editing.sort_order };
       isNew ? await createDoctor(p, secret) : await updateDoctor(editing.id!, p, secret);
-      await load(); setEditing(null);
+      await load();
+      setEditing(null);
+      setPendingFile(null);
+      setPreviewUrl(null);
     } catch (e: unknown) {
-      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Невірний пароль адміна' : 'Помилка збереження');
+      setUploading(false);
+      setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Невірний пароль адміна' : (e instanceof Error ? e.message : 'Помилка збереження'));
     } finally { setSaving(false); }
   };
 
@@ -287,7 +319,7 @@ function DoctorsTab({ secret }: { secret: string }) {
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
-        <button onClick={() => { setEditing({ ...emptyForm }); setIsNew(true); }}
+        <button onClick={() => { setEditing({ ...emptyForm }); setIsNew(true); setPendingFile(null); setPreviewUrl(null); }}
           className="flex items-center gap-2 gradient-gold text-[hsl(220_40%_10%)] px-4 py-2 rounded-xl text-sm font-semibold shadow-gold-custom hover:brightness-110 transition-all active:scale-95"
           style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
           <Plus size={16} />Додати лікаря
@@ -312,7 +344,7 @@ function DoctorsTab({ secret }: { secret: string }) {
                 <p className="text-[hsl(180_20%_50%)] text-xs">{doc.experience}</p>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => { setEditing({ ...doc }); setIsNew(false); }} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all"><Pencil size={15} /></button>
+                <button onClick={() => { setEditing({ ...doc }); setIsNew(false); setPendingFile(null); setPreviewUrl(null); }} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all"><Pencil size={15} /></button>
                 <button onClick={() => setDeleteId(doc.id)} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 size={15} /></button>
               </div>
             </div>
@@ -321,21 +353,21 @@ function DoctorsTab({ secret }: { secret: string }) {
       )}
 
       {editing && (
-        <ModalShell title={isNew ? "Новий лікар" : "Редагувати лікаря"} onClose={() => setEditing(null)}>
+        <ModalShell title={isNew ? "Новий лікар" : "Редагувати лікаря"} onClose={() => { setEditing(null); setPendingFile(null); setPreviewUrl(null); }}>
           <div className="space-y-4">
             <div>
               <label className="block text-[hsl(180_20%_55%)] text-xs mb-2 uppercase tracking-wider">Фото</label>
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0" style={{ background: "hsl(180 50% 15%)", border: "1px solid hsl(180 40% 25%)" }}>
-                  {editing.img_url ? <img src={editing.img_url} alt="" className="w-full h-full object-cover object-top" />
+                  {(previewUrl || editing.img_url) ? <img src={previewUrl ?? editing.img_url} alt="" className="w-full h-full object-cover object-top" />
                     : <div className="w-full h-full flex items-center justify-center text-[hsl(180_30%_45%)]"><Image size={20} /></div>}
                 </div>
                 <div className="flex-1">
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden"
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f && editing) setEditing((p) => p ? { ...p, img_url: URL.createObjectURL(f) } : p); }} />
+                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                    onChange={handleFileChange} />
                   <button onClick={() => fileRef.current?.click()} className="w-full py-2 rounded-xl text-xs text-[hsl(40_20%_65%)] hover:text-[hsl(38_70%_68%)] transition-colors"
                     style={{ border: "1px dashed hsl(180 40% 25%)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-                    Завантажити фото
+                    {pendingFile ? `✓ ${pendingFile.name}` : 'Завантажити фото'}
                   </button>
                   <p className="text-[hsl(180_20%_40%)] text-[10px] mt-1">JPG, PNG, WebP · до 5MB</p>
                 </div>
@@ -354,10 +386,10 @@ function DoctorsTab({ secret }: { secret: string }) {
           {error && <p className="mt-3 text-red-400 text-xs" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{error}</p>}
           <div className="flex gap-2 mt-6">
             <button onClick={() => setEditing(null)} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Скасувати</button>
-            <button onClick={handleSave} disabled={!editing.name.trim() || saving}
+            <button onClick={handleSave} disabled={!editing.name.trim() || saving || uploading}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}Зберегти
+              {uploading ? <><Loader2 size={15} className="animate-spin" />Завантаження...</> : saving ? <><Loader2 size={15} className="animate-spin" />Збереження...</> : <><Check size={15} />Зберегти</>}
             </button>
           </div>
         </ModalShell>
@@ -478,7 +510,6 @@ function LoginScreen({ onLogin }: { onLogin: (s: string) => void }) {
     if (!password.trim()) return;
     setChecking(true);
     try {
-      const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
       const res = await fetch(`${BASE}/api/push/count`, { headers: { Authorization: `Bearer ${password}` } });
       if (res.ok) { onLogin(password); }
       else { setError(true); setPassword(""); setTimeout(() => setError(false), 2000); }
