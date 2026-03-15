@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { HelmetProvider } from "react-helmet-async";
 const ScrollToTop = lazy(() => import("./components/ScrollToTop"));
@@ -14,6 +14,18 @@ const NotFound = lazy(() =>  import("./pages/NotFound"));
 const PWAInstallBanner = lazy(() => import("./components/Pwainstallbanner"));
 const Admin = lazy(() => import("./pages/Admin"));
 import { PushBanner } from "./components/PushBanner";
+
+function AppBanners() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/d-panel");
+  if (isAdmin) return null;
+  return (
+    <>
+      <PWAInstallBanner />
+      <PushBanner />
+    </>
+  );
+}
 
 export default function App() {
   return (
@@ -34,8 +46,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
-       <PWAInstallBanner />
-       <PushBanner />
+       <AppBanners />
     </BrowserRouter>
     </HelmetProvider>
   );

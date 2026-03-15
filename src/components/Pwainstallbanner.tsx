@@ -171,7 +171,15 @@ export default function PWAInstallBanner() {
                 <ol className="space-y-1 pl-1">
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">1.</span>
-                    <span className="text-xs">Натисніть <span style={{ color: 'hsl(40 30% 88%)' }}>«Поділитися»</span> у Safari</span>
+                    <span className="text-xs">Натисніть{' '}
+                      <span style={{ color: 'hsl(40 30% 88%)' }} className="inline-flex items-center gap-1">
+                        «Поширити»
+                        <svg width="11" height="13" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', verticalAlign: 'middle', marginTop: '-1px' }}>
+                          <path d="M6 10V1M6 1L3 4M6 1L9 4" stroke="hsl(40 30% 88%)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M1 8v5a1 1 0 001 1h8a1 1 0 001-1V8" stroke="hsl(40 30% 88%)" strokeWidth="1.4" strokeLinecap="round"/>
+                        </svg>
+                      </span>
+                    {' '}у Safari</span>
                   </li>
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">2.</span>
