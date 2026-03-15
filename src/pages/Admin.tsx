@@ -571,7 +571,7 @@ export default function Admin() {
             <img src="/favicon.png" alt="" className="w-7 h-7 rounded-lg" />
             <div>
               <p className="text-[hsl(38_70%_68%)] text-[10px] tracking-[0.25em] uppercase leading-none" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Дентіс</p>
-              <p className="text-[hsl(40_30%_88%)] text-sm font-medium leading-tight" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмін-панель</p>
+              <p className="text-[hsl(40_30%_88%)] text-sm font-medium leading-tight" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмінь</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
