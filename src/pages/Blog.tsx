@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet-async";
-import { Phone, Tag, CalendarDays, Download, BookOpen, Newspaper, CheckCircle } from "lucide-react";
+import { Phone, Tag, CalendarDays, Download, BookOpen, CheckCircle } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
-import { useRef } from "react";
 
 const API = import.meta.env.VITE_API_URL ?? "https://dentis-site-api.nesterenkovasil9.workers.dev";
 
@@ -18,21 +17,9 @@ type NewsItem = {
   hot: number;
 };
 
-const promos = [
-  {
-    badge: "Акція",
-    title: "Знижка 20% на професійну чистку",
-    desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.",
-    date: "До 31 березня 2026",
-    hot: true,
-  },
-  {
-    badge: "Акція",
-    title: "Відбілювання зубів — 20% знижка",
-    desc: "Отримайте сяючу посмішку зі знижкою 20% на процедуру відбілювання Zoom4 у березні–квітні.",
-    date: "Березень — Квітень 2026",
-    hot: false,
-  },
+const STATIC_PROMOS = [
+  { id: -1, type: "promo", badge: "Акція", title: "Знижка 20% на професійну чистку", desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.", date: "До 31 березня 2026", hot: 1 },
+  { id: -2, type: "promo", badge: "Акція", title: "Відбілювання зубів — 20% знижка", desc: "Отримайте сяючу посмішку зі знижкою 20% на процедуру відбілювання Zoom4 у березні–квітні.", date: "Березень — Квітень 2026", hot: 0 },
 ];
 
 const hygieneSteps = [
@@ -44,18 +31,18 @@ const hygieneSteps = [
   { icon: "📅", title: "Огляд кожні 6 місяців", desc: "Регулярна профілактика — найефективніший спосіб уникнути серйозного лікування." },
 ];
 
-function BlogCard({ item, isPromo = false }: { item: NewsItem | typeof promos[0]; isPromo?: boolean }) {
-  const hot = "hot" in item ? (typeof item.hot === "number" ? item.hot === 1 : item.hot) : false;
+function BlogCard({ item, isPromo = false }: { item: NewsItem; isPromo?: boolean }) {
+  const isHot = item.hot === 1 || item.hot as unknown as boolean === true;
   return (
-    <div className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col ${hot ? "border-gold/40" : "border-border"}`}>
-      {hot && (
-        <div className="gradient-gold px-5 py-2 flex items-center gap-2">
+    <div className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full ${isHot ? "border-gold/40" : "border-border"}`}>
+      {isHot && (
+        <div className="gradient-gold px-5 py-2 flex items-center gap-2 flex-shrink-0">
           <Tag size={13} className="text-accent-foreground" />
           <span className="font-body text-xs text-accent-foreground font-semibold tracking-widest uppercase">Гаряча пропозиція</span>
         </div>
       )}
       <div className="p-6 flex flex-col flex-1">
-        <span className={`inline-block font-body text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full mb-4 ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/8 text-navy"}`}>
+        <span className={`inline-block font-body text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full mb-4 ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/8 text-custom-dark"}`}>
           {item.badge}
         </span>
         <h3 className="font-display font-bold text-custom-dark text-xl mb-3">{item.title}</h3>
@@ -71,9 +58,8 @@ function BlogCard({ item, isPromo = false }: { item: NewsItem | typeof promos[0]
 
 export default function Blog() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"all" | "news" | "promo">("all");
 
   useEffect(() => {
     const video = videoRef.current;
@@ -83,15 +69,16 @@ export default function Blog() {
   useEffect(() => {
     fetch(`${API}/api/news`)
       .then(r => r.json())
-      .then((data: NewsItem[]) => { setNews(data); setLoading(false); })
+      .then((data: NewsItem[]) => { setAllItems(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  const filteredNews = news.filter(item => {
-    if (activeTab === "news") return item.type !== "promo";
-    if (activeTab === "promo") return item.type === "promo";
-    return true;
-  });
+  // Promos from API (newest first), fallback to static
+  const apiPromos = allItems.filter(i => i.type === "promo");
+  const displayPromos: NewsItem[] = apiPromos.length > 0 ? apiPromos : STATIC_PROMOS as NewsItem[];
+
+  // News only (not promo), newest first, all of them
+  const newsOnly = allItems.filter(i => i.type !== "promo");
 
   return (
     <div className="min-h-screen">
@@ -108,13 +95,13 @@ export default function Blog() {
 
       <Header />
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      {/* ── Hero ── */}
       <section className="relative pt-36 pb-24 overflow-hidden">
         <div className="fixed inset-0 -z-10">
           <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="w-full h-full object-cover" />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
         </div>
@@ -123,13 +110,13 @@ export default function Blog() {
           <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
             Блог та новини
           </h1>
-          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
+          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl">
             Корисні статті про стоматологію, актуальні акції та новини клініки. Дбаємо про ваше здоров'я і інформуємо про найкраще.
           </p>
         </div>
       </section>
 
-      {/* ── Promos ──────────────────────────────────────────────────────────── */}
+      {/* ── Promos ── */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -139,52 +126,34 @@ export default function Blog() {
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {promos.map(item => (
-              <BlogCard key={item.title} item={item as unknown as NewsItem} isPromo />
+            {displayPromos.map(item => (
+              <BlogCard key={item.id} item={item} isPromo />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── News from API ────────────────────────────────────────────────────── */}
+      {/* ── News (no promo, all, 3 columns, grows) ── */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
+          <div className="text-center mb-14">
             <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Актуальне</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
               Новини клініки
             </h2>
           </div>
 
-          {/* Tabs */}
-          <div className="flex justify-center gap-2 mb-10">
-            {([["all", "Всі", <Newspaper size={14}/>], ["news", "Статті", <BookOpen size={14}/>], ["promo", "Акції", <Tag size={14}/>]] as const).map(([key, label, icon]) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`inline-flex items-center gap-2 px-5 py-2 rounded-full font-body text-sm font-medium transition-all duration-200 ${
-                  activeTab === key
-                    ? "gradient-gold text-accent-foreground shadow-gold-custom"
-                    : "bg-card border border-border text-muted-foreground hover:text-navy hover:border-navy/30"
-                }`}
-              >
-                {icon}
-                {label}
-              </button>
-            ))}
-          </div>
-
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {[1,2,3].map(i => (
+              {[1, 2, 3].map(i => (
                 <div key={i} className="bg-card rounded-2xl border border-border h-56 animate-pulse" />
               ))}
             </div>
-          ) : filteredNews.length === 0 ? (
+          ) : newsOnly.length === 0 ? (
             <p className="text-center text-muted-foreground font-body py-12">Новин поки немає</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {filteredNews.map(item => (
+              {newsOnly.map(item => (
                 <BlogCard key={item.id} item={item} />
               ))}
             </div>
@@ -192,11 +161,10 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* ── Oral Care Guide ──────────────────────────────────────────────────── */}
+      {/* ── Oral Care Guide ── */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            {/* Header row */}
             <div className="grid md:grid-cols-2 gap-12 items-center mb-14">
               <div>
                 <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Корисно знати</p>
@@ -216,13 +184,12 @@ export default function Blog() {
                 </a>
               </div>
 
-              {/* Preview card */}
               <div className="bg-navy rounded-2xl p-8 shadow-card-custom relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-gold/10 blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-gold/10 blur-2xl" />
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-gold/10 blur-2xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-gold/10 blur-2xl pointer-events-none" />
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
                       <BookOpen size={18} className="text-accent-foreground" />
                     </div>
                     <div>
@@ -231,10 +198,10 @@ export default function Blog() {
                     </div>
                   </div>
                   <ul className="space-y-3">
-                    {["Щоденна гігієна порожнини рота", "Харчування та шкідливі звички", "Графік профілактичних оглядів"].map(item => (
-                      <li key={item} className="flex items-center gap-3">
+                    {["Щоденна гігієна порожнини рота", "Харчування та шкідливі звички", "Графік профілактичних оглядів"].map(point => (
+                      <li key={point} className="flex items-center gap-3">
                         <CheckCircle size={15} className="text-gold flex-shrink-0" />
-                        <span className="font-body text-primary-foreground/80 text-sm">{item}</span>
+                        <span className="font-body text-primary-foreground/80 text-sm">{point}</span>
                       </li>
                     ))}
                   </ul>
@@ -242,7 +209,6 @@ export default function Blog() {
               </div>
             </div>
 
-            {/* Tips grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {hygieneSteps.map(step => (
                 <div key={step.title} className="bg-card rounded-xl border border-border p-5 hover:border-gold/30 hover:shadow-sm transition-all duration-200">
