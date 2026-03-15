@@ -21,14 +21,13 @@ export function usePushNotifications() {
     }).catch(() => setState('unsubscribed'))
   }, [])
 
-  const subscribe = useCallback(async () => {
+  const subscribe = useCallback(async (phone?: string) => {
     if (!('serviceWorker' in navigator)) return false
     try {
       setState('loading')
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') { setState('denied'); return false }
 
-      // Отримуємо VAPID public key з сервера
       const res = await fetch(`${API}/api/vapid-public-key`)
       const { key } = await res.json() as { key: string }
 
@@ -38,11 +37,13 @@ export function usePushNotifications() {
         applicationServerKey: urlBase64ToUint8Array(key),
       })
 
-      // Зберігаємо підписку на сервері
+      const body: Record<string, unknown> = { ...sub.toJSON() }
+      if (phone) body.phone = phone.replace(/\D/g, '')
+
       await fetch(`${API}/api/push/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub.toJSON()),
+        body: JSON.stringify(body),
       })
 
       setState('subscribed')

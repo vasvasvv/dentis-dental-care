@@ -55,8 +55,10 @@ function ConfirmDialog({ message, onConfirm, onCancel }: {
 }
 
 const inputStyle = {
-  border: "1px solid hsl(180 40% 25%)",
-  color: "hsl(40 30% 88%)", fontFamily: '"NueneMontreal", system-ui, sans-serif',
+  background: "hsl(180 30% 92%)",
+  border: "1px solid hsl(180 40% 70%)",
+  color: "#111",
+  fontFamily: '"NueneMontreal", system-ui, sans-serif',
 };
 
 function FieldInput({ label, value, onChange, placeholder }: {
@@ -447,7 +449,6 @@ function ApptForm({
     patient_name: initial.patient_name ?? '',
     phone: initial.phone ?? '',
     appointment_dt: initial.appointment_dt ?? '',
-    doctor: initial.doctor ?? '',
     notes: initial.notes ?? '',
     status: initial.status ?? 'scheduled' as const,
   });
@@ -469,7 +470,6 @@ function ApptForm({
         <input type="datetime-local" value={form.appointment_dt} onChange={e => set('appointment_dt', e.target.value)}
           className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle} />
       </div>
-      <FieldInput label="Лікар" value={form.doctor} onChange={v => set('doctor', v)} placeholder="Лікар-стоматолог" />
       <div>
         <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Примітки</label>
         <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2}
@@ -489,7 +489,7 @@ function ApptForm({
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <div className="flex gap-2 mt-4">
         <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Скасувати</button>
-        <button onClick={() => onSave(form)} disabled={!form.patient_name.trim() || !form.phone.trim() || !form.appointment_dt || saving}
+        <button onClick={() => onSave({ ...form, doctor: null })} disabled={!form.patient_name.trim() || !form.phone.trim() || !form.appointment_dt || saving}
           className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
           style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
           {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}Зберегти
@@ -558,7 +558,7 @@ function AppointmentsTab({ secret }: { secret: string }) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
-            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={inputStyle} />
+            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, minWidth: 140 }} />
           <button onClick={load} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>

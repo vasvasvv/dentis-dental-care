@@ -26,6 +26,7 @@ export function PushBanner() {
   // Banner flow: 'pwa' | 'push' | null
   const [step, setStep] = useState<'pwa' | 'push' | null>(null)
   const [visible, setVisible] = useState(false)
+  const [phone, setPhone] = useState('')
 
   useEffect(() => {
     // Якщо вже підписаний — нічого не показуємо
@@ -83,8 +84,8 @@ export function PushBanner() {
   const handlePushAccept = useCallback(async () => {
     setVisible(false)
     localStorage.setItem('push-banner-seen', '1')
-    await subscribe()
-  }, [subscribe])
+    await subscribe(phone.trim() || undefined)
+  }, [subscribe, phone])
 
   const handleDismiss = useCallback(() => {
     setVisible(false)
@@ -173,8 +174,21 @@ export function PushBanner() {
               </div>
               <div>
                 <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">Отримуйте сповіщення</p>
-                <p className="text-[hsl(180_20%_55%)] text-sm md:text-xs mt-0.5">Акції, новини та важлива інформація</p>
+                <p className="text-[hsl(180_20%_55%)] text-sm md:text-xs mt-0.5">Акції, новини та нагадування про прийом</p>
               </div>
+            </div>
+            <div className="mb-3">
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="Ваш номер (необов'язково)"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                style={{ background: 'hsl(180 30% 92%)', border: '1px solid hsl(180 40% 60%)', color: '#111', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}
+              />
+              <p className="text-[hsl(180_20%_45%)] text-[10px] mt-1 px-1" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                Для індивідуальних нагадувань про запис
+              </p>
             </div>
             <div className="flex gap-2">
               <button onClick={handleDismiss}
