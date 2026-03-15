@@ -743,6 +743,9 @@ function AppointmentsTab({ secret }: { secret: string }) {
 // ─── Push Tab ─────────────────────────────────────────────────────────────────
 
 function PushTab({ secret }: { secret: string }) {
+  const [pushTab, setPushTab] = useState<'all' | 'phone'>('all');
+
+  // ── Broadcast ──
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("/");
@@ -750,6 +753,14 @@ function PushTab({ secret }: { secret: string }) {
   const [sent, setSent] = useState<number | null>(null);
   const [subCount, setSubCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // ── Send to phone ──
+  const [pPhone, setPPhone] = useState("");
+  const [pTitle, setPTitle] = useState("");
+  const [pBody, setPBody] = useState("");
+  const [pSending, setPSending] = useState(false);
+  const [pResult, setPResult] = useState<{ sent: number; noSub?: boolean } | null>(null);
+  const [pError, setPError] = useState<string | null>(null);
 
   useEffect(() => { getPushCount(secret).then(setSubCount); }, [secret]);
 
@@ -761,84 +772,152 @@ function PushTab({ secret }: { secret: string }) {
     finally { setSending(false); }
   };
 
+  const handleSendToPhone = async () => {
+    if (!validatePhone(pPhone) || !pTitle.trim() || !pBody.trim()) return;
+    setPSending(true); setPError(null); setPResult(null);
+    try {
+      const res = await fetch(`${BASE}/api/push/send-to`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: pPhone, title: pTitle, body: pBody, url: '/' }),
+      });
+      const data = await res.json() as { sent: number; noSub?: boolean };
+      setPResult(data);
+    } catch { setPError('Помилка надсилання'); }
+    finally { setPSending(false); }
+  };
+
   const templates = [
     { label: "Акція", title: "🦷 Спецпропозиція від Дентіс", body: "Тільки цього тижня — знижка 15% на профогляд!" },
     { label: "Нагадування", title: "Нагадування про прийом", body: "Не забудьте про завтрашній візит до клініки Дентіс." },
     { label: "Новина", title: "Новини Дентіс", body: "У нашій клініці з'явилося нове обладнання преміум-класу." },
   ];
 
+  const subTabStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1, padding: '7px 0', borderRadius: 10, fontSize: 13, fontWeight: active ? 600 : 400,
+    background: active ? 'hsl(180 50% 20%)' : 'transparent',
+    color: active ? 'hsl(40 30% 92%)' : 'hsl(180 20% 50%)',
+    border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+    fontFamily: '"NueneMontreal", system-ui, sans-serif',
+  });
+
   return (
     <div className="max-w-xl">
-      {subCount !== null && (
-        <div className="rounded-2xl p-4 mb-5 flex items-center gap-3" style={{ background: "hsl(38 62% 52% / 0.08)", border: "1px solid hsl(38 62% 52% / 0.2)" }}>
-          <Users size={16} className="text-[hsl(38_70%_68%)] flex-shrink-0" />
-          <p className="text-[hsl(40_20%_70%)] text-sm" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-            <span className="text-[hsl(38_70%_68%)] font-semibold">{subCount}</span> підписників отримають сповіщення
-          </p>
-        </div>
-      )}
-
-      <div className="mb-5">
-        <p className="text-[hsl(180_20%_55%)] text-xs uppercase tracking-wider mb-2.5">Шаблони</p>
-        <div className="flex flex-wrap gap-2">
-          {templates.map((t) => (
-            <button key={t.label} onClick={() => { setTitle(t.title); setBody(t.body); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-[hsl(40_20%_65%)] hover:text-[hsl(38_70%_68%)] transition-colors"
-              style={{ background: "hsl(180 60% 14%)", border: "1px solid hsl(180 40% 22% / 0.5)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* Sub-tabs */}
+      <div className="flex gap-1 p-1 rounded-xl mb-5" style={{ background: 'hsl(180 60% 10%)', border: '1px solid hsl(180 40% 18% / 0.5)' }}>
+        <button style={subTabStyle(pushTab === 'all')} onClick={() => setPushTab('all')}>Всім підписникам</button>
+        <button style={subTabStyle(pushTab === 'phone')} onClick={() => { setPushTab('phone'); setPResult(null); }}>На номер</button>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Заголовок</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={60} placeholder="Короткий заголовок"
-            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }} />
-          <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{title.length}/60</p>
-        </div>
-        <div>
-          <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Текст</label>
-          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={160} placeholder="Текст повідомлення..."
-            className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }} />
-          <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{body.length}/160</p>
-        </div>
-        <div>
-          <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Посилання</label>
-          <select value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }}>
-            <option value="/">Головна сторінка</option>
-            <option value="/#news">Новини та акції</option>
-            <option value="/#services">Послуги</option>
-            <option value="/contacts">Контакти</option>
-          </select>
-        </div>
-      </div>
-
-      {(title || body) && (
-        <div className="mt-5 rounded-xl p-4" style={{ background: "hsl(180 60% 9%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
-          <p className="text-[hsl(180_20%_45%)] text-[10px] uppercase tracking-wider mb-2.5">Попередній перегляд</p>
-          <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: "hsl(180 50% 14%)", border: "1px solid hsl(180 40% 22% / 0.4)" }}>
-            <img src="/favicon.png" alt="" className="w-8 h-8 rounded-lg flex-shrink-0" />
-            <div>
-              <p className="text-[hsl(40_30%_90%)] text-xs font-semibold" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{title || "Заголовок"}</p>
-              <p className="text-[hsl(40_15%_65%)] text-xs leading-relaxed mt-0.5" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{body || "Текст повідомлення"}</p>
+      {pushTab === 'all' ? (
+        <>
+          {subCount !== null && (
+            <div className="rounded-2xl p-4 mb-5 flex items-center gap-3" style={{ background: "hsl(38 62% 52% / 0.08)", border: "1px solid hsl(38 62% 52% / 0.2)" }}>
+              <Users size={16} className="text-[hsl(38_70%_68%)] flex-shrink-0" />
+              <p className="text-[hsl(40_20%_70%)] text-sm" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                <span className="text-[hsl(38_70%_68%)] font-semibold">{subCount}</span> підписників отримають сповіщення
+              </p>
+            </div>
+          )}
+          <div className="mb-5">
+            <p className="text-[hsl(180_20%_55%)] text-xs uppercase tracking-wider mb-2.5">Шаблони</p>
+            <div className="flex flex-wrap gap-2">
+              {templates.map((t) => (
+                <button key={t.label} onClick={() => { setTitle(t.title); setBody(t.body); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[hsl(40_20%_65%)] hover:text-[hsl(38_70%_68%)] transition-colors"
+                  style={{ background: "hsl(180 60% 14%)", border: "1px solid hsl(180 40% 22% / 0.5)", fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                  {t.label}
+                </button>
+              ))}
             </div>
           </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Заголовок</label>
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={60} placeholder="Короткий заголовок"
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }} />
+              <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{title.length}/60</p>
+            </div>
+            <div>
+              <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Текст</label>
+              <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={160} placeholder="Текст повідомлення..."
+                className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }} />
+              <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{body.length}/160</p>
+            </div>
+            <div>
+              <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Посилання</label>
+              <select value={url} onChange={(e) => setUrl(e.target.value)} className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: "hsl(180 60% 12%)" }}>
+                <option value="/">Головна сторінка</option>
+                <option value="/#news">Новини та акції</option>
+                <option value="/#services">Послуги</option>
+                <option value="/contacts">Контакти</option>
+              </select>
+            </div>
+          </div>
+          {(title || body) && (
+            <div className="mt-5 rounded-xl p-4" style={{ background: "hsl(180 60% 9%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
+              <p className="text-[hsl(180_20%_45%)] text-[10px] uppercase tracking-wider mb-2.5">Попередній перегляд</p>
+              <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: "hsl(180 50% 14%)", border: "1px solid hsl(180 40% 22% / 0.4)" }}>
+                <img src="/favicon.png" alt="" className="w-8 h-8 rounded-lg flex-shrink-0" />
+                <div>
+                  <p className="text-[hsl(40_30%_90%)] text-xs font-semibold" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{title || "Заголовок"}</p>
+                  <p className="text-[hsl(40_15%_65%)] text-xs leading-relaxed mt-0.5" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{body || "Текст повідомлення"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {sent !== null && <div className="mt-4 flex items-center gap-2 text-sm text-green-400" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}><Check size={15} />Надіслано {sent} підписникам</div>}
+          {error && <div className="mt-4 flex items-center gap-2 text-sm text-red-400" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}><AlertTriangle size={15} />{error}</div>}
+          <button onClick={handleSend} disabled={!title.trim() || !body.trim() || sending}
+            className="mt-5 w-full py-3 rounded-xl font-semibold text-sm gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+            {sending ? <><Loader2 size={16} className="animate-spin" />Надсилання...</> : <><Send size={16} />Розіслати всім</>}
+          </button>
+        </>
+      ) : (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Номер телефону</label>
+            <div className="relative">
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(180_20%_45%)]" />
+              <input value={pPhone} onChange={e => { setPPhone(e.target.value); setPResult(null); }}
+                type="tel" autoComplete="tel" placeholder="+380501234567"
+                className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: 'hsl(180 60% 12%)' }} />
+            </div>
+            {pPhone.trim() && !validatePhone(pPhone) && (
+              <p className="text-red-400 text-[11px] mt-1 px-1">Формат: +380XXXXXXXXX або 0XXXXXXXXX</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Заголовок</label>
+            <input type="text" value={pTitle} onChange={e => { setPTitle(e.target.value); setPResult(null); }} maxLength={60} placeholder="Короткий заголовок"
+              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={{ ...inputStyle, background: 'hsl(180 60% 12%)' }} />
+            <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{pTitle.length}/60</p>
+          </div>
+          <div>
+            <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Текст</label>
+            <textarea value={pBody} onChange={e => { setPBody(e.target.value); setPResult(null); }} rows={3} maxLength={160} placeholder="Текст повідомлення..."
+              className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={{ ...inputStyle, background: 'hsl(180 60% 12%)' }} />
+            <p className="text-right text-[10px] text-[hsl(180_20%_40%)] mt-1">{pBody.length}/160</p>
+          </div>
+          {pResult && (
+            <div className="rounded-xl px-3 py-2.5 text-sm text-center"
+              style={{ background: pResult.sent > 0 ? 'hsl(150 50% 12%)' : 'hsl(38 40% 12%)', border: `1px solid ${pResult.sent > 0 ? 'hsl(150 50% 25%)' : 'hsl(38 40% 25%)'}`, color: pResult.sent > 0 ? 'hsl(150 60% 55%)' : 'hsl(38 62% 55%)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              {pResult.sent > 0 ? '✓ Сповіщення надіслано' : '— Цей номер не підписаний на сповіщення'}
+            </div>
+          )}
+          {pError && <div className="flex items-center gap-2 text-sm text-red-400"><AlertTriangle size={14} />{pError}</div>}
+          <button onClick={handleSendToPhone} disabled={!validatePhone(pPhone) || !pTitle.trim() || !pBody.trim() || pSending}
+            className="w-full py-3 rounded-xl font-semibold text-sm gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+            {pSending ? <><Loader2 size={16} className="animate-spin" />Надсилання...</> : <><Send size={16} />Надіслати</>}
+          </button>
         </div>
       )}
-
-      {sent !== null && <div className="mt-4 flex items-center gap-2 text-sm text-green-400" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}><Check size={15} />Надіслано {sent} підписникам</div>}
-      {error && <div className="mt-4 flex items-center gap-2 text-sm text-red-400" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}><AlertTriangle size={15} />{error}</div>}
-
-      <button onClick={handleSend} disabled={!title.trim() || !body.trim() || sending}
-        className="mt-5 w-full py-3 rounded-xl font-semibold text-sm gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-        {sending ? <><Loader2 size={16} className="animate-spin" />Надсилання...</> : <><Send size={16} />Розіслати всім</>}
-      </button>
     </div>
   );
 }
+
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
