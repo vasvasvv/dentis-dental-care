@@ -1,7 +1,7 @@
 // ── CORS & Security Headers ───────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
-  'https://dentis.pp.ua',
-  'https://www.dentis.pp.ua',
+  'https://dentis.kr.ua',
+  'https://www.dentis.kr.ua',
 ]
 
 const SECURITY_HEADERS = {

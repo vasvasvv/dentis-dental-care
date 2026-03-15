@@ -6,6 +6,6 @@
     "deploy": "wrangler deploy --no-bundle"
   },
   "devDependencies": {
-    "wrangler": "3.78.12"
+    "wrangler": "^3.78.12"
   }
 }
