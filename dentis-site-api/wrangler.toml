@@ -1,0 +1,14 @@
+name = "dentis-site-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "site_news_docs_pwa"
+database_id = "707f01aa-a2d9-4cd8-be17-84f37a8d4c8b"
+ 
+# Секрет для адмін-запитів — задати через:
+# wrangler secret put ADMIN_SECRET
+# [vars]
+# ADMIN_SECRET = "..." — НЕ зберігати тут, тільки через wrangler secret
