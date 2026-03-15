@@ -19,6 +19,13 @@ const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenko
 function uid() { return Math.random().toString(36).slice(2, 9); }
 function normalizeHot(v: boolean | number): boolean { return v === true || v === 1; }
 
+function validatePhone(raw: string): string | null {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.startsWith('380') && digits.length === 12) return '+' + digits
+  if (digits.startsWith('0') && digits.length === 10) return '+38' + digits
+  return null
+}
+
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
 function TabButton({ active, onClick, icon, label }: {
@@ -472,6 +479,9 @@ function ApptForm({
             type="tel" autoComplete="tel"
             className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
         </div>
+        {form.phone.trim() && !validatePhone(form.phone) && (
+          <p className="text-red-400 text-[11px] mt-1 px-1">Введіть у форматі +380XXXXXXXXX або 0XXXXXXXXX</p>
+        )}
       </div>
       <div>
         <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Дата та час</label>
@@ -497,7 +507,7 @@ function ApptForm({
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <div className="flex gap-2 mt-4">
         <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Скасувати</button>
-        <button onClick={() => onSave({ ...form, doctor: null })} disabled={!form.patient_name.trim() || !form.phone.trim() || !form.appointment_dt || saving}
+        <button onClick={() => onSave({ ...form, doctor: null })} disabled={!form.patient_name.trim() || !validatePhone(form.phone) || !form.appointment_dt || saving}
           className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
           style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
           {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}Зберегти

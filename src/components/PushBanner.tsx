@@ -188,7 +188,9 @@ export function PushBanner() {
                 style={{ background: 'hsl(180 30% 92%)', border: '1px solid hsl(180 40% 60%)', color: '#111', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}
               />
               <p className="text-[hsl(180_20%_45%)] text-[10px] mt-1 px-1" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-                Для індивідуальних нагадувань про запис
+                {phone.trim() && !/^(\+?380\d{9}|0\d{9})$/.test(phone.replace(/\s/g, ''))
+                  ? <span style={{ color: 'hsl(0 60% 55%)' }}>Формат: +380XXXXXXXXX або 0XXXXXXXXX</span>
+                  : 'Для індивідуальних нагадувань про запис'}
               </p>
             </div>
             <div className="flex gap-2">

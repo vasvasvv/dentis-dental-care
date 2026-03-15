@@ -19,6 +19,24 @@ function idFrom(path) {
   return path.split('/').pop()
 }
 
+// Нормалізація телефону → завжди +380XXXXXXXXX або null
+function normalizePhone(raw) {
+  if (!raw) return null
+  const digits = raw.replace(/\D/g, '')
+  // 0XXXXXXXXX → 380XXXXXXXXX
+  // 380XXXXXXXXX → 380XXXXXXXXX
+  // 38XXXXXXXXX (без нуля) → помилка
+  let normalized
+  if (digits.startsWith('380') && digits.length === 12) {
+    normalized = digits
+  } else if (digits.startsWith('0') && digits.length === 10) {
+    normalized = '38' + digits
+  } else {
+    return null // невалідний формат
+  }
+  return '+' + normalized
+}
+
 // ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
 function b64u(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
@@ -318,7 +336,8 @@ export default {
       const { patient_name, phone, appointment_dt, doctor, notes } = b
 
       // Нормалізуємо телефон
-      const normalPhone = phone.replace(/\D/g, '')
+      const normalPhone = normalizePhone(phone)
+      if (!normalPhone) return json({ error: 'Невалідний номер телефону. Введіть у форматі +380XXXXXXXXX або 0XXXXXXXXX' }, 400)
 
       const { meta } = await env.DB.prepare(
         'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes) VALUES (?,?,?,?,?)'
@@ -351,7 +370,8 @@ export default {
       if (!old) return json({ error: 'Not found' }, 404)
 
       const { patient_name, phone, appointment_dt, doctor, notes, status } = b
-      const normalPhone = (phone || old.phone).replace(/\D/g, '')
+      const normalPhone = normalizePhone(phone || old.phone)
+      if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400)
 
       await env.DB.prepare(`
         UPDATE appointments SET patient_name=?,phone=?,appointment_dt=?,doctor=?,notes=?,status=?,
@@ -403,7 +423,7 @@ export default {
     if (p === '/api/push/subscribe' && m === 'POST') {
       const b = await request.json()
       // phone опціональний — передається якщо є
-      const phone = b.phone ? b.phone.replace(/\D/g, '') : null
+      const phone = b.phone ? normalizePhone(b.phone) : null
       await env.DB.prepare(
         'INSERT OR REPLACE INTO push_subscriptions (endpoint,p256dh,auth,phone) VALUES (?,?,?,?)'
       ).bind(b.endpoint, b.keys.p256dh, b.keys.auth, phone).run()
