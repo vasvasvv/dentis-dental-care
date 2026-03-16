@@ -316,10 +316,11 @@ async function runReminders(db, env, debug = false) {
   L(`[cron] 1h  window: ${from1} — ${to1}`)
 
   // ── 24h reminders ──
+  // REPLACE(appointment_dt,'T',' ') normalizes both "2026-03-16T14:00" and "2026-03-16 14:00"
   const { results: remind24 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_24h=0
-      AND appointment_dt >= ? AND appointment_dt <= ?
+      AND REPLACE(appointment_dt,'T',' ') >= ? AND REPLACE(appointment_dt,'T',' ') <= ?
   `).bind(from24, to24).all()
 
   L(`[cron] 24h matches: ${remind24?.length ?? 0}`)
@@ -349,7 +350,7 @@ async function runReminders(db, env, debug = false) {
   const { results: remind1 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_1h=0
-      AND appointment_dt >= ? AND appointment_dt <= ?
+      AND REPLACE(appointment_dt,'T',' ') >= ? AND REPLACE(appointment_dt,'T',' ') <= ?
   `).bind(from1, to1).all()
 
   L(`[cron] 1h matches: ${remind1?.length ?? 0}`)
