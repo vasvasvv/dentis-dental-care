@@ -642,14 +642,20 @@ async function handleRequest(request, env, origin) {
         if (normalized) {
           const suffix = normalized.slice(-9)
 
-          // 1. Save to telegram_contacts (phone → chat_id mapping, persists across all appointments)
+          // 1. Save to telegram_contacts (requires migration 0005)
           await env.DB.prepare(`
             INSERT INTO telegram_contacts (phone, chat_id, first_name)
             VALUES (?, ?, ?)
             ON CONFLICT(phone) DO UPDATE SET chat_id=excluded.chat_id, first_name=excluded.first_name, updated_at=datetime('now')
           `).bind(normalized, chatId, firstName).run().catch(() => {})
 
-          // 2. Update existing appointments
+          // 2. Also store phone on telegram_pending as backup (migration 0004)
+          await env.DB.prepare(`
+            INSERT OR REPLACE INTO telegram_pending (chat_id, first_name, phone_normalized)
+            VALUES (?, ?, ?)
+          `).bind(chatId, firstName, normalized).run().catch(() => {})
+
+          // 3. Update existing appointments
           await env.DB.prepare(`
             UPDATE appointments SET telegram_chat_id=?
             WHERE phone LIKE ? AND (telegram_chat_id IS NULL OR telegram_chat_id='')
@@ -794,7 +800,7 @@ async function handleRequest(request, env, origin) {
       const normalPhone = normalizePhone(phone)
       if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
 
-      // Look up telegram chat_id: from request, or telegram_contacts table, or previous appointments
+      // Look up telegram chat_id: from request → telegram_contacts → appointments → telegram_pending (by phone suffix)
       let tgChatId = telegram_chat_id || null
       if (!tgChatId) {
         const tc = await env.DB.prepare(
@@ -808,6 +814,13 @@ async function handleRequest(request, env, origin) {
           'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
         ).bind(`%${suffix}`).first().catch(() => null)
         tgChatId = existing?.telegram_chat_id || null
+      }
+      if (!tgChatId) {
+        // Fallback: check telegram_pending where phone was stored after contact share
+        const tp = await env.DB.prepare(
+          'SELECT chat_id FROM telegram_pending WHERE phone_normalized=? LIMIT 1'
+        ).bind(normalPhone).first().catch(() => null)
+        tgChatId = tp?.chat_id || null
       }
 
       const { meta } = await env.DB.prepare(
