@@ -778,31 +778,28 @@ async function handleRequest(request, env, origin) {
       const contact = msg.contact
 
       if (text === '/start') {
-        // Save pending registration — admin will link phone manually or user shares contact
+        // Save pending registration
         await env.DB.prepare(
           'INSERT OR REPLACE INTO telegram_pending (chat_id, first_name) VALUES (?, ?)'
-        ).bind(chatId, firstName).run()
+        ).bind(chatId, firstName).run().catch(() => {})
 
-        const botToken = env.TELEGRAM_BOT_TOKEN
-        if (botToken) {
-          await tgSend(botToken, chatId,
-            `👋 Вітаємо у клініці <b>Дентіс</b>, ${firstName}!\n\nЩоб отримувати нагадування про ваші візити, поділіться номером телефону (кнопка нижче) або зверніться до адміністратора.`
-          )
-          // Ask for contact via custom keyboard
-          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: '📱 Натисніть кнопку нижче, щоб поділитися номером:',
-              reply_markup: {
-                keyboard: [[{ text: '📱 Поділитися номером телефону', request_contact: true }]],
-                one_time_keyboard: true,
-                resize_keyboard: true,
-              },
-            }),
-          })
-        }
+        if (!env.TELEGRAM_BOT_TOKEN) return new Response('ok')
+
+        // Single message with contact-share keyboard
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: `👋 Вітаємо у клініці <b>Дентіс</b>${firstName ? ', ' + firstName : ''}!\n\nЩоб отримувати нагадування про ваші візити, поділіться номером телефону:`,
+            parse_mode: 'HTML',
+            reply_markup: {
+              keyboard: [[{ text: '📱 Поділитися номером телефону', request_contact: true }]],
+              one_time_keyboard: true,
+              resize_keyboard: true,
+            },
+          }),
+        })
       }
 
       if (contact?.phone_number) {
@@ -856,6 +853,27 @@ async function handleRequest(request, env, origin) {
         WHERE phone LIKE ? AND status='scheduled'
       `).bind(String(chatId), `%${suffix}`).run()
       return json({ updated: meta.changes }, 200, origin)
+    }
+
+    // GET /api/telegram/debug — перевірити стан бота (тільки адмін)
+    if (p === '/api/telegram/debug' && m === 'GET') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const hasToken = !!env.TELEGRAM_BOT_TOKEN
+      let webhookInfo = null
+      let botInfo = null
+      if (hasToken) {
+        try {
+          const [wRes, bRes] = await Promise.all([
+            fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getWebhookInfo`),
+            fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getMe`),
+          ])
+          webhookInfo = await wRes.json()
+          botInfo = await bRes.json()
+        } catch (e) {
+          webhookInfo = { error: e?.message }
+        }
+      }
+      return json({ hasToken, webhookInfo, botInfo }, 200, origin)
     }
 
     // GET /api/telegram/pending — список тих хто написав /start але не прив'язаний
