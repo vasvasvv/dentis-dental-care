@@ -890,10 +890,12 @@ async function handleRequest(request, env, origin) {
       }
       if (env.TELEGRAM_BOT_TOKEN) {
         const fakeAppt = { ...old, patient_name, phone: normalPhone, appointment_dt, doctor: doctor || null }
+        const dtChanged = appointment_dt.replace('T',' ').slice(0,16) !== String(old.appointment_dt).replace('T',' ').slice(0,16)
+        console.log('[PUT] status='+status+' old.status='+old.status+' dtChanged='+dtChanged+' new='+appointment_dt+' old='+old.appointment_dt)
         if (status === 'cancelled' && old.status !== 'cancelled') {
-          tgSendReminder(env.DB, fakeAppt, env.TELEGRAM_BOT_TOKEN, 'cancel').catch(() => {})
-        } else if (appointment_dt !== old.appointment_dt) {
-          tgSendReminder(env.DB, fakeAppt, env.TELEGRAM_BOT_TOKEN, 'reschedule').catch(() => {})
+          await tgSendReminder(env.DB, fakeAppt, env.TELEGRAM_BOT_TOKEN, 'cancel').catch(e => console.log('[PUT] cancel tg err:'+e?.message))
+        } else if (dtChanged) {
+          await tgSendReminder(env.DB, fakeAppt, env.TELEGRAM_BOT_TOKEN, 'reschedule').catch(e => console.log('[PUT] reschedule tg err:'+e?.message))
         }
       }
       return json({ ok: true }, 200, origin)
