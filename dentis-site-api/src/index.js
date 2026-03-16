@@ -309,7 +309,12 @@ async function runReminders(db, env, debug = false) {
   const fmt = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ')
 
   const from24 = fmt(in24h - winMs), to24 = fmt(in24h + winMs)
-  const from1  = fmt(in1h  - winMs), to1  = fmt(in1h  + winMs)
+
+  // 1h window: [now+10min, now+70min]
+  // Covers the full upcoming hour regardless of when in the 30min cron cycle we are.
+  // reminded_1h flag prevents duplicate sends if both cron runs catch the same appointment.
+  const from1 = fmt(nowLocal + 10 * 60 * 1000)
+  const to1   = fmt(nowLocal + 70 * 60 * 1000)
 
   L(`[cron] UTC=${new Date(nowUtc).toISOString()} offset=UTC+${isDST?3:2}`)
   L(`[cron] 24h window: ${from24} — ${to24}`)
