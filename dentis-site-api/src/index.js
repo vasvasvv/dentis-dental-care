@@ -378,13 +378,18 @@ async function tgSend(botToken, chatId, text) {
 }
 
 async function tgSendReminder(db, appt, botToken, kind) {
-  // Find telegram_chat_id: stored directly on appointment OR looked up by phone
+  // Priority: appointment.telegram_chat_id → telegram_contacts → other appointments
   let chatId = appt.telegram_chat_id
   if (!chatId && appt.phone) {
-    // Try to find chat_id from other appointments with same phone that have it set
+    const tc = await db.prepare(
+      'SELECT chat_id FROM telegram_contacts WHERE phone=?'
+    ).bind(appt.phone).first().catch(() => null)
+    chatId = tc?.chat_id
+  }
+  if (!chatId && appt.phone) {
     const row = await db.prepare(
       'SELECT telegram_chat_id FROM appointments WHERE phone=? AND telegram_chat_id IS NOT NULL LIMIT 1'
-    ).bind(appt.phone).first()
+    ).bind(appt.phone).first().catch(() => null)
     chatId = row?.telegram_chat_id
   }
   if (!chatId) return false
@@ -618,6 +623,15 @@ async function handleRequest(request, env, origin) {
 
         if (normalized) {
           const suffix = normalized.slice(-9)
+
+          // 1. Save to telegram_contacts (phone → chat_id mapping, persists across all appointments)
+          await env.DB.prepare(`
+            INSERT INTO telegram_contacts (phone, chat_id, first_name)
+            VALUES (?, ?, ?)
+            ON CONFLICT(phone) DO UPDATE SET chat_id=excluded.chat_id, first_name=excluded.first_name, updated_at=datetime('now')
+          `).bind(normalized, chatId, firstName).run().catch(() => {})
+
+          // 2. Update existing appointments
           await env.DB.prepare(`
             UPDATE appointments SET telegram_chat_id=?
             WHERE phone LIKE ? AND (telegram_chat_id IS NULL OR telegram_chat_id='')
@@ -738,11 +752,22 @@ async function handleRequest(request, env, origin) {
     if (p === '/api/appointments' && m === 'GET') {
       const url = new URL(request.url)
       const date = url.searchParams.get('date')
-      let query = 'SELECT * FROM appointments'
+      let query = `
+        SELECT a.*,
+          COALESCE(a.telegram_chat_id, tc.chat_id) AS telegram_chat_id
+        FROM appointments a
+        LEFT JOIN telegram_contacts tc ON tc.phone = a.phone
+      `
       const args = []
-      if (date) { query += ' WHERE appointment_dt LIKE ?'; args.push(`${date}%`) }
-      query += ' ORDER BY appointment_dt ASC'
-      const { results } = await env.DB.prepare(query).bind(...args).all()
+      if (date) { query += ' WHERE a.appointment_dt LIKE ?'; args.push(`${date}%`) }
+      query += ' ORDER BY a.appointment_dt ASC'
+      const { results } = await env.DB.prepare(query).bind(...args).all().catch(async () => {
+        // Fallback if telegram_contacts table doesn't exist yet
+        let q = 'SELECT * FROM appointments'
+        if (date) q += ' WHERE appointment_dt LIKE ?'
+        q += ' ORDER BY appointment_dt ASC'
+        return env.DB.prepare(q).bind(...args).all()
+      })
       return json(results, 200, origin)
     }
     if (p === '/api/appointments' && m === 'POST') {
@@ -751,13 +776,19 @@ async function handleRequest(request, env, origin) {
       const normalPhone = normalizePhone(phone)
       if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
 
-      // Check if we already know their Telegram chat_id from previous appointments
-      const suffix = normalPhone.slice(-9)
+      // Look up telegram chat_id: from request, or telegram_contacts table, or previous appointments
       let tgChatId = telegram_chat_id || null
       if (!tgChatId) {
+        const tc = await env.DB.prepare(
+          'SELECT chat_id FROM telegram_contacts WHERE phone=?'
+        ).bind(normalPhone).first().catch(() => null)
+        tgChatId = tc?.chat_id || null
+      }
+      if (!tgChatId) {
+        const suffix = normalPhone.slice(-9)
         const existing = await env.DB.prepare(
           'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
-        ).bind(`%${suffix}`).first()
+        ).bind(`%${suffix}`).first().catch(() => null)
         tgChatId = existing?.telegram_chat_id || null
       }
 
