@@ -1,2 +1,6 @@
-# SPA fallback — всі маршрути (d-panel обробляється Functions)
-/*    /index.html    200
+# Admin panel — окремий PWA з власним manifest
+/d-panel /admin.html 200
+/d-panel/* /admin.html 200
+
+# SPA fallback — всі інші маршрути
+/* /index.html 200

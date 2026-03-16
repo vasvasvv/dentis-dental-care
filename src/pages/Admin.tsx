@@ -742,7 +742,7 @@ function AppointmentsTab({ token }: { token: string }) {
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filterDate, setFilterDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [filterDate, setFilterDate] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; });
   const [sendingId, setSendingId] = useState<number | null>(null);
   const [sentId, setSentId] = useState<number | null>(null);
   const [pushModal, setPushModal] = useState<Appointment | null>(null);
@@ -1090,7 +1090,7 @@ function TelegramTab({ token }: { token: string }) {
   // appointments sub-tab
   const [appts, setAppts] = useState<TgAppointment[]>([]);
   const [loadingAppts, setLoadingAppts] = useState(true);
-  const [filterDate, setFilterDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [filterDate, setFilterDate] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; });
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Partial<TgAppointment> | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -1554,7 +1554,7 @@ const SESSION_KEY = 'dentis-admin-jwt'
 export default function Admin() {
   // Store JWT in sessionStorage — valid for 1h, cleared on tab close
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(SESSION_KEY));
-  const [tab, setTab] = useState<Tab>("news");
+  const [tab, setTab] = useState<Tab>("appointments");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1603,11 +1603,11 @@ export default function Admin() {
 
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="flex gap-1 p-1 rounded-2xl mb-6" style={{ background: "hsl(180 60% 10%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
+          <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
+          <TabButton active={tab === "telegram"} onClick={() => setTab("telegram")} icon={<MessageCircle size={15} />} label="Telegram" />
+          <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
           <TabButton active={tab === "news"} onClick={() => setTab("news")} icon={<Newspaper size={15} />} label="Новини" />
           <TabButton active={tab === "doctors"} onClick={() => setTab("doctors")} icon={<Stethoscope size={15} />} label="Лікарі" />
-          <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
-          <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
-          <TabButton active={tab === "telegram"} onClick={() => setTab("telegram")} icon={<MessageCircle size={15} />} label="Telegram" />
         </div>
         <style>{`
           @media (max-width: 480px) {
