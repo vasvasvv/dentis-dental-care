@@ -16,3 +16,18 @@ database_id = "707f01aa-a2d9-4cd8-be17-84f37a8d4c8b"
 [[r2_buckets]]
 binding = "DOCTORS_BUCKET"
 bucket_name = "dentis-doctors"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1

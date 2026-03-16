@@ -3,7 +3,6 @@ import { Phone, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@assets/Dentis_with_Text.webp";
 import logogold from "@assets/Dentis_with_Textg.webp";
-import { PushButton } from "./PushBanner";
 
 const navLinks = [
   { label: "Про нас", href: "#about", isHash: true },

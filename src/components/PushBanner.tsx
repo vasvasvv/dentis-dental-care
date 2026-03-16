@@ -211,39 +211,3 @@ export function PushBanner() {
     </div>
   )
 }
-
-// ── Кнопка дзвіночка для хедера ───────────────────────────────────────────────
-export function PushButton({ className = '' }: { className?: string }) {
-  const { state, subscribe, unsubscribe } = usePushNotifications()
-
-  if (state === 'unsupported' || state === 'loading') return null
-
-  if (state === 'subscribed') {
-    return (
-      <button onClick={unsubscribe} title="Відписатись від сповіщень"
-        className={`relative flex items-center justify-center rounded-full transition-all ${className}`}
-        style={{ color: 'hsl(38 62% 52%)' }}>
-        <Bell size={20} />
-        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[hsl(38_62%_52%)]" />
-      </button>
-    )
-  }
-
-  if (state === 'denied') {
-    return (
-      <button title="Сповіщення заблоковані в браузері"
-        className={`flex items-center justify-center rounded-full opacity-40 cursor-not-allowed ${className}`}
-        style={{ color: 'hsl(180 20% 50%)' }}>
-        <BellOff size={20} />
-      </button>
-    )
-  }
-
-  return (
-    <button onClick={subscribe} title="Підписатись на сповіщення"
-      className={`flex items-center justify-center rounded-full transition-all hover:opacity-80 ${className}`}
-      style={{ color: 'hsl(180 20% 55%)' }}>
-      <Bell size={20} />
-    </button>
-  )
-}
