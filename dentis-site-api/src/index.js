@@ -288,35 +288,52 @@ function formatDt(dt) {
 }
 
 // ── CRON: нагадування ─────────────────────────────────────────────────────────
-async function runReminders(db, env) {
-  // Cloudflare cron runs in UTC. appointment_dt is stored as local Kyiv time (no timezone).
-  // We offset by +2h (UTC+2 winter) / +3h (UTC+3 summer DST) to match.
-  // Using fixed UTC+2 — adjust to +3 in summer if needed, or store as UTC in DB.
-  const KYIV_OFFSET_MS = 2 * 60 * 60 * 1000  // UTC+2 (change to 3 in summer)
+function lastSunday(year, month0) {
+  // Last Sunday of month (0-based) at 01:00 UTC
+  const d = new Date(Date.UTC(year, month0 + 1, 0))
+  d.setUTCDate(d.getUTCDate() - d.getUTCDay())
+  d.setUTCHours(1, 0, 0, 0)
+  return d.getTime()
+}
 
+async function runReminders(db, env, debug = false) {
+  const log = []
+  const L = (msg) => { console.log(msg); if (debug) log.push(msg) }
+
+  // Auto-detect Kyiv DST (UTC+2 winter, UTC+3 summer: last Sun Mar → last Sun Oct)
   const nowUtc = Date.now()
-  const nowLocal = nowUtc + KYIV_OFFSET_MS   // current Kyiv time as ms
+  const year = new Date(nowUtc).getUTCFullYear()
+  const isDST = nowUtc >= lastSunday(year, 2) && nowUtc < lastSunday(year, 9)
+  const offsetMs = (isDST ? 3 : 2) * 60 * 60 * 1000
+  const nowLocal = nowUtc + offsetMs
 
-  const in24h = new Date(nowLocal + 24 * 60 * 60 * 1000)
-  const in1h  = new Date(nowLocal +      60 * 60 * 1000)
-  const window = 30 * 60 * 1000  // ±30 min window
+  const in24h = nowLocal + 24 * 60 * 60 * 1000
+  const in1h  = nowLocal +      60 * 60 * 1000
+  const winMs = 30 * 60 * 1000
 
-  const fmt = (d) => new Date(d).toISOString().slice(0, 16).replace('T', ' ')
+  // Format as local "YYYY-MM-DD HH:MM" — matches datetime-local input stored in DB
+  const fmt = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ')
 
+  const from24 = fmt(in24h - winMs), to24 = fmt(in24h + winMs)
+  const from1  = fmt(in1h  - winMs), to1  = fmt(in1h  + winMs)
+
+  L(`[cron] UTC=${new Date(nowUtc).toISOString()} offset=UTC+${isDST?3:2}`)
+  L(`[cron] 24h window: ${from24} — ${to24}`)
+  L(`[cron] 1h  window: ${from1} — ${to1}`)
+
+  // ── 24h reminders ──
   const { results: remind24 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_24h=0
       AND appointment_dt >= ? AND appointment_dt <= ?
-  `).bind(
-    fmt(in24h.getTime() - window),
-    fmt(in24h.getTime() + window)
-  ).all()
+  `).bind(from24, to24).all()
+
+  L(`[cron] 24h matches: ${remind24?.length ?? 0}`)
 
   for (const appt of (remind24 || [])) {
     const { day, time } = formatDt(appt.appointment_dt)
-    // Always mark as reminded first — prevents duplicate sends on retry
+    L(`[cron] 24h → ${appt.patient_name} at ${appt.appointment_dt}`)
     await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
-
     try {
       await pushToPhone(db, appt.phone, {
         title: '📅 Нагадування про прийом',
@@ -324,30 +341,29 @@ async function runReminders(db, env) {
         url: '/', icon: '/icon-192.png',
       }, env)
     } catch {}
-
     if (env.TELEGRAM_BOT_TOKEN) {
       try {
-        await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
-        await db.prepare('UPDATE appointments SET tg_reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
-      } catch {}
+        const ok = await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
+        L(`[cron] 24h tg=${ok}`)
+        if (ok) await db.prepare('UPDATE appointments SET tg_reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+      } catch (e) { L(`[cron] 24h tg err: ${e?.message}`) }
     }
     void day
   }
 
+  // ── 1h reminders ──
   const { results: remind1 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_1h=0
       AND appointment_dt >= ? AND appointment_dt <= ?
-  `).bind(
-    fmt(in1h.getTime() - window),
-    fmt(in1h.getTime() + window)
-  ).all()
+  `).bind(from1, to1).all()
+
+  L(`[cron] 1h matches: ${remind1?.length ?? 0}`)
 
   for (const appt of (remind1 || [])) {
     const { time } = formatDt(appt.appointment_dt)
-    // Always mark as reminded first
+    L(`[cron] 1h → ${appt.patient_name} at ${appt.appointment_dt}`)
     await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
-
     try {
       await pushToPhone(db, appt.phone, {
         title: '⏰ Прийом через годину',
@@ -355,14 +371,16 @@ async function runReminders(db, env) {
         url: '/', icon: '/icon-192.png',
       }, env)
     } catch {}
-
     if (env.TELEGRAM_BOT_TOKEN) {
       try {
-        await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
-        await db.prepare('UPDATE appointments SET tg_reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
-      } catch {}
+        const ok = await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
+        L(`[cron] 1h tg=${ok}`)
+        if (ok) await db.prepare('UPDATE appointments SET tg_reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+      } catch (e) { L(`[cron] 1h tg err: ${e?.message}`) }
     }
   }
+
+  return { log, remind24: remind24?.length ?? 0, remind1: remind1?.length ?? 0 }
 }
 
 // ── TELEGRAM HELPERS ──────────────────────────────────────────────────────────
@@ -904,8 +922,7 @@ async function handleRequest(request, env, origin) {
     if (p === '/api/telegram/debug' && m === 'GET') {
       if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
       const hasToken = !!env.TELEGRAM_BOT_TOKEN
-      let webhookInfo = null
-      let botInfo = null
+      let webhookInfo = null, botInfo = null
       if (hasToken) {
         try {
           const [wRes, bRes] = await Promise.all([
@@ -914,11 +931,24 @@ async function handleRequest(request, env, origin) {
           ])
           webhookInfo = await wRes.json()
           botInfo = await bRes.json()
-        } catch (e) {
-          webhookInfo = { error: e?.message }
-        }
+        } catch (e) { webhookInfo = { error: e?.message } }
       }
-      return json({ hasToken, webhookInfo, botInfo }, 200, origin)
+      // Show upcoming appointments and their reminder state
+      const { results: upcoming } = await env.DB.prepare(`
+        SELECT id, patient_name, phone, appointment_dt, status, reminded_1h, reminded_24h,
+          tg_reminded_1h, tg_reminded_24h, telegram_chat_id
+        FROM appointments
+        WHERE status='scheduled' AND appointment_dt >= datetime('now')
+        ORDER BY appointment_dt ASC LIMIT 10
+      `).all().catch(() => ({ results: [] }))
+      return json({ hasToken, webhookInfo, botInfo, upcoming }, 200, origin)
+    }
+
+    // POST /api/telegram/debug/trigger — вручну запустити cron нагадування (для тесту)
+    if (p === '/api/telegram/debug/trigger' && m === 'POST') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const result = await runReminders(env.DB, env, true)
+      return json(result, 200, origin)
     }
 
     // GET /api/telegram/pending — список тих хто написав /start але не прив'язаний
