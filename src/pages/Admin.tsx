@@ -523,6 +523,142 @@ function formatApptDt(dt: string) {
   };
 }
 
+// ─── iOS-style drum roller picker ─────────────────────────────────────────────
+
+function DrumColumn({
+  items, selectedIndex, onSelect, width,
+}: {
+  items: string[]; selectedIndex: number; onSelect: (i: number) => void; width?: string;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const itemH = 40;
+  const touchRef = React.useRef<{ startY: number; startScroll: number } | null>(null);
+
+  React.useEffect(() => {
+    if (ref.current) ref.current.scrollTop = selectedIndex * itemH;
+  }, []);
+
+  const snapToIndex = (el: HTMLDivElement) => {
+    const idx = Math.round(el.scrollTop / itemH);
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    el.scrollTo({ top: clamped * itemH, behavior: 'smooth' });
+    onSelect(clamped);
+  };
+
+  const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    clearTimeout((el as any)._snap);
+    (el as any)._snap = setTimeout(() => snapToIndex(el), 120);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchRef.current = { startY: e.touches[0].clientY, startScroll: ref.current!.scrollTop };
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchRef.current || !ref.current) return;
+    const dy = touchRef.current.startY - e.touches[0].clientY;
+    ref.current.scrollTop = touchRef.current.startScroll + dy;
+  };
+  const onTouchEnd = () => { if (ref.current) snapToIndex(ref.current); touchRef.current = null; };
+
+  return (
+    <div style={{ width: width || '100%', position: 'relative', userSelect: 'none' }}>
+      {/* top fade */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, zIndex: 2, pointerEvents: 'none',
+        background: 'linear-gradient(to bottom, hsl(180 60% 12%) 0%, transparent 100%)' }} />
+      {/* bottom fade */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, zIndex: 2, pointerEvents: 'none',
+        background: 'linear-gradient(to top, hsl(180 60% 12%) 0%, transparent 100%)' }} />
+      {/* selection highlight */}
+      <div style={{ position: 'absolute', top: '50%', left: 4, right: 4, height: itemH, transform: 'translateY(-50%)',
+        zIndex: 1, borderRadius: 10, background: 'hsl(180 50% 20%)', border: '1px solid hsl(180 40% 30% / 0.6)', pointerEvents: 'none' }} />
+      <div ref={ref} onScroll={onScroll} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+        style={{ height: 200, overflowY: 'scroll', scrollbarWidth: 'none', paddingTop: 80, paddingBottom: 80,
+          WebkitOverflowScrolling: 'touch', cursor: 'grab' }}>
+        <style>{`div::-webkit-scrollbar{display:none}`}</style>
+        {items.map((item, i) => (
+          <div key={i} onClick={() => { onSelect(i); ref.current!.scrollTo({ top: i * itemH, behavior: 'smooth' }); }}
+            style={{ height: itemH, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 17, fontWeight: i === selectedIndex ? 600 : 400, transition: 'all 0.15s',
+              color: i === selectedIndex ? 'hsl(40 30% 92%)' : 'hsl(180 20% 50%)',
+              fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+            {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const UK_MONTHS = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function IOSDatePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const now = value ? new Date(value) : new Date();
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => String(currentYear + i));
+
+  const [day, setDay] = React.useState(now.getDate() - 1);
+  const [month, setMonth] = React.useState(now.getMonth());
+  const [year, setYear] = React.useState(Math.max(0, now.getFullYear() - currentYear));
+  const [hour, setHour] = React.useState(now.getHours());
+  const [minute, setMinute] = React.useState(now.getMinutes());
+
+  const daysInMonth = getDaysInMonth(currentYear + year, month);
+  const days = Array.from({ length: daysInMonth }, (_, i) => String(i + 1).padStart(2, '0'));
+
+  // clamp day if month changed
+  const clampedDay = Math.min(day, daysInMonth - 1);
+
+  const confirm = () => {
+    const y = currentYear + year;
+    const m = String(month + 1).padStart(2, '0');
+    const d = String(clampedDay + 1).padStart(2, '0');
+    const h = HOURS[hour];
+    const min = MINUTES[minute];
+    onChange(`${y}-${m}-${d}T${h}:${min}`);
+  };
+
+  const displayStr = (() => {
+    const y = currentYear + year;
+    const d = String(clampedDay + 1).padStart(2, '0');
+    return `${d} ${UK_MONTHS[month]} ${y}, ${HOURS[hour]}:${MINUTES[minute]}`;
+  })();
+
+  return (
+    <div>
+      <div style={{ borderRadius: 16, overflow: 'hidden', background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+        <div style={{ display: 'flex', gap: 0 }}>
+          <DrumColumn items={days} selectedIndex={clampedDay} onSelect={setDay} width="18%" />
+          <DrumColumn items={UK_MONTHS} selectedIndex={month} onSelect={(i) => { setMonth(i); }} width="36%" />
+          <DrumColumn items={years} selectedIndex={year} onSelect={setYear} width="22%" />
+          <div style={{ width: 1, background: 'hsl(180 40% 22% / 0.4)', alignSelf: 'stretch', margin: '12px 0' }} />
+          <DrumColumn items={HOURS} selectedIndex={hour} onSelect={setHour} width="12%" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'hsl(40 30% 70%)', fontSize: 18, fontWeight: 600, paddingBottom: 0, width: 8 }}>:</div>
+          <DrumColumn items={MINUTES} selectedIndex={minute} onSelect={setMinute} width="12%" />
+        </div>
+      </div>
+      {/* Selected value display */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, padding: '0 2px' }}>
+        <span style={{ fontSize: 12, color: 'hsl(180 20% 50%)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{displayStr}</span>
+        <button onClick={confirm}
+          style={{ padding: '6px 16px', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            background: 'hsl(38 62% 52% / 0.2)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(38 62% 52% / 0.4)',
+            fontFamily: '"NueneMontreal", system-ui, sans-serif', transition: 'all 0.15s' }}
+          onMouseOver={e => (e.currentTarget.style.background = 'hsl(38 62% 52% / 0.35)')}
+          onMouseOut={e => (e.currentTarget.style.background = 'hsl(38 62% 52% / 0.2)')}>
+          ✓ Підтвердити
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ApptForm({
   initial, onSave, onCancel, saving, error,
 }: {
@@ -532,7 +668,7 @@ function ApptForm({
   saving: boolean;
   error: string | null;
 }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = React.useState({
     patient_name: initial.patient_name ?? '',
     phone: initial.phone ?? '',
     appointment_dt: initial.appointment_dt ?? '',
@@ -557,9 +693,13 @@ function ApptForm({
         )}
       </div>
       <div>
-        <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Дата та час</label>
-        <input type="datetime-local" value={form.appointment_dt} onChange={e => set('appointment_dt', e.target.value)}
-          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
+        <label className="block text-[hsl(180_20%_55%)] text-xs mb-2 uppercase tracking-wider">Дата та час</label>
+        <IOSDatePicker value={form.appointment_dt} onChange={v => set('appointment_dt', v)} />
+        {form.appointment_dt && (
+          <p className="text-[hsl(180_20%_40%)] text-[11px] mt-1.5 px-1">
+            ← Прокрутіть барабани, потім натисніть "Підтвердити"
+          </p>
+        )}
       </div>
       <div>
         <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Примітки</label>
