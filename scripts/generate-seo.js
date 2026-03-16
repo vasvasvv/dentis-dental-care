@@ -4,7 +4,7 @@ const path = require("path");
 // Основний домен
 const baseUrl = "https://dentis.kr.ua";
 
-// Список маршрутов сайту
+// Список маршрутів сайту
 const pages = [
   "/",
   "/implantaciya",
@@ -14,6 +14,7 @@ const pages = [
   "/estetychna-stomatolohiya",
   "/diagnostika-zubiv",
   "/contacts",
+  "/blog",
 ];
 
 // Поточна дата у форматі YYYY-MM-DD
@@ -22,10 +23,9 @@ const today = new Date().toISOString().split("T")[0];
 // --- Генерація sitemap.xml ---
 const urlset = pages
   .map((page) => {
-    let priority = "0.8";
+    let priority = "0.9";
     if (page === "/") priority = "1.0";
-    else if (page === "/implantaciya" || page === "/protezuvannya") priority = "0.9";
-    else if (page === "/contacts") priority = "0.7";
+    else if (page === "/contacts" || page === "/blog") priority = "0.8";
 
     const changefreq = page === "/" ? "weekly" : "monthly";
 
