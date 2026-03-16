@@ -13,7 +13,7 @@ precacheAndRoute(self.__WB_MANIFEST)
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({ cacheName: 'pages' }),
-    { denylist: [/^\/api\//] }
+    { denylist: [/^\/api\//, /^\/d-panel/] }
   )
 )
 

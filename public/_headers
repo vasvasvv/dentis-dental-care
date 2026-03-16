@@ -33,6 +33,10 @@
   Cache-Control: no-cache
 /manifest.json
   Cache-Control: no-cache
+/admin-manifest.json
+  Cache-Control: no-cache
+/admin-sw.js
+  Cache-Control: no-cache
 /sitemap.xml
   Cache-Control: public, max-age=86400
   Content-Type: application/xml; charset=utf-8

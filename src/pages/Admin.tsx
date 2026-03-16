@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import AdminPWABanner from "@/components/AdminPWABanner";
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
   Newspaper, Stethoscope, Bell, BellRing, Tag, ChevronDown, ChevronUp,
@@ -1013,6 +1015,16 @@ export default function Admin() {
   if (!token) return <LoginScreen onLogin={handleLogin} />;
 
   return (
+    <>
+      <Helmet>
+        <title>Дентіс — Адмін панель</title>
+        <link rel="manifest" href="/admin-manifest.json" />
+        <link rel="apple-touch-icon" href="/admin-apple-touch-icon.png" />
+        <meta name="theme-color" content="#0d1f3c" />
+        <meta name="apple-mobile-web-app-title" content="Дентіс Адмін" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </Helmet>
     <div className="min-h-screen" style={{ background: "hsl(180 60% 8%)" }}>
       <div className="sticky top-0 z-30" style={{
         background: "hsl(180 60% 10% / 0.95)", backdropFilter: "blur(12px)",
@@ -1046,5 +1058,7 @@ export default function Admin() {
         {tab === "push" && <PushTab token={token} />}
       </div>
     </div>
+    <AdminPWABanner />
+    </>
   );
 }
