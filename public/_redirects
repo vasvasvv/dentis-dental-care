@@ -1,4 +1,2 @@
-# SPA fallback — всі маршрути крім /d-panel (він має власний index.html)
-/d-panel         /d-panel/index.html 200
-/d-panel/*       /d-panel/index.html 200
-/*               /index.html 200
+# SPA fallback — всі маршрути (d-panel обробляється Functions)
+/*    /index.html    200

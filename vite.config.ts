@@ -57,10 +57,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-        admin: path.resolve(__dirname, 'public/d-panel/index.html'),
-      },
+      input: path.resolve(__dirname, 'index.html'),
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
