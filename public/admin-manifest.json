@@ -1,13 +1,14 @@
 {
+  "id": "/d-panel",
   "name": "Дентіс — Адмін панель",
   "short_name": "Дентіс Адмін",
   "description": "Панель керування клінікою Дентіс",
   "start_url": "/d-panel",
-  "scope": "/d-panel",
+  "scope": "/d-panel/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0d1f3c",
-  "theme_color": "#0d1f3c",
+  "background_color": "#0d1f1f",
+  "theme_color": "#0d1f1f",
   "lang": "uk",
   "categories": ["medical", "productivity"],
   "icons": [

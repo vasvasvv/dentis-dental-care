@@ -1579,12 +1579,7 @@ export default function Admin() {
     <>
       <Helmet>
         <title>Дентіс — Адмін панель</title>
-        <link rel="manifest" href="/admin-manifest.json" />
-        <link rel="apple-touch-icon" href="/admin-apple-touch-icon.png" />
-        <meta name="theme-color" content="#0d1f3c" />
-        <meta name="apple-mobile-web-app-title" content="Дентіс Адмін" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#0d1f1f" />
       </Helmet>
     <div className="min-h-screen" style={{ background: "hsl(180 60% 8%)" }}>
       <div className="sticky top-0 z-30" style={{

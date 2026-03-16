@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Дентіс — Адмін панель</title>
+    <meta name="description" content="Панель керування клінікою Дентіс" />
+    <meta name="theme-color" content="#0d1f1f" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/admin-manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Дентіс Адмін" />
+    <link rel="apple-touch-icon" href="/admin-apple-touch-icon.png" />
+
+    <!-- Fonts preload -->
+    <link rel="preload" as="font" href="/assets/font-bold.woff2" type="font/woff2" crossorigin />
+    <link rel="preload" as="font" href="/assets/font-medium.woff2" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
