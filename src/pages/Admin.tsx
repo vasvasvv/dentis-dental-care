@@ -7,6 +7,7 @@ import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
   Newspaper, Stethoscope, Bell, BellRing, Tag, ChevronDown, ChevronUp,
   Image, AlertTriangle, Loader2, RefreshCw, Users, CalendarDays, Phone, Clock,
+  MessageCircle, Link2, LinkIcon, Copy, CheckCheck, ExternalLink,
 } from "lucide-react";
 import {
   getNews, createNews, updateNews, deleteNews,
@@ -15,7 +16,7 @@ import {
   type NewsItem, type Doctor,
 } from "@/lib/adminApi.ts";
 
-type Tab = "news" | "doctors" | "push" | "appointments";
+type Tab = "news" | "doctors" | "push" | "appointments" | "telegram";
 
 const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
 
@@ -922,6 +923,456 @@ function PushTab({ token }: { token: string }) {
 }
 
 
+// ─── Telegram Tab ─────────────────────────────────────────────────────────────
+
+type TgPending = { id: number; chat_id: string; first_name: string; created_at: string };
+
+type TgAppointment = {
+  id: number;
+  patient_name: string;
+  phone: string;
+  appointment_dt: string;
+  doctor: string | null;
+  notes: string | null;
+  status: string;
+  telegram_chat_id: string | null;
+  tg_reminded_24h: number;
+  tg_reminded_1h: number;
+};
+
+function TelegramTab({ token }: { token: string }) {
+  const [subTab, setSubTab] = useState<'appointments' | 'pending' | 'settings'>('appointments');
+
+  // appointments sub-tab
+  const [appts, setAppts] = useState<TgAppointment[]>([]);
+  const [loadingAppts, setLoadingAppts] = useState(true);
+  const [filterDate, setFilterDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<Partial<TgAppointment> | null>(null);
+  const [isNew, setIsNew] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sentId, setSentId] = useState<number | null>(null);
+
+  // manual send modal
+  const [sendModal, setSendModal] = useState<TgAppointment | null>(null);
+  const [sendText, setSendText] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const [sendResult, setSendResult] = useState<string | null>(null);
+
+  // pending sub-tab
+  const [pending, setPending] = useState<TgPending[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [linkModal, setLinkModal] = useState<TgPending | null>(null);
+  const [linkPhone, setLinkPhone] = useState('');
+  const [linking, setLinking] = useState(false);
+  const [linkResult, setLinkResult] = useState<string | null>(null);
+
+  // settings sub-tab
+  const [botName, setBotName] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
+  const [settingWebhook, setSettingWebhook] = useState(false);
+
+  const loadAppts = async () => {
+    setLoadingAppts(true); setError(null);
+    try {
+      const res = await fetch(`${BASE}/api/appointments?date=${filterDate}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      setAppts(await res.json() as TgAppointment[]);
+    } catch { setError('Не вдалося завантажити записи'); }
+    finally { setLoadingAppts(false); }
+  };
+
+  const loadPending = async () => {
+    setLoadingPending(true);
+    try {
+      const res = await fetch(`${BASE}/api/telegram/pending`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPending(await res.json() as TgPending[]);
+    } catch {}
+    finally { setLoadingPending(false); }
+  };
+
+  useEffect(() => { loadAppts(); }, [filterDate]);
+  useEffect(() => { if (subTab === 'pending') loadPending(); }, [subTab]);
+
+  const handleSave = async (data: Omit<TgAppointment, 'id' | 'tg_reminded_24h' | 'tg_reminded_1h'>) => {
+    setSaving(true); setError(null);
+    try {
+      const url = isNew ? `${BASE}/api/appointments` : `${BASE}/api/appointments/${editing?.id}`;
+      const res = await fetch(url, {
+        method: isNew ? 'POST' : 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      await loadAppts(); setEditing(null);
+    } catch { setError('Помилка збереження'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await fetch(`${BASE}/api/appointments/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      setAppts(p => p.filter(i => i.id !== id));
+    } catch { setError('Помилка видалення'); }
+    setDeleteId(null);
+  };
+
+  const handleSendTg = async () => {
+    if (!sendModal?.telegram_chat_id || !sendText.trim()) return;
+    setSendingMsg(true); setSendResult(null);
+    try {
+      const res = await fetch(`${BASE}/api/telegram/send`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: sendModal.telegram_chat_id, text: sendText }),
+      });
+      setSendResult(res.ok ? 'ok' : 'error');
+      if (res.ok) { setSentId(sendModal.id); setTimeout(() => { setSentId(null); setSendModal(null); }, 1500); }
+    } catch { setSendResult('error'); }
+    finally { setSendingMsg(false); }
+  };
+
+  const handleLink = async () => {
+    if (!linkModal || !linkPhone.trim()) return;
+    setLinking(true); setLinkResult(null);
+    try {
+      const res = await fetch(`${BASE}/api/telegram/link`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: linkPhone, telegram_chat_id: linkModal.chat_id }),
+      });
+      const data = await res.json() as { updated: number };
+      setLinkResult(data.updated > 0 ? `✓ Прив'язано до ${data.updated} запису` : 'Записів з таким номером не знайдено');
+      if (data.updated > 0) {
+        setTimeout(() => { setLinkModal(null); setLinkPhone(''); setLinkResult(null); loadPending(); }, 1800);
+      }
+    } catch { setLinkResult('Помилка'); }
+    finally { setLinking(false); }
+  };
+
+  const copyBotLink = async () => {
+    const link = `https://t.me/${botName || 'your_bot'}?start=dentis`;
+    await navigator.clipboard.writeText(link);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+  };
+
+  const subTabStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1, padding: '7px 0', borderRadius: 10, fontSize: 13, fontWeight: active ? 600 : 400,
+    background: active ? 'hsl(180 50% 20%)' : 'transparent',
+    color: active ? 'hsl(40 30% 92%)' : 'hsl(180 20% 50%)',
+    border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+    fontFamily: '"NueneMontreal", system-ui, sans-serif',
+  });
+
+  return (
+    <div>
+      {/* Sub-tabs */}
+      <div className="flex gap-1 p-1 rounded-xl mb-5" style={{ background: 'hsl(180 60% 10%)', border: '1px solid hsl(180 40% 18% / 0.5)' }}>
+        <button style={subTabStyle(subTab === 'appointments')} onClick={() => setSubTab('appointments')}>Записи</button>
+        <button style={subTabStyle(subTab === 'pending')} onClick={() => setSubTab('pending')}>
+          Очікують прив'язки {pending.length > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'hsl(38 62% 52% / 0.3)', color: 'hsl(38 70% 68%)' }}>{pending.length}</span>}
+        </button>
+        <button style={subTabStyle(subTab === 'settings')} onClick={() => setSubTab('settings')}>Налаштування</button>
+      </div>
+
+      {/* ── Appointments sub-tab ── */}
+      {subTab === 'appointments' && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
+                className="px-3 py-1.5 rounded-xl text-sm outline-none" style={{ ...lightInputStyle, minWidth: 140 }} />
+              <button onClick={loadAppts} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
+                <RefreshCw size={14} className={loadingAppts ? 'animate-spin' : ''} />
+              </button>
+            </div>
+            <button onClick={() => { setEditing({}); setIsNew(true); }}
+              className="flex items-center gap-2 gradient-gold text-[hsl(220_40%_10%)] px-4 py-2 rounded-xl text-sm font-semibold shadow-gold-custom hover:brightness-110 transition-all active:scale-95"
+              style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              <Plus size={16} />Новий запис
+            </button>
+          </div>
+
+          {error && <div className="mb-4 flex items-center gap-2 text-red-400 text-sm"><AlertTriangle size={14} />{error}</div>}
+
+          {loadingAppts ? (
+            <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-[hsl(38_62%_52%)]" /></div>
+          ) : (
+            <div className="space-y-2">
+              {appts.length === 0 && (
+                <p className="text-center text-[hsl(180_20%_45%)] text-sm py-10" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                  Записів на {filterDate} немає
+                </p>
+              )}
+              {appts.map(appt => {
+                const { date, time } = formatApptDt(appt.appointment_dt);
+                const hasTg = !!appt.telegram_chat_id;
+                return (
+                  <div key={appt.id} className="rounded-2xl p-4 flex items-center gap-3"
+                    style={{ background: 'hsl(180 60% 12%)', border: `1px solid ${appt.status === 'cancelled' ? 'hsl(0 60% 35% / 0.4)' : hasTg ? 'hsl(180 70% 40% / 0.35)' : 'hsl(180 40% 22% / 0.5)'}`, opacity: appt.status === 'cancelled' ? 0.6 : 1 }}>
+                    {/* Час */}
+                    <div className="flex-shrink-0 w-14 text-center rounded-xl py-2" style={{ background: 'hsl(180 50% 18%)' }}>
+                      <p className="text-[hsl(38_62%_52%)] text-xs font-medium">{date}</p>
+                      <p className="text-[hsl(40_30%_92%)] text-base font-semibold leading-tight">{time}</p>
+                    </div>
+                    {/* Інфо */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-[hsl(40_30%_92%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{appt.patient_name}</p>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full flex-shrink-0"
+                          style={{ background: STATUS_COLOR[appt.status] + '22', color: STATUS_COLOR[appt.status], border: `1px solid ${STATUS_COLOR[appt.status]}44` }}>
+                          {STATUS_LABEL[appt.status]}
+                        </span>
+                        {/* Telegram badge */}
+                        <span className="text-[10px] px-2 py-0.5 rounded-full flex-shrink-0 flex items-center gap-1"
+                          style={{ background: hasTg ? 'hsl(200 80% 30% / 0.3)' : 'hsl(180 50% 15%)', color: hasTg ? 'hsl(200 80% 70%)' : 'hsl(180 20% 40%)', border: `1px solid ${hasTg ? 'hsl(200 80% 45% / 0.4)' : 'hsl(180 40% 25% / 0.4)'}` }}>
+                          <MessageCircle size={9} />{hasTg ? 'Telegram ✓' : 'Без Telegram'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-[hsl(180_20%_50%)] text-xs flex items-center gap-1"><Phone size={10} />{appt.phone}</p>
+                        {appt.doctor && <p className="text-[hsl(38_50%_55%)] text-xs truncate">{appt.doctor}</p>}
+                      </div>
+                      {appt.status === 'scheduled' && hasTg && (
+                        <div className="flex gap-1.5 mt-1">
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: appt.tg_reminded_24h ? 'hsl(200 80% 20%)' : 'hsl(180 50% 15%)', color: appt.tg_reminded_24h ? 'hsl(200 80% 60%)' : 'hsl(180 20% 45%)' }}>
+                            TG 24г {appt.tg_reminded_24h ? '✓' : '○'}
+                          </span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: appt.tg_reminded_1h ? 'hsl(200 80% 20%)' : 'hsl(180 50% 15%)', color: appt.tg_reminded_1h ? 'hsl(200 80% 60%)' : 'hsl(180 20% 45%)' }}>
+                            TG 1г {appt.tg_reminded_1h ? '✓' : '○'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Дії */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {hasTg && (
+                        <button onClick={() => { setSendModal(appt); setSendText(`Доброго дня, ${appt.patient_name}! Нагадуємо про ваш прийом у Дентіс 🦷`); setSendResult(null); }}
+                          title="Написати у Telegram"
+                          className="p-2 rounded-lg transition-all"
+                          style={{ color: sentId === appt.id ? 'hsl(150 60% 55%)' : 'hsl(200 70% 60%)', background: sentId === appt.id ? 'hsl(150 50% 15%)' : 'transparent' }}>
+                          {sentId === appt.id ? <CheckCheck size={15} /> : <MessageCircle size={15} />}
+                        </button>
+                      )}
+                      <button onClick={() => { setEditing(appt); setIsNew(false); }} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-[hsl(38_70%_68%)] hover:bg-[hsl(38_62%_52%/0.1)] transition-all"><Pencil size={15} /></button>
+                      <button onClick={() => setDeleteId(appt.id)} className="p-2 rounded-lg text-[hsl(180_20%_50%)] hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 size={15} /></button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {editing !== null && (
+            <ModalShell title={isNew ? 'Новий запис' : 'Редагувати запис'} onClose={() => setEditing(null)}>
+              <ApptForm initial={editing} onSave={handleSave} onCancel={() => setEditing(null)} saving={saving} error={error} />
+            </ModalShell>
+          )}
+          {deleteId !== null && <ConfirmDialog message="Видалити цей запис?" onConfirm={() => handleDelete(deleteId!)} onCancel={() => setDeleteId(null)} />}
+
+          {/* Send Telegram message modal */}
+          {sendModal && (
+            <ModalShell title="Написати у Telegram" onClose={() => setSendModal(null)}>
+              <div className="space-y-4">
+                <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: 'hsl(200 60% 12%)', border: '1px solid hsl(200 60% 25% / 0.4)' }}>
+                  <MessageCircle size={16} className="flex-shrink-0" style={{ color: 'hsl(200 80% 65%)' }} />
+                  <div className="min-w-0">
+                    <p className="text-[hsl(40_30%_90%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{sendModal.patient_name}</p>
+                    <p className="text-[hsl(180_20%_50%)] text-xs">{sendModal.phone} · chat_id: {sendModal.telegram_chat_id}</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Повідомлення</label>
+                  <textarea value={sendText} onChange={e => setSendText(e.target.value)} rows={4}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={inputStyle} />
+                </div>
+                {sendResult && (
+                  <div className={`rounded-xl px-3 py-2.5 text-sm text-center ${sendResult === 'ok' ? 'text-green-400' : 'text-red-400'}`}
+                    style={{ background: sendResult === 'ok' ? 'hsl(150 50% 12%)' : 'hsl(0 50% 12%)', border: `1px solid ${sendResult === 'ok' ? 'hsl(150 50% 25%)' : 'hsl(0 50% 25%)'}` }}>
+                    {sendResult === 'ok' ? '✓ Надіслано' : '✗ Помилка'}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button onClick={() => setSendModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Закрити</button>
+                  <button onClick={handleSendTg} disabled={!sendText.trim() || sendingMsg || sendResult === 'ok'}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+                    style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                    {sendingMsg ? <><Loader2 size={15} className="animate-spin" />Надсилання...</> : <><Send size={15} />Надіслати</>}
+                  </button>
+                </div>
+              </div>
+            </ModalShell>
+          )}
+        </div>
+      )}
+
+      {/* ── Pending sub-tab ── */}
+      {subTab === 'pending' && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[hsl(180_20%_55%)] text-sm" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              Написали /start боту, але ще не прив'язані до запису
+            </p>
+            <button onClick={loadPending} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
+              <RefreshCw size={14} className={loadingPending ? 'animate-spin' : ''} />
+            </button>
+          </div>
+
+          {loadingPending ? (
+            <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-[hsl(38_62%_52%)]" /></div>
+          ) : pending.length === 0 ? (
+            <div className="text-center py-12">
+              <MessageCircle size={32} className="mx-auto mb-3 opacity-30" style={{ color: 'hsl(200 70% 60%)' }} />
+              <p className="text-[hsl(180_20%_45%)] text-sm" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                Немає непідтверджених користувачів
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {pending.map(p => (
+                <div key={p.id} className="rounded-2xl p-4 flex items-center gap-3"
+                  style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(200 60% 30% / 0.3)' }}>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'hsl(200 60% 20%)', color: 'hsl(200 80% 65%)' }}>
+                    <MessageCircle size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[hsl(40_30%_90%)] text-sm font-medium" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{p.first_name || 'Без імені'}</p>
+                    <p className="text-[hsl(180_20%_50%)] text-xs">chat_id: {p.chat_id}</p>
+                    <p className="text-[hsl(180_20%_40%)] text-[10px]">{new Date(p.created_at).toLocaleString('uk-UA')}</p>
+                  </div>
+                  <button onClick={() => { setLinkModal(p); setLinkPhone(''); setLinkResult(null); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{ background: 'hsl(38 62% 52% / 0.12)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(38 62% 52% / 0.25)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                    <LinkIcon size={12} />Прив'язати
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {linkModal && (
+            <ModalShell title={`Прив'язати ${linkModal.first_name || 'користувача'}`} onClose={() => setLinkModal(null)}>
+              <div className="space-y-4">
+                <div className="rounded-xl p-3" style={{ background: 'hsl(200 60% 12%)', border: '1px solid hsl(200 60% 25% / 0.4)' }}>
+                  <p className="text-[hsl(40_30%_88%)] text-sm" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                    Telegram: <span className="text-[hsl(200_80%_65%)] font-medium">{linkModal.first_name}</span> (chat_id: {linkModal.chat_id})
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Номер телефону пацієнта</label>
+                  <div className="relative">
+                    <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(180_20%_45%)]" />
+                    <input value={linkPhone} onChange={e => { setLinkPhone(e.target.value); setLinkResult(null); }}
+                      type="tel" placeholder="+380501234567"
+                      className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
+                  </div>
+                  {linkPhone.trim() && !validatePhone(linkPhone) && (
+                    <p className="text-red-400 text-[11px] mt-1 px-1">Формат: +380XXXXXXXXX або 0XXXXXXXXX</p>
+                  )}
+                </div>
+                {linkResult && (
+                  <div className={`rounded-xl px-3 py-2.5 text-sm text-center ${linkResult.startsWith('✓') ? 'text-green-400' : 'text-[hsl(38_62%_55%)]'}`}
+                    style={{ background: linkResult.startsWith('✓') ? 'hsl(150 50% 12%)' : 'hsl(38 40% 12%)', border: `1px solid ${linkResult.startsWith('✓') ? 'hsl(150 50% 25%)' : 'hsl(38 40% 25%)'}` }}>
+                    {linkResult}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button onClick={() => setLinkModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-[hsl(180_20%_55%)] border border-[hsl(180_40%_22%/0.5)]" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Скасувати</button>
+                  <button onClick={handleLink} disabled={!validatePhone(linkPhone) || linking}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-40 flex items-center justify-center gap-2"
+                    style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                    {linking ? <><Loader2 size={15} className="animate-spin" />Прив'язка...</> : <><Link2 size={15} />Прив'язати</>}
+                  </button>
+                </div>
+              </div>
+            </ModalShell>
+          )}
+        </div>
+      )}
+
+      {/* ── Settings sub-tab ── */}
+      {subTab === 'settings' && (
+        <div className="max-w-xl space-y-5">
+          {/* Step 1 */}
+          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 1 — Secrets у Cloudflare</p>
+            <p className="text-[hsl(40_15%_65%)] text-sm leading-relaxed mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              Виконайте у терміналі (один раз):
+            </p>
+            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
+              npx wrangler secret put TELEGRAM_BOT_TOKEN --name dentis-site-api<br />
+              npx wrangler secret put TELEGRAM_CHAT_ID --name dentis-site-api
+            </div>
+            <p className="text-[hsl(180_20%_40%)] text-xs mt-2">TELEGRAM_CHAT_ID — необов'язково, якщо хочете копію сповіщень адміну</p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 2 — Реєстрація webhook</p>
+            <p className="text-[hsl(40_15%_65%)] text-sm leading-relaxed mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              Замініть TOKEN на ваш bot token і виконайте:
+            </p>
+            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto leading-relaxed" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
+              curl "https://api.telegram.org/bot<span style={{ color: 'hsl(200 80% 70%)' }}>TOKEN</span>/setWebhook?url=https://dentis-site-api.nesterenkovasil9.workers.dev/api/telegram/webhook"
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 3 — Міграція бази даних</p>
+            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
+              cd dentis-site-api<br />
+              npx wrangler d1 migrations apply site_news_docs_pwa --remote
+            </div>
+          </div>
+
+          {/* Step 4 — bot link */}
+          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 4 — Посилання для пацієнтів</p>
+            <p className="text-[hsl(40_15%_65%)] text-sm mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              Вкажіть username вашого бота (без @):
+            </p>
+            <div className="flex gap-2 mb-3">
+              <input value={botName} onChange={e => setBotName(e.target.value)} placeholder="dentis_clinic_bot"
+                className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
+              <button onClick={copyBotLink} disabled={!botName.trim()}
+                className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-all disabled:opacity-40"
+                style={{ background: 'hsl(38 62% 52% / 0.15)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(38 62% 52% / 0.3)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                {copied ? <><CheckCheck size={14} />Скопійовано</> : <><Copy size={14} />Копіювати</>}
+              </button>
+            </div>
+            {botName && (
+              <div className="rounded-xl p-3 text-sm" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(200 80% 70%)', border: '1px solid hsl(200 60% 25% / 0.3)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                https://t.me/{botName}
+              </div>
+            )}
+            <p className="text-[hsl(180_20%_40%)] text-xs mt-2">Надішліть це посилання пацієнтам — після переходу бот запросить номер телефону</p>
+          </div>
+
+          {/* Flow reminder */}
+          <div className="rounded-2xl p-5" style={{ background: 'hsl(38 62% 52% / 0.06)', border: '1px solid hsl(38 62% 52% / 0.2)' }}>
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Як це працює</p>
+            <div className="space-y-2 text-sm" style={{ color: 'hsl(40 15% 65%)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+              <p>1. Пацієнт переходить за посиланням → пише /start боту</p>
+              <p>2. Бот просить поділитись номером телефону</p>
+              <p>3. Номер автоматично прив'язується до записів у базі</p>
+              <p>4. За 24г та 1г до прийому — пацієнт отримує нагадування у Telegram</p>
+              <p>5. При створенні запису — пацієнт отримує підтвердження</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
@@ -1057,11 +1508,13 @@ export default function Admin() {
           <TabButton active={tab === "doctors"} onClick={() => setTab("doctors")} icon={<Stethoscope size={15} />} label="Лікарі" />
           <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
           <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
+          <TabButton active={tab === "telegram"} onClick={() => setTab("telegram")} icon={<MessageCircle size={15} />} label="Telegram" />
         </div>
         {tab === "news" && <NewsTab token={token} />}
         {tab === "doctors" && <DoctorsTab token={token} />}
         {tab === "appointments" && <AppointmentsTab token={token} />}
         {tab === "push" && <PushTab token={token} />}
+        {tab === "telegram" && <TelegramTab token={token} />}
       </div>
     </div>
     </>

@@ -305,7 +305,12 @@ async function runReminders(db, env) {
       body: `${appt.patient_name}, завтра о ${time} — ${appt.doctor || 'Дентіс'}`,
       url: '/', icon: '/icon-192.png',
     }, env)
-    await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
+    if (env.TELEGRAM_BOT_TOKEN) {
+      await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
+      await db.prepare('UPDATE appointments SET reminded_24h=1, tg_reminded_24h=1 WHERE id=?').bind(appt.id).run()
+    } else {
+      await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
+    }
     void day
   }
 
@@ -325,8 +330,46 @@ async function runReminders(db, env) {
       body: `${appt.patient_name}, сьогодні о ${time} — ${appt.doctor || 'Дентіс'}`,
       url: '/', icon: '/icon-192.png',
     }, env)
-    await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
+    if (env.TELEGRAM_BOT_TOKEN) {
+      await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
+      await db.prepare('UPDATE appointments SET reminded_1h=1, tg_reminded_1h=1 WHERE id=?').bind(appt.id).run()
+    } else {
+      await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
+    }
   }
+}
+
+// ── TELEGRAM HELPERS ──────────────────────────────────────────────────────────
+async function tgSend(botToken, chatId, text) {
+  if (!botToken || !chatId) return
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    })
+  } catch {}
+}
+
+async function tgSendReminder(db, appt, botToken, kind) {
+  // Find telegram_chat_id: stored directly on appointment OR looked up by phone
+  let chatId = appt.telegram_chat_id
+  if (!chatId && appt.phone) {
+    // Try to find chat_id from other appointments with same phone that have it set
+    const row = await db.prepare(
+      'SELECT telegram_chat_id FROM appointments WHERE phone=? AND telegram_chat_id IS NOT NULL LIMIT 1'
+    ).bind(appt.phone).first()
+    chatId = row?.telegram_chat_id
+  }
+  if (!chatId) return false
+
+  const { day, time } = formatDt(appt.appointment_dt)
+  const text = kind === '24h'
+    ? `⏰ <b>Нагадування від Дентіс</b>\n\nДобрий день, ${appt.patient_name}!\nЗавтра о <b>${time}</b> ви записані на прийом.${appt.doctor ? `\n👨‍⚕️ Лікар: ${appt.doctor}` : ''}\n\n📍 Кропивницький, вул. Велика Перспективна 34\n\nЧекаємо вас! 🦷`
+    : `⏰ <b>Прийом через годину!</b>\n\n${appt.patient_name}, сьогодні о <b>${time}</b> у вас прийом у Дентіс.${appt.doctor ? `\n👨‍⚕️ Лікар: ${appt.doctor}` : ''}\n\nБудь ласка, не запізнюйтесь 🙏`
+  await tgSend(botToken, chatId, text)
+  void day
+  return true
 }
 
 // ── CRON: автопублікація запланованих статей ──────────────────────────────────
@@ -587,12 +630,23 @@ export default {
     }
     if (p === '/api/appointments' && m === 'POST') {
       const b = await request.json()
-      const { patient_name, phone, appointment_dt, doctor, notes } = b
+      const { patient_name, phone, appointment_dt, doctor, notes, telegram_chat_id } = b
       const normalPhone = normalizePhone(phone)
       if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
+
+      // Check if we already know their Telegram chat_id from previous appointments
+      const suffix = normalPhone.slice(-9)
+      let tgChatId = telegram_chat_id || null
+      if (!tgChatId) {
+        const existing = await env.DB.prepare(
+          'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
+        ).bind(`%${suffix}`).first()
+        tgChatId = existing?.telegram_chat_id || null
+      }
+
       const { meta } = await env.DB.prepare(
-        'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes) VALUES (?,?,?,?,?)'
-      ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null).run()
+        'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes,telegram_chat_id) VALUES (?,?,?,?,?,?)'
+      ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null, tgChatId).run()
       const id = meta.last_row_id
       const sub = await env.DB.prepare('SELECT endpoint FROM push_subscriptions WHERE phone=? LIMIT 1').bind(normalPhone).first()
       const { day, time } = formatDt(appointment_dt)
@@ -603,7 +657,13 @@ export default {
           url: '/', icon: '/icon-192.png',
         }, env).catch(() => {})
       }
-      return json({ id, hasPush: !!sub }, 201, origin)
+      // Telegram підтвердження
+      if (tgChatId && env.TELEGRAM_BOT_TOKEN) {
+        tgSend(env.TELEGRAM_BOT_TOKEN, tgChatId,
+          `✅ <b>Запис підтверджено!</b>\n\n📅 ${day} о <b>${time}</b>${doctor ? `\n👨‍⚕️ Лікар: ${doctor}` : ''}\n\n📍 Кропивницький, вул. Велика Перспективна 34\n\nЧекаємо вас у клініці Дентіс! 🦷`
+        ).catch(() => {})
+      }
+      return json({ id, hasPush: !!sub, hasTelegram: !!tgChatId }, 201, origin)
     }
     if (p.match(/^\/api\/appointments\/\d+$/) && m === 'PUT') {
       const b = await request.json()
@@ -669,6 +729,131 @@ export default {
         title: b.title || 'Дентіс', body: b.body || '', url: b.url || '/', icon: '/icon-192.png',
       }, env)
       return json(result, 200, origin)
+    }
+
+    // ── TELEGRAM WEBHOOK (public — called by Telegram servers) ───────────────
+    if (p === '/api/telegram/webhook' && m === 'POST') {
+      let upd
+      try { upd = await request.json() } catch { return new Response('ok') }
+      const msg = upd?.message
+      if (!msg) return new Response('ok')
+
+      const chatId = String(msg.chat.id)
+      const firstName = msg.chat.first_name || ''
+      const text = (msg.text || '').trim()
+      const contact = msg.contact
+
+      if (text === '/start') {
+        // Save pending registration — admin will link phone manually or user shares contact
+        await env.DB.prepare(
+          'INSERT OR REPLACE INTO telegram_pending (chat_id, first_name) VALUES (?, ?)'
+        ).bind(chatId, firstName).run()
+
+        const botToken = env.TELEGRAM_BOT_TOKEN
+        if (botToken) {
+          await tgSend(botToken, chatId,
+            `👋 Вітаємо у клініці <b>Дентіс</b>, ${firstName}!\n\nЩоб отримувати нагадування про ваші візити, поділіться номером телефону (кнопка нижче) або зверніться до адміністратора.`
+          )
+          // Ask for contact via custom keyboard
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: '📱 Натисніть кнопку нижче, щоб поділитися номером:',
+              reply_markup: {
+                keyboard: [[{ text: '📱 Поділитися номером телефону', request_contact: true }]],
+                one_time_keyboard: true,
+                resize_keyboard: true,
+              },
+            }),
+          })
+        }
+      }
+
+      if (contact?.phone_number) {
+        const raw = contact.phone_number.replace(/\D/g, '')
+        const normalized = raw.startsWith('380') && raw.length === 12 ? raw
+          : raw.startsWith('0') && raw.length === 10 ? '38' + raw
+          : raw.length === 9 ? '380' + raw : null
+
+        if (normalized) {
+          // Link this chat_id to all matching appointments
+          const suffix = normalized.slice(-9)
+          await env.DB.prepare(`
+            UPDATE appointments SET telegram_chat_id=?
+            WHERE phone LIKE ? AND (telegram_chat_id IS NULL OR telegram_chat_id='')
+          `).bind(chatId, `%${suffix}`).run()
+
+          // Remove from pending
+          await env.DB.prepare('DELETE FROM telegram_pending WHERE chat_id=?').bind(chatId).run()
+
+          if (env.TELEGRAM_BOT_TOKEN) {
+            await tgSend(env.TELEGRAM_BOT_TOKEN, chatId,
+              `✅ <b>Готово!</b> Ваш номер +${normalized} прив'язано до акаунту Дентіс.\n\nВи отримуватимете нагадування про прийоми у цьому чаті. 🦷`
+            )
+            // Remove keyboard
+            await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: chatId,
+                text: 'Очікуйте нагадувань від клініки Дентіс 😊',
+                reply_markup: { remove_keyboard: true },
+              }),
+            })
+          }
+        }
+      }
+
+      return new Response('ok')
+    }
+
+    // ── TELEGRAM ADMIN API ────────────────────────────────────────────────────
+    // POST /api/telegram/link — вручну прив'язати chat_id до телефону
+    if (p === '/api/telegram/link' && m === 'POST') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const { phone, telegram_chat_id: chatId } = await request.json()
+      const normalPhone = normalizePhone(phone)
+      if (!normalPhone || !chatId) return json({ error: 'phone and telegram_chat_id required' }, 400, origin)
+      const suffix = normalPhone.slice(-9)
+      const { meta } = await env.DB.prepare(`
+        UPDATE appointments SET telegram_chat_id=?
+        WHERE phone LIKE ? AND status='scheduled'
+      `).bind(String(chatId), `%${suffix}`).run()
+      return json({ updated: meta.changes }, 200, origin)
+    }
+
+    // GET /api/telegram/pending — список тих хто написав /start але не прив'язаний
+    if (p === '/api/telegram/pending' && m === 'GET') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const { results } = await env.DB.prepare(
+        'SELECT * FROM telegram_pending ORDER BY created_at DESC LIMIT 50'
+      ).all()
+      return json(results || [], 200, origin)
+    }
+
+    // GET /api/telegram/status?phone=... — чи є chat_id для цього телефону
+    if (p === '/api/telegram/status' && m === 'GET') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      const phone = new URL(request.url).searchParams.get('phone')
+      const normalPhone = normalizePhone(phone)
+      if (!normalPhone) return json({ linked: false }, 200, origin)
+      const suffix = normalPhone.slice(-9)
+      const row = await env.DB.prepare(
+        'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
+      ).bind(`%${suffix}`).first()
+      return json({ linked: !!row?.telegram_chat_id, chat_id: row?.telegram_chat_id || null }, 200, origin)
+    }
+
+    // POST /api/telegram/send — вручну надіслати повідомлення у Telegram конкретному пацієнту
+    if (p === '/api/telegram/send' && m === 'POST') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      if (!env.TELEGRAM_BOT_TOKEN) return json({ error: 'TELEGRAM_BOT_TOKEN not set' }, 503, origin)
+      const { chat_id, text } = await request.json()
+      if (!chat_id || !text) return json({ error: 'chat_id and text required' }, 400, origin)
+      await tgSend(env.TELEGRAM_BOT_TOKEN, String(chat_id), text)
+      return json({ ok: true }, 200, origin)
     }
 
     return json({ error: 'Not found' }, 404, origin)
