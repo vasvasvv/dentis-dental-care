@@ -1,6 +1,6 @@
-# Admin panel — окремий PWA з власним manifest
-/d-panel /admin.html 200
-/d-panel/* /admin.html 200
+# Admin panel — окремий HTML з admin-manifest.json (браузер читає manifest при завантаженні)
+/d-panel         /d-panel/index.html 200
+/d-panel/*       /d-panel/index.html 200
 
 # SPA fallback — всі інші маршрути
-/* /index.html 200
+/*               /index.html 200
