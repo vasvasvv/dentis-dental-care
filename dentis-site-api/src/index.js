@@ -309,7 +309,9 @@ async function runReminders(db, env) {
     }, env)
     if (env.TELEGRAM_BOT_TOKEN) {
       await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
-      await db.prepare('UPDATE appointments SET reminded_24h=1, tg_reminded_24h=1 WHERE id=?').bind(appt.id).run()
+      await db.prepare('UPDATE appointments SET reminded_24h=1, tg_reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() =>
+        db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
+      )
     } else {
       await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
     }
@@ -334,7 +336,9 @@ async function runReminders(db, env) {
     }, env)
     if (env.TELEGRAM_BOT_TOKEN) {
       await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
-      await db.prepare('UPDATE appointments SET reminded_1h=1, tg_reminded_1h=1 WHERE id=?').bind(appt.id).run()
+      await db.prepare('UPDATE appointments SET reminded_1h=1, tg_reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() =>
+        db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
+      )
     } else {
       await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
     }
@@ -431,9 +435,32 @@ async function publishScheduledArticles(db, env) {
 // ── MAIN HANDLER ──────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get('Origin') || ''
+    try {
+      return await handleRequest(request, env, origin)
+    } catch (err) {
+      console.error('Unhandled error:', err?.message ?? err)
+      return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...getCorsHeaders(origin),
+        },
+      })
+    }
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(Promise.all([
+      runReminders(env.DB, env),
+      publishScheduledArticles(env.DB, env),
+    ]))
+  },
+}
+
+async function handleRequest(request, env, origin) {
     const { pathname: p } = new URL(request.url)
     const m = request.method
-    const origin = request.headers.get('Origin') || ''
 
     if (m === 'OPTIONS') {
       return new Response(null, {
@@ -648,7 +675,12 @@ export default {
 
       const { meta } = await env.DB.prepare(
         'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes,telegram_chat_id) VALUES (?,?,?,?,?,?)'
-      ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null, tgChatId).run()
+      ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null, tgChatId).run().catch(async () => {
+        // Fallback: column may not exist yet (migration not applied)
+        return env.DB.prepare(
+          'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes) VALUES (?,?,?,?,?)'
+        ).bind(patient_name, normalPhone, appointment_dt, doctor || null, notes || null).run()
+      })
       const id = meta.last_row_id
       const sub = await env.DB.prepare('SELECT endpoint FROM push_subscriptions WHERE phone=? LIMIT 1').bind(normalPhone).first()
       const { day, time } = formatDt(appointment_dt)
@@ -859,12 +891,4 @@ export default {
     }
 
     return json({ error: 'Not found' }, 404, origin)
-  },
-
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(Promise.all([
-      runReminders(env.DB, env),
-      publishScheduledArticles(env.DB, env),
-    ]))
-  },
 }
