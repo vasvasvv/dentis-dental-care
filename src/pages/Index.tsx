@@ -18,12 +18,12 @@ const Index = () => {
       <Helmet>
         <title>Дентіс — Стоматологічна клініка у Кропивницькому</title>
         <meta name="description" content="Сучасна стоматологія з індивідуальним підходом. Імплантація, протезування, лікування карієсу, професійна гігієна. Кропивницький." />
-        <link rel="canonical" href="https://dentis.pp.ua/" />
+        <link rel="canonical" href="https://dentis.kr.ua/" />
         <meta property="og:title" content="Дентіс — Стоматологічна клініка у Кропивницькому" />
         <meta property="og:description" content="Сучасна стоматологія з індивідуальним підходом. Комфорт, безпека та бездоганний результат." />
-        <meta property="og:url" content="https://dentis.pp.ua/" />
+        <meta property="og:url" content="https://dentis.kr.ua/" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>
