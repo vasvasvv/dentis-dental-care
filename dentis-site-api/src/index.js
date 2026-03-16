@@ -538,10 +538,10 @@ async function handleRequest(request, env, origin) {
       }
 
       const token = await signJwt(
-        { role: 'admin', iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 3600 },
+        { role: 'admin', iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 2592000 },
         env.JWT_SECRET
       )
-      return json({ token, expiresIn: 3600 }, 200, origin)
+      return json({ token, expiresIn: 2592000 }, 200, origin)
     }
 
     // ── PUSH SUBSCRIBE (public) ──────────────────────────────────────────────

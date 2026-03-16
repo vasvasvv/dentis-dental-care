@@ -1553,7 +1553,7 @@ const SESSION_KEY = 'dentis-admin-jwt'
 
 export default function Admin() {
   // Store JWT in sessionStorage — valid for 1h, cleared on tab close
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(SESSION_KEY));
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
@@ -1564,12 +1564,12 @@ export default function Admin() {
   }, []);
 
   const handleLogin = (jwtToken: string) => {
-    sessionStorage.setItem(SESSION_KEY, jwtToken);
+    localStorage.setItem(SESSION_KEY, jwtToken);
     setToken(jwtToken);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
     setToken(null);
   };
 
