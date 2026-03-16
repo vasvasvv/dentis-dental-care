@@ -413,7 +413,9 @@ async function tgSendReminder(db, appt, botToken, kind) {
   if (!chatId) return false
 
   const { day, time } = formatDt(appt.appointment_dt)
-  const text = kind === '24h'
+  const text = kind === 'cancel'
+    ? `❌ <b>Запис скасовано</b>\n\n${appt.patient_name}, ваш прийом <b>${day}</b> о <b>${time}</b> скасовано.\n\nЯкщо це помилка — зверніться до клініки Дентіс. 🦷`
+    : kind === '24h'
     ? `⏰ <b>Нагадування від Дентіс</b>\n\nДобрий день, ${appt.patient_name}!\nЗавтра о <b>${time}</b> ви записані на прийом.${appt.doctor ? `\n👨‍⚕️ Лікар: ${appt.doctor}` : ''}\n\n📍 Кропивницький, вул. Велика Перспективна 34\n\nЧекаємо вас! 🦷`
     : `⏰ <b>Прийом через годину!</b>\n\n${appt.patient_name}, сьогодні о <b>${time}</b> у вас прийом у Дентіс.${appt.doctor ? `\n👨‍⚕️ Лікар: ${appt.doctor}` : ''}\n\nБудь ласка, не запізнюйтесь 🙏`
   await tgSend(botToken, chatId, text)
@@ -884,17 +886,35 @@ async function handleRequest(request, env, origin) {
           }, env).catch(() => {})
         }
       }
+      if (env.TELEGRAM_BOT_TOKEN) {
+        const fakeAppt = { ...old, patient_name, phone: normalPhone, appointment_dt, doctor: doctor || null }
+        const { day, time } = formatDt(appointment_dt)
+        if (status === 'cancelled' && old.status !== 'cancelled') {
+          tgSendReminder(env.DB, fakeAppt, env.TELEGRAM_BOT_TOKEN, 'cancel').catch(() => {})
+        } else if (appointment_dt !== old.appointment_dt) {
+          tgSend(env.TELEGRAM_BOT_TOKEN, fakeAppt.telegram_chat_id || null,
+            `🔄 <b>Час прийому змінено</b>\n\n${patient_name}, ваш прийом перенесено на <b>${day}</b> о <b>${time}</b>.${doctor ? `\n👨‍⚕️ Лікар: ${doctor}` : ''}\n\n📍 Кропивницький, вул. Велика Перспективна 34`
+          ).catch(() => {})
+          void time
+        }
+        void day
+      }
       return json({ ok: true }, 200, origin)
     }
     if (p.match(/^\/api\/appointments\/\d+$/) && m === 'DELETE') {
       const appt = await env.DB.prepare('SELECT * FROM appointments WHERE id=?').bind(idFrom(p)).first()
-      if (appt && env.VAPID_PUBLIC_KEY) {
+      if (appt) {
         const { day, time } = formatDt(appt.appointment_dt)
-        pushToPhone(env.DB, appt.phone, {
-          title: '❌ Запис скасовано',
-          body: `${appt.patient_name}, ваш прийом ${day} о ${time} скасовано.`,
-          url: '/', icon: '/icon-192.png',
-        }, env).catch(() => {})
+        if (env.VAPID_PUBLIC_KEY) {
+          pushToPhone(env.DB, appt.phone, {
+            title: '❌ Запис скасовано',
+            body: `${appt.patient_name}, ваш прийом ${day} о ${time} скасовано.`,
+            url: '/', icon: '/icon-192.png',
+          }, env).catch(() => {})
+        }
+        if (env.TELEGRAM_BOT_TOKEN) {
+          tgSendReminder(env.DB, appt, env.TELEGRAM_BOT_TOKEN, 'cancel').catch(() => {})
+        }
       }
       await env.DB.prepare('DELETE FROM appointments WHERE id=?').bind(idFrom(p)).run()
       return json({ ok: true }, 200, origin)
