@@ -303,7 +303,7 @@ async function runReminders(db, env, debug = false) {
 
   const in24h = nowLocal + 24 * 60 * 60 * 1000
   const in1h  = nowLocal +      60 * 60 * 1000
-  const winMs = 30 * 60 * 1000
+  const winMs = 20 * 60 * 1000
 
   // Format as local "YYYY-MM-DD HH:MM" — matches datetime-local input stored in DB
   const fmt = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ')
