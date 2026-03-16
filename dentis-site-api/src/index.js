@@ -278,42 +278,58 @@ async function broadcast(db, payload, env) {
 }
 
 function formatDt(dt) {
-  const d = new Date(dt)
-  const day = d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' })
-  const time = d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+  // appointment_dt is stored as local Kyiv time without timezone (e.g. "2026-03-16 14:00")
+  // Append Z-offset so JS doesn't treat it as UTC and shift the display time
+  const normalized = dt.replace(' ', 'T')
+  const d = new Date(normalized.includes('+') || normalized.endsWith('Z') ? normalized : normalized + '+02:00')
+  const day = d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', timeZone: 'Europe/Kyiv' })
+  const time = d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Kyiv' })
   return { day, time }
 }
 
 // ── CRON: нагадування ─────────────────────────────────────────────────────────
 async function runReminders(db, env) {
-  const now = Date.now()
-  const in24h = new Date(now + 24 * 60 * 60 * 1000)
-  const in1h  = new Date(now +      60 * 60 * 1000)
-  const window = 30 * 60 * 1000
+  // Cloudflare cron runs in UTC. appointment_dt is stored as local Kyiv time (no timezone).
+  // We offset by +2h (UTC+2 winter) / +3h (UTC+3 summer DST) to match.
+  // Using fixed UTC+2 — adjust to +3 in summer if needed, or store as UTC in DB.
+  const KYIV_OFFSET_MS = 2 * 60 * 60 * 1000  // UTC+2 (change to 3 in summer)
+
+  const nowUtc = Date.now()
+  const nowLocal = nowUtc + KYIV_OFFSET_MS   // current Kyiv time as ms
+
+  const in24h = new Date(nowLocal + 24 * 60 * 60 * 1000)
+  const in1h  = new Date(nowLocal +      60 * 60 * 1000)
+  const window = 30 * 60 * 1000  // ±30 min window
+
+  const fmt = (d) => new Date(d).toISOString().slice(0, 16).replace('T', ' ')
 
   const { results: remind24 } = await db.prepare(`
     SELECT * FROM appointments
     WHERE status='scheduled' AND reminded_24h=0
       AND appointment_dt >= ? AND appointment_dt <= ?
   `).bind(
-    new Date(in24h.getTime() - window).toISOString().slice(0,16),
-    new Date(in24h.getTime() + window).toISOString().slice(0,16)
+    fmt(in24h.getTime() - window),
+    fmt(in24h.getTime() + window)
   ).all()
 
   for (const appt of (remind24 || [])) {
     const { day, time } = formatDt(appt.appointment_dt)
-    await pushToPhone(db, appt.phone, {
-      title: '📅 Нагадування про прийом',
-      body: `${appt.patient_name}, завтра о ${time} — ${appt.doctor || 'Дентіс'}`,
-      url: '/', icon: '/icon-192.png',
-    }, env)
+    // Always mark as reminded first — prevents duplicate sends on retry
+    await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+
+    try {
+      await pushToPhone(db, appt.phone, {
+        title: '📅 Нагадування про прийом',
+        body: `${appt.patient_name}, завтра о ${time} — ${appt.doctor || 'Дентіс'}`,
+        url: '/', icon: '/icon-192.png',
+      }, env)
+    } catch {}
+
     if (env.TELEGRAM_BOT_TOKEN) {
-      await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
-      await db.prepare('UPDATE appointments SET reminded_24h=1, tg_reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() =>
-        db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
-      )
-    } else {
-      await db.prepare('UPDATE appointments SET reminded_24h=1 WHERE id=?').bind(appt.id).run()
+      try {
+        await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '24h')
+        await db.prepare('UPDATE appointments SET tg_reminded_24h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+      } catch {}
     }
     void day
   }
@@ -323,24 +339,28 @@ async function runReminders(db, env) {
     WHERE status='scheduled' AND reminded_1h=0
       AND appointment_dt >= ? AND appointment_dt <= ?
   `).bind(
-    new Date(in1h.getTime() - window).toISOString().slice(0,16),
-    new Date(in1h.getTime() + window).toISOString().slice(0,16)
+    fmt(in1h.getTime() - window),
+    fmt(in1h.getTime() + window)
   ).all()
 
   for (const appt of (remind1 || [])) {
     const { time } = formatDt(appt.appointment_dt)
-    await pushToPhone(db, appt.phone, {
-      title: '⏰ Прийом через годину',
-      body: `${appt.patient_name}, сьогодні о ${time} — ${appt.doctor || 'Дентіс'}`,
-      url: '/', icon: '/icon-192.png',
-    }, env)
+    // Always mark as reminded first
+    await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+
+    try {
+      await pushToPhone(db, appt.phone, {
+        title: '⏰ Прийом через годину',
+        body: `${appt.patient_name}, сьогодні о ${time} — ${appt.doctor || 'Дентіс'}`,
+        url: '/', icon: '/icon-192.png',
+      }, env)
+    } catch {}
+
     if (env.TELEGRAM_BOT_TOKEN) {
-      await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
-      await db.prepare('UPDATE appointments SET reminded_1h=1, tg_reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() =>
-        db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
-      )
-    } else {
-      await db.prepare('UPDATE appointments SET reminded_1h=1 WHERE id=?').bind(appt.id).run()
+      try {
+        await tgSendReminder(db, appt, env.TELEGRAM_BOT_TOKEN, '1h')
+        await db.prepare('UPDATE appointments SET tg_reminded_1h=1 WHERE id=?').bind(appt.id).run().catch(() => {})
+      } catch {}
     }
   }
 }
