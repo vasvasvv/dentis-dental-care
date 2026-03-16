@@ -37,11 +37,11 @@ function TabButton({ active, onClick, icon, label }: {
 }) {
   return (
     <button onClick={onClick}
-      className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+      className={`flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 flex-1 sm:flex-none ${
         active ? "gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom"
           : "text-[hsl(40_20%_70%)] hover:text-[hsl(40_30%_92%)] hover:bg-[hsl(180_60%_18%)]"
       }`} style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-      {icon}<span>{label}</span>
+      {icon}<span className="hidden sm:inline">{label}</span>
     </button>
   );
 }
@@ -354,8 +354,8 @@ function DoctorsTab({ token }: { token: string }) {
       ) : (
         <div className="space-y-3">
           {doctors.map((doc) => (
-            <div key={doc.id} className="rounded-2xl p-4 flex items-center gap-4" style={{ background: "hsl(180 60% 12%)", border: "1px solid hsl(180 40% 22% / 0.5)" }}>
-              <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[hsl(180_50%_18%)]">
+            <div key={doc.id} className="rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4" style={{ background: "hsl(180 60% 12%)", border: "1px solid hsl(180 40% 22% / 0.5)" }}>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[hsl(180_50%_18%)]">
                 {doc.img_url ? <img src={doc.img_url} alt={doc.name} className="w-full h-full object-cover object-top" />
                   : <div className="w-full h-full flex items-center justify-center text-[hsl(38_62%_52%)]"><Stethoscope size={22} /></div>}
               </div>
@@ -649,18 +649,18 @@ function AppointmentsTab({ token }: { token: string }) {
   return (
     <div>
       {/* Заголовок */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
           <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
-            className="px-3 py-1.5 rounded-xl text-sm outline-none" style={{ ...lightInputStyle, minWidth: 140 }} />
+            className="px-2 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm outline-none" style={{ ...lightInputStyle, minWidth: 120 }} />
           <button onClick={load} className="p-1.5 rounded-lg text-[hsl(180_20%_45%)] hover:text-[hsl(38_70%_68%)] transition-colors">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
         <button onClick={() => { setEditing({}); setIsNew(true); }}
-          className="flex items-center gap-2 gradient-gold text-[hsl(220_40%_10%)] px-4 py-2 rounded-xl text-sm font-semibold shadow-gold-custom hover:brightness-110 transition-all active:scale-95"
+          className="flex items-center gap-1.5 gradient-gold text-[hsl(220_40%_10%)] px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-gold-custom hover:brightness-110 transition-all active:scale-95"
           style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-          <Plus size={16} />Новий запис
+          <Plus size={14} /><span>Новий запис</span>
         </button>
       </div>
 
@@ -679,7 +679,7 @@ function AppointmentsTab({ token }: { token: string }) {
             const { date, time } = formatApptDt(appt.appointment_dt);
             const hasPush = false; // placeholder
             return (
-              <div key={appt.id} className="rounded-2xl p-4 flex items-center gap-3"
+              <div key={appt.id} className="rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3"
                 style={{ background: 'hsl(180 60% 12%)', border: `1px solid ${appt.status === 'cancelled' ? 'hsl(0 60% 35% / 0.4)' : 'hsl(180 40% 22% / 0.5)'}`, opacity: appt.status === 'cancelled' ? 0.6 : 1 }}>
                 {/* Час */}
                 <div className="flex-shrink-0 w-14 text-center rounded-xl py-2" style={{ background: 'hsl(180 50% 18%)' }}>
@@ -1114,7 +1114,7 @@ function TelegramTab({ token }: { token: string }) {
                 const { date, time } = formatApptDt(appt.appointment_dt);
                 const hasTg = !!appt.telegram_chat_id;
                 return (
-                  <div key={appt.id} className="rounded-2xl p-4 flex items-center gap-3"
+                  <div key={appt.id} className="rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3"
                     style={{ background: 'hsl(180 60% 12%)', border: `1px solid ${appt.status === 'cancelled' ? 'hsl(0 60% 35% / 0.4)' : hasTg ? 'hsl(180 70% 40% / 0.35)' : 'hsl(180 40% 22% / 0.5)'}`, opacity: appt.status === 'cancelled' ? 0.6 : 1 }}>
                     {/* Час */}
                     <div className="flex-shrink-0 w-14 text-center rounded-xl py-2" style={{ background: 'hsl(180 50% 18%)' }}>
@@ -1300,60 +1300,20 @@ function TelegramTab({ token }: { token: string }) {
       {/* ── Settings sub-tab ── */}
       {subTab === 'settings' && (
         <div className="max-w-xl space-y-5">
-          {/* Step 1 */}
+          {/* Bot link */}
           <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
-            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 1 — Secrets у Cloudflare</p>
-            <p className="text-[hsl(40_15%_65%)] text-sm leading-relaxed mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              Виконайте у терміналі (один раз):
-            </p>
-            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
-              npx wrangler secret put TELEGRAM_BOT_TOKEN --name dentis-site-api<br />
-              npx wrangler secret put TELEGRAM_CHAT_ID --name dentis-site-api
-            </div>
-            <p className="text-[hsl(180_20%_40%)] text-xs mt-2">TELEGRAM_CHAT_ID — необов'язково, якщо хочете копію сповіщень адміну</p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
-            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 2 — Реєстрація webhook</p>
-            <p className="text-[hsl(40_15%_65%)] text-sm leading-relaxed mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              Замініть TOKEN на ваш bot token і виконайте:
-            </p>
-            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto leading-relaxed" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
-              curl "https://api.telegram.org/bot<span style={{ color: 'hsl(200 80% 70%)' }}>TOKEN</span>/setWebhook?url=https://dentis-site-api.nesterenkovasil9.workers.dev/api/telegram/webhook"
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
-            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 3 — Міграція бази даних</p>
-            <div className="rounded-xl p-3 text-xs font-mono overflow-x-auto" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(180 40% 18%)' }}>
-              cd dentis-site-api<br />
-              npx wrangler d1 migrations apply site_news_docs_pwa --remote
-            </div>
-          </div>
-
-          {/* Step 4 — bot link */}
-          <div className="rounded-2xl p-5" style={{ background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
-            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Крок 4 — Посилання для пацієнтів</p>
-            <p className="text-[hsl(40_15%_65%)] text-sm mb-3" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              Вкажіть username вашого бота (без @):
-            </p>
-            <div className="flex gap-2 mb-3">
-              <input value={botName} onChange={e => setBotName(e.target.value)} placeholder="dentis_clinic_bot"
-                className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none" style={lightInputStyle} />
-              <button onClick={copyBotLink} disabled={!botName.trim()}
-                className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-all disabled:opacity-40"
+            <p className="text-[hsl(38_70%_68%)] text-xs font-semibold uppercase tracking-wider mb-3">Посилання для пацієнтів</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 rounded-xl px-3 py-2.5 text-sm" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(200 80% 70%)', border: '1px solid hsl(200 60% 25% / 0.3)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
+                https://t.me/dentis_notif_bot
+              </div>
+              <button onClick={async () => { await navigator.clipboard.writeText('https://t.me/dentis_notif_bot'); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 transition-all"
                 style={{ background: 'hsl(38 62% 52% / 0.15)', color: 'hsl(38 70% 68%)', border: '1px solid hsl(38 62% 52% / 0.3)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
                 {copied ? <><CheckCheck size={14} />Скопійовано</> : <><Copy size={14} />Копіювати</>}
               </button>
             </div>
-            {botName && (
-              <div className="rounded-xl p-3 text-sm" style={{ background: 'hsl(180 60% 8%)', color: 'hsl(200 80% 70%)', border: '1px solid hsl(200 60% 25% / 0.3)', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-                https://t.me/{botName}
-              </div>
-            )}
-            <p className="text-[hsl(180_20%_40%)] text-xs mt-2">Надішліть це посилання пацієнтам — після переходу бот запросить номер телефону</p>
+            <p className="text-[hsl(180_20%_40%)] text-xs">Надішліть це посилання пацієнтам — після переходу бот запросить номер телефону</p>
           </div>
 
           {/* Flow reminder */}
@@ -1487,7 +1447,7 @@ export default function Admin() {
         background: "hsl(180 60% 10% / 0.95)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid hsl(180 40% 18% / 0.5)",
       }}>
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/favicon.png" alt="" className="w-7 h-7 rounded-lg" />
             <div>
@@ -1502,7 +1462,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="flex gap-1 p-1 rounded-2xl mb-6" style={{ background: "hsl(180 60% 10%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
           <TabButton active={tab === "news"} onClick={() => setTab("news")} icon={<Newspaper size={15} />} label="Новини" />
           <TabButton active={tab === "doctors"} onClick={() => setTab("doctors")} icon={<Stethoscope size={15} />} label="Лікарі" />
@@ -1510,6 +1470,11 @@ export default function Admin() {
           <TabButton active={tab === "push"} onClick={() => setTab("push")} icon={<Bell size={15} />} label="Push" />
           <TabButton active={tab === "telegram"} onClick={() => setTab("telegram")} icon={<MessageCircle size={15} />} label="Telegram" />
         </div>
+        <style>{`
+          @media (max-width: 480px) {
+            .admin-tab-bar { gap: 2px !important; padding: 4px !important; }
+          }
+        `}</style>
         {tab === "news" && <NewsTab token={token} />}
         {tab === "doctors" && <DoctorsTab token={token} />}
         {tab === "appointments" && <AppointmentsTab token={token} />}
