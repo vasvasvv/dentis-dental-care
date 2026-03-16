@@ -808,13 +808,13 @@ async function handleRequest(request, env, origin) {
 
       // Look up telegram chat_id: from request → telegram_contacts → appointments → telegram_pending
       let tgChatId = telegram_chat_id || null
+      console.log('[POST] phone='+normalPhone+' tgFromReq='+tgChatId)
       if (!tgChatId) {
-        // Search both with and without leading '+' since webhook stores without '+'
-        const phoneVariants = [normalPhone, normalPhone.replace(/^\+/, '')]
         const tc = await env.DB.prepare(
-          'SELECT chat_id FROM telegram_contacts WHERE phone=? OR phone=? LIMIT 1'
-        ).bind(phoneVariants[0], phoneVariants[1]).first().catch(() => null)
+          'SELECT chat_id FROM telegram_contacts WHERE phone=? LIMIT 1'
+        ).bind(normalPhone).first().catch(() => null)
         tgChatId = tc?.chat_id || null
+        console.log('[POST] tc lookup='+tgChatId)
       }
       if (!tgChatId) {
         const suffix = normalPhone.replace(/^\+/, '').slice(-9)
@@ -822,14 +822,17 @@ async function handleRequest(request, env, origin) {
           'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
         ).bind(`%${suffix}`).first().catch(() => null)
         tgChatId = existing?.telegram_chat_id || null
+        console.log('[POST] appt lookup='+tgChatId)
       }
       if (!tgChatId) {
         const phoneNoPlus = normalPhone.replace(/^\+/, '')
         const tp = await env.DB.prepare(
-          'SELECT chat_id FROM telegram_pending WHERE phone_normalized=? OR phone_normalized=? LIMIT 1'
-        ).bind(normalPhone, phoneNoPlus).first().catch(() => null)
+          'SELECT chat_id FROM telegram_pending WHERE phone_normalized=? LIMIT 1'
+        ).bind(phoneNoPlus).first().catch(() => null)
         tgChatId = tp?.chat_id || null
+        console.log('[POST] pending lookup='+tgChatId)
       }
+      console.log('[POST] final tgChatId='+tgChatId+' hasToken='+!!env.TELEGRAM_BOT_TOKEN)
 
       const { meta } = await env.DB.prepare(
         'INSERT INTO appointments (patient_name,phone,appointment_dt,doctor,notes,telegram_chat_id) VALUES (?,?,?,?,?,?)'
