@@ -533,11 +533,29 @@ function DrumColumn({
   const ref = React.useRef<HTMLDivElement>(null);
   const itemH = 44;
   const touchRef = React.useRef<{ startY: number; startScroll: number } | null>(null);
+  const selectRef = React.useRef(onSelect);
+  selectRef.current = onSelect;
+  const itemsRef = React.useRef(items);
+  itemsRef.current = items;
 
   React.useEffect(() => {
-    if (ref.current) {
-      ref.current.scrollTop = selectedIndex * itemH;
-    }
+    if (ref.current) ref.current.scrollTop = selectedIndex * itemH;
+  }, []);
+
+  // Attach wheel listener as non-passive so preventDefault works
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 1 : -1;
+      const cur = Math.round(el.scrollTop / itemH);
+      const next = Math.max(0, Math.min(itemsRef.current.length - 1, cur + delta));
+      el.scrollTo({ top: next * itemH, behavior: 'smooth' });
+      selectRef.current(next);
+    };
+    el.addEventListener('wheel', handler, { passive: false });
+    return () => el.removeEventListener('wheel', handler);
   }, []);
 
   const snapToIndex = (el: HTMLDivElement) => {
@@ -553,17 +571,6 @@ function DrumColumn({
     (el as any)._snap = setTimeout(() => snapToIndex(el), 150);
   };
 
-  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const el = ref.current;
-    if (!el) return;
-    const delta = e.deltaY > 0 ? 1 : -1;
-    const cur = Math.round(el.scrollTop / itemH);
-    const next = Math.max(0, Math.min(items.length - 1, cur + delta));
-    el.scrollTo({ top: next * itemH, behavior: 'smooth' });
-    onSelect(next);
-  };
-
   const onTouchStart = (e: React.TouchEvent) => {
     touchRef.current = { startY: e.touches[0].clientY, startScroll: ref.current!.scrollTop };
   };
@@ -574,25 +581,21 @@ function DrumColumn({
   };
   const onTouchEnd = () => { if (ref.current) snapToIndex(ref.current); touchRef.current = null; };
 
-  const visibleH = itemH * 5; // show 5 items
-  const padV = itemH * 2;     // 2 items padding top/bottom so center item is selected
+  const visibleH = itemH * 5;
+  const padV = itemH * 2;
 
   return (
     <div style={{ width: width || '100%', position: 'relative', userSelect: 'none', flexShrink: 0 }}>
-      {/* top fade — shorter so text is readable */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: padV - 4, zIndex: 2, pointerEvents: 'none',
         background: 'linear-gradient(to bottom, hsl(180 60% 12%) 60%, transparent 100%)' }} />
-      {/* bottom fade */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: padV - 4, zIndex: 2, pointerEvents: 'none',
         background: 'linear-gradient(to top, hsl(180 60% 12%) 60%, transparent 100%)' }} />
-      {/* selection highlight — sits behind text (zIndex:1) */}
       <div style={{ position: 'absolute', top: '50%', left: 2, right: 2, height: itemH - 4,
         transform: 'translateY(-50%)', zIndex: 1, borderRadius: 8,
         background: 'hsl(180 50% 22%)', border: '1px solid hsl(180 40% 32% / 0.7)', pointerEvents: 'none' }} />
       <div
         ref={ref}
         onScroll={onScroll}
-        onWheel={onWheel}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
