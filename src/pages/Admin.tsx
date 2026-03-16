@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import AdminPWABanner from "@/components/AdminPWABanner";
+
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
   Newspaper, Stethoscope, Bell, BellRing, Tag, ChevronDown, ChevronUp,
@@ -1002,6 +1002,12 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>("news");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/admin-sw.js', { scope: '/d-panel' }).catch(() => {})
+    }
+  }, []);
+
   const handleLogin = (jwtToken: string) => {
     sessionStorage.setItem(SESSION_KEY, jwtToken);
     setToken(jwtToken);
@@ -1058,7 +1064,6 @@ export default function Admin() {
         {tab === "push" && <PushTab token={token} />}
       </div>
     </div>
-    <AdminPWABanner />
     </>
   );
 }
