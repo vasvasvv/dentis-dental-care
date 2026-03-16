@@ -147,15 +147,9 @@ function idFrom(path) {
 function normalizePhone(raw) {
   if (!raw) return null
   const digits = raw.replace(/\D/g, '')
-  let normalized
-  if (digits.startsWith('380') && digits.length === 12) {
-    normalized = digits
-  } else if (digits.startsWith('0') && digits.length === 10) {
-    normalized = '38' + digits
-  } else {
-    return null
-  }
-  return '+' + normalized
+  if (digits.startsWith('380') && digits.length === 12) return digits
+  if (digits.startsWith('0') && digits.length === 10) return '38' + digits
+  return null
 }
 
 // ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
@@ -780,13 +774,15 @@ async function handleRequest(request, env, origin) {
         SELECT a.*,
           COALESCE(a.telegram_chat_id, tc.chat_id) AS telegram_chat_id
         FROM appointments a
-        LEFT JOIN telegram_contacts tc ON tc.phone = a.phone
+        LEFT JOIN telegram_contacts tc
+          ON tc.phone = a.phone
+          OR tc.phone = REPLACE(a.phone, '+', '')
+          OR REPLACE(tc.phone, '+', '') = REPLACE(a.phone, '+', '')
       `
       const args = []
       if (date) { query += ' WHERE a.appointment_dt LIKE ?'; args.push(`${date}%`) }
       query += ' ORDER BY a.appointment_dt ASC'
       const { results } = await env.DB.prepare(query).bind(...args).all().catch(async () => {
-        // Fallback if telegram_contacts table doesn't exist yet
         let q = 'SELECT * FROM appointments'
         if (date) q += ' WHERE appointment_dt LIKE ?'
         q += ' ORDER BY appointment_dt ASC'
@@ -800,26 +796,28 @@ async function handleRequest(request, env, origin) {
       const normalPhone = normalizePhone(phone)
       if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
 
-      // Look up telegram chat_id: from request → telegram_contacts → appointments → telegram_pending (by phone suffix)
+      // Look up telegram chat_id: from request → telegram_contacts → appointments → telegram_pending
       let tgChatId = telegram_chat_id || null
       if (!tgChatId) {
+        // Search both with and without leading '+' since webhook stores without '+'
+        const phoneVariants = [normalPhone, normalPhone.replace(/^\+/, '')]
         const tc = await env.DB.prepare(
-          'SELECT chat_id FROM telegram_contacts WHERE phone=?'
-        ).bind(normalPhone).first().catch(() => null)
+          'SELECT chat_id FROM telegram_contacts WHERE phone=? OR phone=? LIMIT 1'
+        ).bind(phoneVariants[0], phoneVariants[1]).first().catch(() => null)
         tgChatId = tc?.chat_id || null
       }
       if (!tgChatId) {
-        const suffix = normalPhone.slice(-9)
+        const suffix = normalPhone.replace(/^\+/, '').slice(-9)
         const existing = await env.DB.prepare(
           'SELECT telegram_chat_id FROM appointments WHERE phone LIKE ? AND telegram_chat_id IS NOT NULL LIMIT 1'
         ).bind(`%${suffix}`).first().catch(() => null)
         tgChatId = existing?.telegram_chat_id || null
       }
       if (!tgChatId) {
-        // Fallback: check telegram_pending where phone was stored after contact share
+        const phoneNoPlus = normalPhone.replace(/^\+/, '')
         const tp = await env.DB.prepare(
-          'SELECT chat_id FROM telegram_pending WHERE phone_normalized=? LIMIT 1'
-        ).bind(normalPhone).first().catch(() => null)
+          'SELECT chat_id FROM telegram_pending WHERE phone_normalized=? OR phone_normalized=? LIMIT 1'
+        ).bind(normalPhone, phoneNoPlus).first().catch(() => null)
         tgChatId = tp?.chat_id || null
       }
 
