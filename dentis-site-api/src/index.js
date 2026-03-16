@@ -555,6 +555,74 @@ async function handleRequest(request, env, origin) {
       })
     }
 
+    // ── TELEGRAM WEBHOOK (public — called by Telegram servers, MUST be before auth check) ──
+    if (p === '/api/telegram/webhook' && m === 'POST') {
+      let upd
+      try { upd = await request.json() } catch { return new Response('ok') }
+      const msg = upd?.message
+      if (!msg) return new Response('ok')
+
+      const chatId = String(msg.chat.id)
+      const firstName = msg.chat.first_name || ''
+      const text = (msg.text || '').trim()
+      const contact = msg.contact
+
+      if (text === '/start') {
+        await env.DB.prepare(
+          'INSERT OR REPLACE INTO telegram_pending (chat_id, first_name) VALUES (?, ?)'
+        ).bind(chatId, firstName).run().catch(() => {})
+
+        if (!env.TELEGRAM_BOT_TOKEN) return new Response('ok')
+
+        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: `👋 Вітаємо у клініці <b>Дентіс</b>${firstName ? ', ' + firstName : ''}!\n\nЩоб отримувати нагадування про ваші візити, поділіться номером телефону:`,
+            parse_mode: 'HTML',
+            reply_markup: {
+              keyboard: [[{ text: '📱 Поділитися номером телефону', request_contact: true }]],
+              one_time_keyboard: true,
+              resize_keyboard: true,
+            },
+          }),
+        })
+      }
+
+      if (contact?.phone_number) {
+        const raw = contact.phone_number.replace(/\D/g, '')
+        const normalized = raw.startsWith('380') && raw.length === 12 ? raw
+          : raw.startsWith('0') && raw.length === 10 ? '38' + raw
+          : raw.length === 9 ? '380' + raw : null
+
+        if (normalized) {
+          const suffix = normalized.slice(-9)
+          await env.DB.prepare(`
+            UPDATE appointments SET telegram_chat_id=?
+            WHERE phone LIKE ? AND (telegram_chat_id IS NULL OR telegram_chat_id='')
+          `).bind(chatId, `%${suffix}`).run().catch(() => {})
+
+          await env.DB.prepare('DELETE FROM telegram_pending WHERE chat_id=?').bind(chatId).run().catch(() => {})
+
+          if (env.TELEGRAM_BOT_TOKEN) {
+            await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: chatId,
+                text: `✅ <b>Готово!</b> Ваш номер прив'язано до акаунту Дентіс.\n\nВи отримуватимете нагадування про прийоми у цьому чаті. 🦷`,
+                parse_mode: 'HTML',
+                reply_markup: { remove_keyboard: true },
+              }),
+            })
+          }
+        }
+      }
+
+      return new Response('ok')
+    }
+
     // ── All remaining routes require admin auth ──────────────────────────────
     if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
 
@@ -765,80 +833,6 @@ async function handleRequest(request, env, origin) {
       return json(result, 200, origin)
     }
 
-    // ── TELEGRAM WEBHOOK (public — called by Telegram servers) ───────────────
-    if (p === '/api/telegram/webhook' && m === 'POST') {
-      let upd
-      try { upd = await request.json() } catch { return new Response('ok') }
-      const msg = upd?.message
-      if (!msg) return new Response('ok')
-
-      const chatId = String(msg.chat.id)
-      const firstName = msg.chat.first_name || ''
-      const text = (msg.text || '').trim()
-      const contact = msg.contact
-
-      if (text === '/start') {
-        // Save pending registration
-        await env.DB.prepare(
-          'INSERT OR REPLACE INTO telegram_pending (chat_id, first_name) VALUES (?, ?)'
-        ).bind(chatId, firstName).run().catch(() => {})
-
-        if (!env.TELEGRAM_BOT_TOKEN) return new Response('ok')
-
-        // Single message with contact-share keyboard
-        await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: `👋 Вітаємо у клініці <b>Дентіс</b>${firstName ? ', ' + firstName : ''}!\n\nЩоб отримувати нагадування про ваші візити, поділіться номером телефону:`,
-            parse_mode: 'HTML',
-            reply_markup: {
-              keyboard: [[{ text: '📱 Поділитися номером телефону', request_contact: true }]],
-              one_time_keyboard: true,
-              resize_keyboard: true,
-            },
-          }),
-        })
-      }
-
-      if (contact?.phone_number) {
-        const raw = contact.phone_number.replace(/\D/g, '')
-        const normalized = raw.startsWith('380') && raw.length === 12 ? raw
-          : raw.startsWith('0') && raw.length === 10 ? '38' + raw
-          : raw.length === 9 ? '380' + raw : null
-
-        if (normalized) {
-          // Link this chat_id to all matching appointments
-          const suffix = normalized.slice(-9)
-          await env.DB.prepare(`
-            UPDATE appointments SET telegram_chat_id=?
-            WHERE phone LIKE ? AND (telegram_chat_id IS NULL OR telegram_chat_id='')
-          `).bind(chatId, `%${suffix}`).run()
-
-          // Remove from pending
-          await env.DB.prepare('DELETE FROM telegram_pending WHERE chat_id=?').bind(chatId).run()
-
-          if (env.TELEGRAM_BOT_TOKEN) {
-            await tgSend(env.TELEGRAM_BOT_TOKEN, chatId,
-              `✅ <b>Готово!</b> Ваш номер +${normalized} прив'язано до акаунту Дентіс.\n\nВи отримуватимете нагадування про прийоми у цьому чаті. 🦷`
-            )
-            // Remove keyboard
-            await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: chatId,
-                text: 'Очікуйте нагадувань від клініки Дентіс 😊',
-                reply_markup: { remove_keyboard: true },
-              }),
-            })
-          }
-        }
-      }
-
-      return new Response('ok')
-    }
 
     // ── TELEGRAM ADMIN API ────────────────────────────────────────────────────
     // POST /api/telegram/link — вручну прив'язати chat_id до телефону
