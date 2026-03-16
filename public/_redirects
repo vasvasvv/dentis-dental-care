@@ -1,6 +1,4 @@
-# Admin panel — окремий HTML з admin-manifest.json (браузер читає manifest при завантаженні)
+# SPA fallback — всі маршрути крім /d-panel (він має власний index.html)
 /d-panel         /d-panel/index.html 200
 /d-panel/*       /d-panel/index.html 200
-
-# SPA fallback — всі інші маршрути
 /*               /index.html 200
