@@ -22,7 +22,7 @@ export async function onRequestGet(context) {
     })
     .on('meta[name="theme-color"]', {
       element(el) {
-        el.setAttribute('content', '#0d1f3c');
+        el.setAttribute('content', '#0d1f1f');
       },
     })
     .on('meta[name="apple-mobile-web-app-title"]', {

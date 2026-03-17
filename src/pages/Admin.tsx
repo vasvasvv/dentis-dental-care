@@ -1538,7 +1538,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
             <button onClick={handleSubmit} disabled={checking || isLocked}
               className="w-full py-3 rounded-xl text-sm font-semibold gradient-gold text-[hsl(220_40%_10%)] shadow-gold-custom hover:brightness-110 transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2"
               style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
-              {checking ? <><Loader2 size={15} className="animate-spin" />Перевірка...</> : "Увійти"}
+              {checking ? <><Loader2 size={15} className="animate-spin" />Перевірка</> : "Увійти"}
             </button>
           </div>
         </div>
@@ -1588,10 +1588,10 @@ export default function Admin() {
       }}>
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/favicon.png" alt="" className="w-7 h-7 rounded-lg" />
+            <img src="/admin-icon-192.png" alt="" className="w-7 h-7 rounded-lg" />
             <div>
               <p className="text-[hsl(38_70%_68%)] text-[10px] tracking-[0.25em] uppercase leading-none" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Дентіс</p>
-              <p className="text-[hsl(40_30%_88%)] text-sm font-medium leading-tight" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмінь</p>
+              <p className="text-[hsl(40_30%_88%)] text-sm font-medium leading-tight" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмін-панель</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 {
   "id": "/d-panel",
-  "name": "Дентіс — Адмін панель",
-  "short_name": "Дентіс Адмін",
+  "name": "Адмін панель Дентіс",
+  "short_name": "Адмін Дентіс",
   "description": "Панель керування клінікою Дентіс",
   "start_url": "/d-panel",
   "scope": "/d-panel/",
