@@ -1006,7 +1006,7 @@ function PushTab({ token }: { token: string }) {
             <div className="mt-5 rounded-xl p-4" style={{ background: "hsl(180 60% 9%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
               <p className="text-[hsl(180_20%_45%)] text-[10px] uppercase tracking-wider mb-2.5">Попередній перегляд</p>
               <div className="rounded-xl p-3 flex items-start gap-3" style={{ background: "hsl(180 50% 14%)", border: "1px solid hsl(180 40% 22% / 0.4)" }}>
-                <img src="/favicon.png" alt="" className="w-8 h-8 rounded-lg flex-shrink-0" />
+                <img src="/admin-icon-512.png" alt="" className="w-8 h-8 rounded-lg flex-shrink-0" />
                 <div>
                   <p className="text-[hsl(40_30%_90%)] text-xs font-semibold" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{title || "Заголовок"}</p>
                   <p className="text-[hsl(40_15%_65%)] text-xs leading-relaxed mt-0.5" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{body || "Текст повідомлення"}</p>
@@ -1523,7 +1523,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
         <div className="h-[2px] gradient-gold" />
         <div className="p-8">
           <div className="text-center mb-8">
-            <img src="/favicon.png" alt="Дентіс" className="w-12 h-12 mx-auto mb-4 rounded-xl" />
+            <img src="/admin-icon-512.png" alt="Дентіс" className="w-12 h-12 mx-auto mb-4 rounded-xl" />
             <p className="text-[hsl(38_70%_68%)] text-xs tracking-[0.3em] uppercase mb-1" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Дентіс</p>
             <h1 className="text-[hsl(40_30%_92%)] text-xl font-semibold" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмін-панель</h1>
           </div>
