@@ -44,7 +44,7 @@ export default function Hero() {
           </p>
 
           <h1 className="font-sans font-extralight text-secondary
-               text-6xl sm:text-7xl md:text-8xl lg:text-9xl
+               text-5xl sm:text-6xl md:text-7xl lg:text-8xl
                leading-[1.05] tracking-[-0.01em]
                mb-4 sm:mb-6 md:mb-8">
   
