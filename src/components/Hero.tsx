@@ -43,11 +43,25 @@ export default function Hero() {
             стоматологія у · м.Кропивницький
           </p>
 
-          <h1 className="text-5xl md:text-6xl leading-tight mb-6 animate-fade-up delay-100 font-sans font-extralight lg:text-6xl text-secondary">
-            Посмішка,
-            <br />
-            <em className="not-italic text-gold">що надихає</em>
-          </h1>
+<h1 className="font-sans font-extralight text-secondary
+               text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+               leading-[1.05] tracking-[-0.01em]
+               mb-4 sm:mb-6 md:mb-8">
+  
+  <span className="block">
+    Посмішка,
+  </span>
+
+  <span className="block
+                   text-[0.68em] sm:text-[0.7em]
+                   leading-[1.1]
+                   tracking-[0.08em] sm:tracking-[0.1em]
+                   text-gold
+                   mt-1 sm:mt-2">
+    що надихає
+  </span>
+
+</h1>
 
           <p className="text-lg leading-relaxed max-w-lg mb-10 animate-fade-up delay-200 font-sans font-extralight text-secondary">
             Сучасна стоматологія з індивідуальним підходом до кожного пацієнта.
