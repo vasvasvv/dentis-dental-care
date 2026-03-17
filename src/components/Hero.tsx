@@ -50,6 +50,7 @@ export default function Hero() {
    Посмішка, що
    <br />
  <em className="block
+                   not-italic
                    text-[0.68em] sm:text-[0.7em]
                    leading-[1.1]
                    tracking-[0.08em] sm:tracking-[0.1em]
