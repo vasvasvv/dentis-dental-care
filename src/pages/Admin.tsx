@@ -1586,7 +1586,7 @@ export default function Admin() {
         background: "hsl(180 60% 10% / 0.95)", backdropFilter: "blur(12px)",
         borderBottom: "1px solid hsl(180 40% 18% / 0.5)",
       }}>
-        <div className="mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/admin-icon-192.png" alt="" className="w-7 h-7 rounded-lg" />
             <div>
@@ -1601,7 +1601,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="flex gap-1 p-1 rounded-2xl mb-6" style={{ background: "hsl(180 60% 10%)", border: "1px solid hsl(180 40% 18% / 0.5)" }}>
           <TabButton active={tab === "appointments"} onClick={() => setTab("appointments")} icon={<CalendarDays size={15} />} label="Записи" />
           <TabButton active={tab === "telegram"} onClick={() => setTab("telegram")} icon={<MessageCircle size={15} />} label="Telegram" />
