@@ -4,6 +4,7 @@ const ALLOWED_ORIGINS = [
   'https://www.dentis.kr.ua',
   'http://localhost:5173',
   'http://localhost:4173',
+  'http://localhost:8080',
 ]
 
 const SECURITY_HEADERS = {
