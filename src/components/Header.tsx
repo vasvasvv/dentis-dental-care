@@ -65,16 +65,16 @@ export default function Header() {
               <img
                 src={logo}
                 alt="Dentis Logo White"
-                width={350}
-                height={130}
+                width={300}
+                height={100}
                 fetchPriority="high"
                 className="h-20 w-auto block transition-opacity duration-300 ease-out group-hover:opacity-0"
               />
               <img
                 src={logogold}
                 alt="Dentis Logo Gold"
-                width={350}
-                height={130}
+                width={300}
+                height={100}
                 loading="lazy"
                 className="h-20 w-auto block absolute top-0 left-0 transition-opacity duration-300 ease-out opacity-0 group-hover:opacity-100"
               />

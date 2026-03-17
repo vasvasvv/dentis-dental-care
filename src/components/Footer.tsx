@@ -41,8 +41,8 @@ export default function Footer() {
               <img
                 src={logo}
                 alt="Dentis Logo"
-                width={350}
-                height={130}
+                width={300}
+                height={100}
                 loading="lazy"
                 className="h-24 w-auto brightness-125 opacity-95 hover:opacity-100 transition-opacity duration-500"
               />
