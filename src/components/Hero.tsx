@@ -39,30 +39,15 @@ export default function Hero() {
       {/* Контент, який буде прокручуватися */}
       <div className="relative z-10 container mx-auto px-4 pt-28 pb-20">
         <div className="max-w-3xl">
-          <p className="text-sm tracking-[0.3em] uppercase mb-5 animate-fade-up font-sans font-normal text-gold">
+          <p className="text-sm  uppercase mb-5 animate-fade-up font-sans font-normal text-gold">
             стоматологія у · м.Кропивницький
           </p>
 
-          <h1 className="font-sans font-extralight text-secondary
-               text-5xl sm:text-6xl md:text-7xl lg:text-8xl
-               leading-[1.05] tracking-[-0.01em]
-               mb-4 sm:mb-6 md:mb-8">
-  
-             
-               Посмішка,
-             <br />
-
-             <span className="block
-                   text-[0.68em] sm:text-[0.7em]
-                   leading-[1.1]
-                   tracking-[0.2em] sm:tracking-[0.22em]
-                   text-gold
-                   mt-1 sm:mt-2">
-               що надихає
-            </span>
-
-          </h1>
-
+<h1 className="text-5xl md:text-6xl leading-tight mb-6 animate-fade-up delay-100 font-sans font-extralight lg:text-6xl text-secondary">
+   Посмішка, що
+   <br />
+ <em className="not-italic text-gold"> надихає</em>
+ </h1>
           <p className="text-lg leading-relaxed max-w-lg mb-10 animate-fade-up delay-200 font-sans font-extralight text-secondary">
             Сучасна стоматологія з індивідуальним підходом до кожного пацієнта.
             Комфорт, безпека та бездоганний результат — наш стандарт.
