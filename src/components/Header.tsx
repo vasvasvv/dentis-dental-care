@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Phone, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "@assets/Dentis_with_Text.webp";
-import logogold from "@assets/Dentis_with_Textg.webp";
+import logo from "@assets/logo-white.webp";
+import logogold from "@assets/logo-gold.webp";
 
 const navLinks = [
   { label: "Про нас", href: "#about", isHash: true },

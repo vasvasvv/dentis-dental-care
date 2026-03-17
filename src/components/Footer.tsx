@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "@assets/Dentis_with_Text.webp";
+import logo from "@assets/logo-white.webp";
 
 export default function Footer() {
   const navigate = useNavigate();
