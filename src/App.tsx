@@ -33,7 +33,7 @@ export default function App() {
     <HelmetProvider>
     <BrowserRouter>
       <ScrollToTop />
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div>Завантаження</div>}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/implantaciya" element={<Implantaciya />} />
