@@ -428,56 +428,91 @@ async function tgSendReminder(db, appt, botToken, kind) {
 
 // ── CRON: автопублікація запланованих статей ──────────────────────────────────
 async function publishScheduledArticles(db, env) {
-  const now = new Date().toISOString().slice(0, 19) // 'YYYY-MM-DDTHH:MM:SS'
+  // ✅ FIX: Конвертуйте ISO формат у SQLite формат (YYYY-MM-DD HH:MM:SS)
+  const iso = new Date().toISOString()
+  const now = iso.replace('T', ' ').slice(0, 19) // 'YYYY-MM-DD HH:MM:SS' (UTC)
+  
+  console.log('[publishScheduledArticles] ⏰ Current UTC time:', now)
+  console.log('[publishScheduledArticles] Full ISO:', iso)
 
-  const { results } = await db.prepare(`
-    SELECT * FROM scheduled_articles
-    WHERE published = 0 AND publish_at <= ?
-    ORDER BY publish_at ASC
-  `).bind(now).all()
+  try {
+    const { results } = await db.prepare(`
+      SELECT * FROM scheduled_articles
+      WHERE published = 0 AND publish_at <= ?
+      ORDER BY publish_at ASC
+    `).bind(now).all()
 
-  if (!results?.length) return { published: 0 }
-
-  let published = 0
-  for (const article of results) {
-    try {
-      const today = new Date().toLocaleDateString('uk-UA', {
-        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Kiev'
-      })
-
-      const { meta } = await db.prepare(
-        'INSERT INTO news (type, badge, title, desc, date, hot) VALUES (?, ?, ?, ?, ?, ?)'
-      ).bind(
-        article.type || 'blog',
-        article.badge || 'Стаття',
-        article.title,
-        article.desc,
-        today,
-        article.hot ?? 0
-      ).run()
-
-      await db.prepare(
-        "UPDATE scheduled_articles SET published = 1 WHERE id = ?"
-      ).bind(article.id).run()
-
-      // Push-сповіщення всім підписникам
-      if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
-        broadcast(db, {
-          title: article.badge || 'Дентіс',
-          body: article.title,
-          url: '/#news',
-          icon: '/icon-192.png',
-        }, env).catch(() => {})
-      }
-
-      published++
-      void meta
-    } catch (e) {
-      console.error('publishScheduledArticles error:', e?.message)
+    console.log('[publishScheduledArticles] 📦 Found pending articles:', results?.length ?? 0)
+    if (results?.length > 0) {
+      console.log('[publishScheduledArticles] 📄 Article details:', 
+        results.map(a => ({ id: a.id, title: a.title, publish_at: a.publish_at }))
+      )
     }
-  }
 
-  return { published }
+    if (!results?.length) {
+      console.log('[publishScheduledArticles] ✓ No articles to publish')
+      return { published: 0 }
+    }
+
+    let published = 0
+    for (const article of results) {
+      try {
+        console.log(`[publishScheduledArticles] 🔄 Processing article ID=${article.id}: "${article.title}"`)
+        console.log(`[publishScheduledArticles]    publish_at="${article.publish_at}" vs now="${now}"`)
+        
+        const today = new Date().toLocaleDateString('uk-UA', {
+          day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Kiev'
+        })
+
+        console.log(`[publishScheduledArticles]    Inserting into news table with date="${today}"`)
+
+        const { meta } = await db.prepare(
+          'INSERT INTO news (type, badge, title, desc, date, hot) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(
+          article.type || 'blog',
+          article.badge || 'Стаття',
+          article.title,
+          article.desc,
+          today,
+          article.hot ?? 0
+        ).run()
+
+        console.log(`[publishScheduledArticles]    ✓ Inserted news record ID=${meta.last_row_id}`)
+
+        await db.prepare(
+          "UPDATE scheduled_articles SET published = 1 WHERE id = ?"
+        ).bind(article.id).run()
+
+        console.log(`[publishScheduledArticles]    ✓ Marked scheduled_articles ID=${article.id} as published`)
+
+        // Push-сповіщення всім підписникам
+        if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
+          console.log(`[publishScheduledArticles]    📲 Sending push notification...`)
+          broadcast(db, {
+            title: article.badge || 'Дентіс',
+            body: article.title,
+            url: '/#news',
+            icon: '/icon-192.png',
+          }, env).catch((e) => {
+            console.warn(`[publishScheduledArticles]    ⚠️  Push notification failed: ${e?.message}`)
+          })
+        } else {
+          console.log(`[publishScheduledArticles]    ⓘ VAPID keys not configured, skipping push`)
+        }
+
+        published++
+        void meta
+      } catch (e) {
+        console.error(`[publishScheduledArticles] ❌ Error processing article ID=${article.id}:`, e?.message)
+      }
+    }
+
+    console.log(`[publishScheduledArticles] ✅ Complete: published ${published} article(s)`)
+    return { published }
+  } catch (e) {
+    console.error('[publishScheduledArticles] ❌ Fatal error:', e?.message, e?.stack)
+    return { published: 0, error: e?.message }
+  }
 }
 
 // ── MAIN HANDLER ──────────────────────────────────────────────────────────────
@@ -715,33 +750,104 @@ async function handleRequest(request, env, origin) {
     // GET  /api/scheduled-articles          — список (admin)
     // POST /api/scheduled-articles          — додати в чергу (admin)
     // DELETE /api/scheduled-articles/:id    — видалити зі черги (admin)
+    // GET  /api/scheduled-articles/status   — статус публікацій (admin, для дебагу)
     if (p === '/api/scheduled-articles' && m === 'GET') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
       const { results } = await env.DB.prepare(
         'SELECT * FROM scheduled_articles ORDER BY publish_at ASC'
       ).all()
       return json(results, 200, origin)
     }
+    if (p === '/api/scheduled-articles/status' && m === 'GET') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19)
+      const { results: pending } = await env.DB.prepare(
+        'SELECT id, title, badge, publish_at, created_at FROM scheduled_articles WHERE published=0 ORDER BY publish_at ASC'
+      ).all()
+      const { results: published } = await env.DB.prepare(
+        'SELECT id, title, badge, publish_at, created_at FROM scheduled_articles WHERE published=1 ORDER BY publish_at DESC LIMIT 10'
+      ).all()
+      const { results: recentNews } = await env.DB.prepare(
+        'SELECT id, title, badge, date FROM news ORDER BY id DESC LIMIT 5'
+      ).all()
+
+      return json({
+        currentTime: now,
+        stats: {
+          pending: pending?.length ?? 0,
+          published: published?.length ?? 0,
+        },
+        pending: pending ?? [],
+        recentPublished: published ?? [],
+        recentNews: recentNews ?? [],
+      }, 200, origin)
+    }
     if (p === '/api/scheduled-articles' && m === 'POST') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      
       const b = await request.json()
       if (!b.title || !b.desc || !b.publish_at) {
         return json({ error: 'title, desc, publish_at — обовʼязкові поля' }, 400, origin)
       }
-      const { meta } = await env.DB.prepare(
-        'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at) VALUES (?, ?, ?, ?, ?, ?)'
-      ).bind(
-        b.type   || 'blog',
-        b.badge  || 'Стаття',
-        b.title,
-        b.desc,
-        b.hot ? 1 : 0,
-        b.publish_at
-      ).run()
-      return json({ id: meta.last_row_id }, 201, origin)
+
+      // ✅ FIX: Нормалізуйте дату в SQLite формат (YYYY-MM-DD HH:MM:SS)
+      let publishTime = b.publish_at
+      console.log(`[POST /api/scheduled-articles] 📝 Raw publish_at: "${publishTime}"`)
+
+      try {
+        // Якщо надійшло як ISO з T: замініть T на пробіл
+        if (publishTime.includes('T')) {
+          publishTime = publishTime.replace('T', ' ')
+        }
+        
+        // Видаліть Z (якщо присутній) та все після 19 символів
+        if (publishTime.includes('Z')) {
+          publishTime = publishTime.replace('Z', '')
+        }
+        publishTime = publishTime.slice(0, 19) // Ровно 'YYYY-MM-DD HH:MM:SS'
+
+        // Валідація формату
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(publishTime)) {
+          console.warn(`[POST /api/scheduled-articles] ⚠️  Invalid format after parsing: "${publishTime}"`)
+          return json({ 
+            error: 'publish_at повинна мати формат YYYY-MM-DD HH:MM:SS або ISO-формат',
+            received: publishTime 
+          }, 400, origin)
+        }
+
+        console.log(`[POST /api/scheduled-articles] ✓ Normalized publish_at: "${publishTime}"`)
+
+        const { meta } = await env.DB.prepare(
+          'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at) VALUES (?, ?, ?, ?, ?, ?)'
+        ).bind(
+          b.type   || 'blog',
+          b.badge  || 'Стаття',
+          b.title,
+          b.desc,
+          b.hot ? 1 : 0,
+          publishTime
+        ).run()
+
+        console.log(`[POST /api/scheduled-articles] ✓ Inserted ID=${meta.last_row_id}`)
+        return json({ id: meta.last_row_id, publish_at: publishTime }, 201, origin)
+      } catch (e) {
+        console.error(`[POST /api/scheduled-articles] ❌ Error: ${e?.message}`)
+        return json({ error: 'Помилка обробки дати: ' + e?.message }, 400, origin)
+      }
     }
     if (p.match(/^\/api\/scheduled-articles\/\d+$/) && m === 'DELETE') {
+      if (!await isAdmin(env, request)) return json({ error: 'Unauthorized' }, 401, origin)
+      
+      const id = idFrom(p)
+      const article = await env.DB.prepare('SELECT title FROM scheduled_articles WHERE id=?').bind(id).first()
+      if (!article) return json({ error: 'Not found' }, 404, origin)
+      
       await env.DB.prepare(
         'DELETE FROM scheduled_articles WHERE id = ?'
-      ).bind(idFrom(p)).run()
+      ).bind(id).run()
+      
+      console.log(`[DELETE /api/scheduled-articles/${id}] ✓ Deleted: "${article.title}"`)
       return json({ ok: true }, 200, origin)
     }
 
