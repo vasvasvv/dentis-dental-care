@@ -44,9 +44,9 @@ export default function Hero() {
           </p>
 
           <h1 className="text-5xl md:text-6xl leading-tight mb-6 animate-fade-up delay-100 font-sans font-extralight lg:text-6xl text-secondary">
-            Посмішка, що
+            Посмішка,
             <br />
-            <em className="not-italic text-gold">надихає</em>
+            <em className="not-italic text-gold">що надихає</em>
           </h1>
 
           <p className="text-lg leading-relaxed max-w-lg mb-10 animate-fade-up delay-200 font-sans font-extralight text-secondary">
