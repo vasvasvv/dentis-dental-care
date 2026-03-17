@@ -1588,7 +1588,7 @@ export default function Admin() {
       }}>
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/admin-icon-192.png" alt="" className="w-7 h-7 rounded-lg" />
+            <img src="/admin-icon-512.png" alt="" className="w-7 h-7 rounded-lg" />
             <div>
               <p className="text-[hsl(38_70%_68%)] text-[12px] tracking-[0.25em] uppercase leading-none" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Дентіс</p>
               <p className="text-[hsl(40_30%_88%)] text-sm font-medium leading-tight" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>Адмін</p>
