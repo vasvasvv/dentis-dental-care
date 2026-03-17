@@ -26,7 +26,7 @@ export default function Doctors() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Команда</p>
-                <h2 className="font-display text-4xl md:text-5xl font-bold text-custom-dark mb-2 gold-line-center">
+                <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-2 gold-line-center">
             Наші лікарі
           </h2>
           <p className="font-body text-muted-foreground max-w-xl mx-auto mt-5">
