@@ -1,8 +1,11 @@
 import { Phone } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { useLang } from "@/contexts/LanguageContext";
 
 export default function Hero() {
+  const { t } = useLang();
+
   const handleScroll = (href: string) => {
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -20,7 +23,6 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Фіксований фон з відео */}
       <div className="fixed inset-0 -z-10">
         <video
           ref={videoRef}
@@ -36,32 +38,29 @@ export default function Hero() {
         <div className="absolute inset-0 gradient-hero opacity-70" />
       </div>
 
-      {/* Контент, який буде прокручуватися */}
       <div className="relative z-10 container mx-auto px-4 pt-28 pb-20">
         <div className="max-w-3xl">
-          <p className="text-sm  uppercase mb-5 animate-fade-up font-sans font-normal text-gold">
-            стоматологія у · м.Кропивницький
+          <p className="text-sm uppercase mb-5 animate-fade-up font-sans font-normal text-gold">
+            {t("hero.city")}
           </p>
 
-<h1 className="font-sans font-extralight text-secondary
-               text-4xl sm:text-5xl md:text-6xl lg:text-7xl
-               leading-[1.05] tracking-[-0.01em]
-               mb-4 sm:mb-6 md:mb-8 drop-shadow-sm">
-   Посмішка, що
-   <br />
- <em className="block
-                   not-italic
-                   text-[0.68em] sm:text-[0.7em]
-                   leading-[1.1]
-                   tracking-[0.08em] sm:tracking-[0.1em]
-                   text-gold
-                   mt-1 sm:mt-2 
-                   drop-shadow-sm
-                   "> надихає</em>
- </h1>
+          <h1 className="font-sans font-extralight text-secondary
+                         text-4xl sm:text-5xl md:text-6xl lg:text-7xl
+                         leading-[1.05] tracking-[-0.01em]
+                         mb-4 sm:mb-6 md:mb-8 drop-shadow-sm">
+            {t("hero.h1")}
+            <br />
+            <em className="block not-italic
+                           text-[0.68em] sm:text-[0.7em]
+                           leading-[1.1]
+                           tracking-[0.08em] sm:tracking-[0.1em]
+                           text-gold mt-1 sm:mt-2 drop-shadow-sm">
+              {t("hero.h1em")}
+            </em>
+          </h1>
+
           <p className="text-lg leading-relaxed max-w-lg mb-10 animate-fade-up delay-200 font-sans font-extralight text-secondary">
-            Сучасна стоматологія з індивідуальним підходом до кожного пацієнта.
-            Комфорт, безпека та бездоганний результат — наш стандарт.
+            {t("hero.desc")}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300">
@@ -70,35 +69,17 @@ export default function Hero() {
               className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity duration-200"
             >
               <Phone size={18} />
-              Записатися на консультацію
+              {t("hero.cta")}
             </a>
             <button
               onClick={() => handleScroll("#services")}
               className="flex items-center justify-center gap-2 border border-gold-light/80 text-gold-light hover:bg-gold hover:border-gold hover:text-secondary px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
             >
-              Наші послуги
+              {t("hero.services")}
             </button>
-          </div>
-
-          <div className="flex gap-10 mt-14 animate-fade-up delay-400">
-            {[
-              { num: "15+", label: "Років досвіду" },
-              { num: "1000+", label: "Пацієнтів" },
-              { num: "98%", label: "Задоволені клієнти" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="font-display text-2xl font-bold text-gold">{stat.num}</div>
-                <div className="font-body text-xs text-primary-foreground/60 tracking-wide mt-0.5">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
-
-      {/* Нижній градієнтний фейд (теж фіксований відносно секції, якщо потрібно) */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 }

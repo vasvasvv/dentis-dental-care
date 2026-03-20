@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet-async";
 import { Phone, Tag, CalendarDays, Download, BookOpen, CheckCircle } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
+import { useLang } from "@/contexts/LanguageContext";
 
 const API = import.meta.env.VITE_API_URL ?? "https://dentis-site-api.nesterenkovasil9.workers.dev";
 
@@ -17,12 +18,16 @@ type NewsItem = {
   hot: number;
 };
 
-const STATIC_PROMOS = [
+const STATIC_PROMOS_UK = [
   { id: -1, type: "promo", badge: "Акція", title: "Знижка 20% на професійну чистку", desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.", date: "До 31 березня 2026", hot: 1 },
   { id: -2, type: "promo", badge: "Акція", title: "Відбілювання зубів — 20% знижка", desc: "Отримайте сяючу посмішку зі знижкою 20% на процедуру відбілювання Zoom4 у березні–квітні.", date: "Березень — Квітень 2026", hot: 0 },
 ];
+const STATIC_PROMOS_EN = [
+  { id: -1, type: "promo", badge: "Deal", title: "20% off professional cleaning", desc: "Book a comprehensive hygiene appointment (ultrasound + polishing) and get 20% off the procedure.", date: "Until 31 March 2026", hot: 1 },
+  { id: -2, type: "promo", badge: "Deal", title: "Teeth whitening — 20% off", desc: "Get a radiant smile with 20% off the Zoom4 whitening procedure in March–April.", date: "March — April 2026", hot: 0 },
+];
 
-const hygieneSteps = [
+const hygieneStepsUk = [
   { icon: "🪥", title: "Чистіть зуби двічі на день", desc: "Мінімум 2 хвилини — вранці після сніданку та ввечері перед сном. М'яка щітина, рухи від ясен до краю зуба." },
   { icon: "🦷", title: "Використовуйте зубну нитку", desc: "Щодня, бажано ввечері. Очищає міжзубні проміжки, де щітка не дістається." },
   { icon: "💧", title: "Іригатор — щодня", desc: "Чудово доповнює нитку. Незамінний при брекетах, коронках та імплантах." },
@@ -30,15 +35,24 @@ const hygieneSteps = [
   { icon: "🚫", title: "Без куріння", desc: "Нікотин руйнує ясна, фарбує зуби і знижує приживлюваність імплантів." },
   { icon: "📅", title: "Огляд кожні 6 місяців", desc: "Регулярна профілактика — найефективніший спосіб уникнути серйозного лікування." },
 ];
+const hygieneStepsEn = [
+  { icon: "🪥", title: "Brush twice a day", desc: "At least 2 minutes — morning after breakfast and evening before bed. Soft bristles, brush from gum to tooth edge." },
+  { icon: "🦷", title: "Floss daily", desc: "Preferably in the evening. Cleans between teeth where a brush can't reach." },
+  { icon: "💧", title: "Use a water flosser daily", desc: "A great complement to floss. Essential with braces, crowns and implants." },
+  { icon: "🍎", title: "Diet", desc: "Limit sugar and acidic drinks. After eating — rinse your mouth with water." },
+  { icon: "🚫", title: "No smoking", desc: "Nicotine damages gums, stains teeth and reduces implant osseointegration rates." },
+  { icon: "📅", title: "Check-up every 6 months", desc: "Regular prevention is the most effective way to avoid serious dental treatment." },
+];
 
 function BlogCard({ item, isPromo = false }: { item: NewsItem; isPromo?: boolean }) {
-  const isHot = item.hot === 1 || item.hot as unknown as boolean === true;
+  const isHot = item.hot === 1 || (item.hot as unknown as boolean) === true;
+  const { t } = useLang();
   return (
     <div className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full ${isHot ? "border-gold/40" : "border-border"}`}>
       {isHot && (
         <div className="gradient-gold px-5 py-2 flex items-center gap-2 flex-shrink-0">
           <Tag size={13} className="text-accent-foreground" />
-          <span className="font-body text-xs text-accent-foreground font-semibold tracking-widest uppercase">Гаряча пропозиція</span>
+          <span className="font-body text-xs text-accent-foreground font-semibold tracking-widest uppercase">{t("news.hot")}</span>
         </div>
       )}
       <div className="p-6 flex flex-col flex-1">
@@ -60,6 +74,7 @@ export default function Blog() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { lang, t } = useLang();
 
   useEffect(() => {
     const video = videoRef.current;
@@ -73,21 +88,24 @@ export default function Blog() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Promos from API (newest first), fallback to static
+  const STATIC_PROMOS = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;
+
   const apiPromos = allItems.filter(i => i.type === "promo");
   const displayPromos: NewsItem[] = apiPromos.length > 0 ? apiPromos : STATIC_PROMOS as NewsItem[];
-
-  // News only (not promo), newest first, all of them
   const newsOnly = allItems.filter(i => i.type !== "promo");
+  const hygieneSteps = lang === "uk" ? hygieneStepsUk : hygieneStepsEn;
+
+  const guidePoints = lang === "uk"
+    ? ["Щоденна гігієна порожнини рота", "Харчування та шкідливі звички", "Графік профілактичних оглядів"]
+    : ["Daily oral hygiene", "Diet and bad habits", "Preventive check-up schedule"];
 
   return (
     <div className="min-h-screen">
       <Helmet>
-        <title>Блог та новини — Дентіс Кропивницький</title>
-        <meta name="description" content="Корисні статті про стоматологію, акції та новини клініки Дентіс у Кропивницькому. Поради щодо догляду за зубами від наших лікарів." />
+        <title>{lang === "uk" ? "Блог та новини — Дентіс Кропивницький" : "Blog & News — Dentis Kropyvnytskyi"}</title>
+        <meta name="description" content={lang === "uk" ? "Корисні статті про стоматологію, акції та новини клініки Дентіс у Кропивницькому." : "Useful dental articles, deals and news from Dentis clinic in Kropyvnytskyi."} />
         <link rel="canonical" href="https://dentis.kr.ua/blog" />
-        <meta property="og:title" content="Блог та новини — Дентіс Кропивницький" />
-        <meta property="og:description" content="Корисні статті, акції та новини стоматологічної клініки Дентіс." />
+        <meta property="og:title" content={lang === "uk" ? "Блог та новини — Дентіс Кропивницький" : "Blog & News — Dentis Kropyvnytskyi"} />
         <meta property="og:url" content="https://dentis.kr.ua/blog" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
@@ -95,7 +113,7 @@ export default function Blog() {
 
       <Header />
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <section className="relative pt-36 pb-24 overflow-hidden">
         <div className="fixed inset-0 -z-10">
           <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="w-full h-full object-cover" />
@@ -106,23 +124,23 @@ export default function Blog() {
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Дентіс</p>
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">{t("blog.hero.label")}</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Блог та новини
+            {t("blog.hero.h1")}
           </h1>
           <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl">
-            Корисні статті про стоматологію, актуальні акції та новини клініки. Дбаємо про ваше здоров'я і інформуємо про найкраще.
+            {t("blog.hero.desc")}
           </p>
         </div>
       </section>
 
-      {/* ── Promos ── */}
+      {/* Promos */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Зараз</p>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("news.label")}</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">
-              Акції та пропозиції
+              {t("blog.promos.h2")}
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
@@ -133,13 +151,13 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* ── News (no promo, all, 3 columns, grows) ── */}
+      {/* News */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Актуальне</p>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("news.label")}</p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
-              Новини клініки
+              {t("blog.news.h2")}
             </h2>
           </div>
 
@@ -150,7 +168,7 @@ export default function Blog() {
               ))}
             </div>
           ) : newsOnly.length === 0 ? (
-            <p className="text-center text-muted-foreground font-body py-12">Новин поки немає</p>
+            <p className="text-center text-muted-foreground font-body py-12">{t("blog.no_news")}</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {newsOnly.map(item => (
@@ -161,18 +179,18 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* ── Oral Care Guide ── */}
+      {/* Oral care guide */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12 items-center mb-14">
               <div>
-                <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Корисно знати</p>
+                <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("blog.hygiene.desc")}</p>
                 <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-5 leading-tight">
-                  Пам'ятка з догляду за порожниною рота
+                  {t("blog.hygiene.h2")}
                 </h2>
                 <p className="font-body text-muted-foreground text-base leading-relaxed mb-8">
-                  Прості правила щоденної гігієни, які допоможуть зберегти здоров'я зубів і ясен на роки. Складено лікарями клініки Дентіс.
+                  {t("blog.hygiene.desc")}
                 </p>
                 <a
                   href="/oral-care-guide.pdf"
@@ -180,7 +198,7 @@ export default function Blog() {
                   className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-medium text-sm shadow-gold-custom hover:scale-105 transition-all duration-200"
                 >
                   <Download size={16} />
-                  Завантажити PDF-пам'ятку
+                  {t("blog.hygiene.download")}
                 </a>
               </div>
 
@@ -193,12 +211,12 @@ export default function Blog() {
                       <BookOpen size={18} className="text-accent-foreground" />
                     </div>
                     <div>
-                      <p className="font-display font-bold text-secondary text-base">Пам'ятка</p>
-                      <p className="font-body text-primary-foreground/50 text-xs">1 сторінка · PDF</p>
+                      <p className="font-display font-bold text-secondary text-base">{t("blog.hygiene.h2")}</p>
+                      <p className="font-body text-primary-foreground/50 text-xs">1 {lang === "uk" ? "сторінка" : "page"} · PDF</p>
                     </div>
                   </div>
                   <ul className="space-y-3">
-                    {["Щоденна гігієна порожнини рота", "Харчування та шкідливі звички", "Графік профілактичних оглядів"].map(point => (
+                    {guidePoints.map(point => (
                       <li key={point} className="flex items-center gap-3">
                         <CheckCircle size={15} className="text-gold flex-shrink-0" />
                         <span className="font-body text-primary-foreground/80 text-sm">{point}</span>

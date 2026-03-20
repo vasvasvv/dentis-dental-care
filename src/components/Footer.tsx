@@ -1,10 +1,12 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "@assets/logo-white.webp";
+import { useLang } from "@/contexts/LanguageContext";
 
 export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLang();
 
   const handleNav = (href: string, isHash: boolean) => {
     if (!isHash) {
@@ -22,6 +24,15 @@ export default function Footer() {
       if (el) el.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const navItems = [
+    { href: "#about", labelKey: "nav.about", isHash: true },
+    { href: "#services", labelKey: "nav.services", isHash: true },
+    { href: "#doctors", labelKey: "nav.doctors", isHash: true },
+    { href: "#news", labelKey: "footer.news", isHash: true },
+    { href: "#reviews", labelKey: "footer.reviews", isHash: true },
+    { href: "/contacts", labelKey: "nav.contacts", isHash: false },
+  ];
 
   return (
     <footer className="border-t border-primary-foreground/10">
@@ -48,28 +59,23 @@ export default function Footer() {
               />
             </a>
             <p className="font-body text-primary-foreground/50 text-sm leading-relaxed">
-              Стоматологічна клініка у Кропивницькому. Ваша посмішка — наша гордість.
+              {t("footer.tagline")}
             </p>
           </div>
 
           {/* Nav */}
           <div>
-            <p className="font-body text-primary-foreground/40 text-xs tracking-widest uppercase mb-4">Навігація</p>
+            <p className="font-body text-primary-foreground/40 text-xs tracking-widest uppercase mb-4">
+              {t("footer.nav")}
+            </p>
             <nav className="flex flex-col gap-2.5">
-              {[
-                { href: "#about", label: "Про нас", isHash: true },
-                { href: "#services", label: "Послуги", isHash: true },
-                { href: "#doctors", label: "Лікарі", isHash: true },
-                { href: "#news", label: "Новини та акції", isHash: true },
-                { href: "#reviews", label: "Відгуки", isHash: true },
-                { href: "/contacts", label: "Контакти", isHash: false },
-              ].map(({ href, label, isHash }) => (
+              {navItems.map(({ href, labelKey, isHash }) => (
                 <button
                   key={href}
                   onClick={() => handleNav(href, isHash)}
                   className="font-body text-primary-foreground/60 hover:text-gold text-sm text-left transition-colors"
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </nav>
@@ -77,7 +83,9 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <p className="font-body text-primary-foreground/60 text-xs tracking-widest uppercase mb-4">Контакти</p>
+            <p className="font-body text-primary-foreground/60 text-xs tracking-widest uppercase mb-4">
+              {t("footer.contacts")}
+            </p>
             <div className="space-y-3">
               <a href="tel:+380504800825" className="flex items-center gap-2.5 text-primary-foreground/70 hover:text-gold transition-colors text-sm font-body">
                 <Phone size={14} /> +38 050 480 0825
@@ -87,7 +95,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-2.5 text-primary-foreground/70 text-sm font-body">
                 <MapPin size={14} className="mt-0.5 shrink-0" />
-                <span>вул. Героїв-рятувальників, 9 к.2, Кропивницький</span>
+                <span>{t("contacts.addr.value")}, {t("contacts.addr.sub")}</span>
               </div>
             </div>
           </div>
@@ -95,10 +103,10 @@ export default function Footer() {
 
         <div className="border-t border-gold/70 mt-10 pt-7 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="font-body text-primary-foreground/60 text-xs">
-            © {new Date().getFullYear()} Дентіс. Всі права захищені.
+            © {new Date().getFullYear()} Дентіс. {t("footer.rights")}
           </p>
           <p className="font-body text-primary-foreground/60 text-xs">
-            Головний лікар: Верховський Олександр Олександрович
+            Верховський Олександр Олександрович
           </p>
         </div>
       </div>

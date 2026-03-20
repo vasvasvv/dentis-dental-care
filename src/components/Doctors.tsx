@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import doctorVerhovsky from "@/assets/doctor-verhovsky.webp";
 import doctorFemale from "@/assets/doctor-female.webp";
 import { getPublicDoctors, type PublicDoctor } from "@/lib/publicApi";
+import { useLang } from "@/contexts/LanguageContext";
 
 type DoctorCard = {
   img: string;
@@ -18,7 +19,7 @@ const fallbackDoctors: DoctorCard[] = [
     name: "Верховський Олександр Олександрович",
     title: "Головний лікар",
     speciality: "Лікар-стоматолог, імплантолог",
-    experience: "19+ років досвіду",
+    experience: "19",
     desc: "Спеціаліст вищої категорії. Регулярно проходить навчання в провідних клініках. Автор індивідуальних планів реабілітації.",
   },
   {
@@ -26,7 +27,7 @@ const fallbackDoctors: DoctorCard[] = [
     name: "Гальченко Антон Євгенович",
     title: "Лікар-стоматолог",
     speciality: "Терапевт, естетична стоматологія",
-    experience: "8 років досвіду",
+    experience: "8",
     desc: "Досвідчений терапевт та фахівець з естетичного відновлення зубів. Майстер художньої реставрації.",
   },
 ];
@@ -44,20 +45,19 @@ function toDoctorCard(doctor: PublicDoctor, index: number): DoctorCard {
     name: doctor.full_name,
     title: doctor.position,
     speciality: doctor.specialization ?? "",
-    experience: `${doctor.experience_years}+ років досвіду`,
+    experience: String(doctor.experience_years),
     desc: doctor.description ?? "",
   };
 }
 
 export default function Doctors() {
   const [doctors, setDoctors] = useState<DoctorCard[]>(fallbackDoctors);
+  const { t } = useLang();
 
   useEffect(() => {
     getPublicDoctors()
       .then((items) => {
-        if (items.length > 0) {
-          setDoctors(items.map(toDoctorCard));
-        }
+        if (items.length > 0) setDoctors(items.map(toDoctorCard));
       })
       .catch(() => {});
   }, []);
@@ -66,12 +66,14 @@ export default function Doctors() {
     <section id="doctors" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Команда</p>
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">
+            {t("doctors.label")}
+          </p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-2 gold-line-center">
-            Наші лікарі
+            {t("doctors.h2")}
           </h2>
           <p className="font-body text-muted-foreground max-w-xl mx-auto mt-5">
-            Ваше здоров'я в руках досвідчених спеціалістів, які постійно вдосконалюють свою майстерність
+            {t("doctors.desc")}
           </p>
         </div>
 
@@ -79,42 +81,30 @@ export default function Doctors() {
           {doctors.map((doctor) => (
             <div
               key={doctor.name}
-              className="bg-card rounded-2xl overflow-hidden border border-border shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="bg-card border border-border rounded-2xl overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="relative h-81 overflow-hidden bg-secondary">
+              <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src={doctor.img}
                   alt={doctor.name}
-                  width={800}
-                  height={843}
+                  className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
                   loading="lazy"
-                  className="w-full h-full object-cover object-top"
                 />
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-card to-transparent" />
               </div>
-
               <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-display font-bold text-custom-dark text-lg leading-snug">{doctor.name}</h3>
-                    <p className="text-gold font-body font-semibold text-sm mt-1">{doctor.title}</p>
+                    <h3 className="font-display font-bold text-custom-dark text-xl leading-tight">
+                      {doctor.name}
+                    </h3>
+                    <p className="font-body text-gold text-sm font-medium mt-1">{doctor.title}</p>
                   </div>
-                  <span className="shrink-0 text-[10px] tracking-wider uppercase font-body font-semibold bg-navy/8 text-navy px-2.5 py-1 rounded-full">
-                    {doctor.experience}
-                  </span>
                 </div>
-
-                <p className="font-body text-sm text-muted-foreground mb-1">
-                  <span className="text-custom-dark font-medium">Спеціалізація:</span> {doctor.speciality}
+                <p className="font-body text-muted-foreground text-sm mb-1">{doctor.speciality}</p>
+                <p className="font-body text-navy/60 text-xs mb-4">
+                  {doctor.experience}+ {t("doctors.exp")}
                 </p>
-                <p className="font-body text-sm text-muted-foreground leading-relaxed mt-3">{doctor.desc}</p>
-
-                <a
-                  href="tel:+380504800825"
-                  className="mt-5 inline-flex items-center gap-2 gradient-gold text-accent-foreground px-5 py-2.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
-                >
-                  Записатися
-                </a>
+                <p className="font-body text-muted-foreground text-sm leading-relaxed">{doctor.desc}</p>
               </div>
             </div>
           ))}

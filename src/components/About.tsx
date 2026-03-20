@@ -1,51 +1,53 @@
 import { Award, Users, Clock, Shield } from "lucide-react";
-
-const values = [
-  { icon: Award, title: "Висока якість", desc: "Використовуємо лише сертифіковані матеріали та сучасне обладнання від провідних виробників." },
-  { icon: Users, title: "Індивідуальний підхід", desc: "Кожен пацієнт отримує персоналізований план лікування та увагу досвідченого фахівця." },
-  { icon: Clock, title: "Зручний час", desc: "Прийом без черг у зручний для вас час. Цінуємо ваш час так само, як і своє." },
-  { icon: Shield, title: "Повна безпека", desc: "Суворе дотримання санітарних норм, стерилізація інструментів та безпечна анестезія." },
-];
+import { useLang } from "@/contexts/LanguageContext";
 
 export default function About() {
+  const { t } = useLang();
+
+  const values = [
+    { icon: Award, titleKey: "about.v1title", descKey: "about.v1desc" },
+    { icon: Users, titleKey: "about.v2title", descKey: "about.v2desc" },
+    { icon: Clock, titleKey: "about.v3title", descKey: "about.v3desc" },
+    { icon: Shield, titleKey: "about.v4title", descKey: "about.v4desc" },
+  ];
+
   return (
     <section id="about" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left text */}
           <div>
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Про нас</p>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">
+              {t("about.label")}
+            </p>
             <h2 className="font-display text-4xl md:text-5xl font-bold text-navy leading-tight mb-6 gold-line">
-              Довіра пацієнтів —<br />
-              <em className="not-italic text-navy">наша найвища нагорода</em>
+              {t("about.h2a")}<br />
+              <em className="not-italic text-navy">{t("about.h2b")}</em>
             </h2>
             <p className="font-body text-navy leading-relaxed mb-5">
-              Стоматологічна клініка <strong className="text-custom-dark">«Дентіс»</strong> — це місце, де сучасна медицина поєднується з турботою та теплом. Ми надаємо стоматологічну допомогу найвищого рівня.
+              {t("about.p1")}
             </p>
             <p className="font-body text-navy leading-relaxed mb-8">
-              Наша клініка оснащена передовим цифровим обладнанням. Ми постійно навчаємося та впроваджуємо найновіші методики лікування, щоб ви отримували найкращий результат.
+              {t("about.p2")}
             </p>
-
             <a
               href="tel:+380504800825"
               className="inline-flex items-center gap-2 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
             >
-              Зателефонувати
+              {t("about.cta")}
             </a>
           </div>
 
-          {/* Right — values grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {values.map(({ icon: Icon, title, desc }) => (
+            {values.map(({ icon: Icon, titleKey, descKey }) => (
               <div
-                key={title}
+                key={titleKey}
                 className="bg-card border border-border rounded-xl p-6 shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center mb-4">
                   <Icon size={20} className="text-gold" />
                 </div>
-                <h3 className="font-display font-semibold text-custom-dark text-lg mb-2">{title}</h3>
-                <p className="font-body text-muted-foreground text-sm leading-relaxed">{desc}</p>
+                <h3 className="font-display font-semibold text-custom-dark text-lg mb-2">{t(titleKey)}</h3>
+                <p className="font-body text-muted-foreground text-sm leading-relaxed">{t(descKey)}</p>
               </div>
             ))}
           </div>
