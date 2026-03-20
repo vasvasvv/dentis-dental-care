@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Tag, CalendarDays, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const API =
-  import.meta.env.VITE_API_URL ??
-  "https://dentis-site-api.nesterenkovasil9.workers.dev";
+import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
 
 type NewsItem = {
   id: number;
@@ -26,7 +23,23 @@ const FALLBACK_NEWS: NewsItem[] = [
   { id: -4, type: "news", badge: "Інформація", title: "Чому важливо регулярно відвідувати стоматолога", desc: "Регулярні профілактичні огляди допомагають уникнути серйозних стоматологічних проблем.", date: "Січень 2026", hot: 0 },
 ];
 
+function formatPublicDate(item: PublicNewsItem) {
+  if (item.expires_on) return item.expires_on;
+  if (item.published_at) return item.published_at.slice(0, 10);
+  return "";
+}
 
+function toNewsItem(item: PublicNewsItem): NewsItem {
+  return {
+    id: item.id,
+    type: item.kind,
+    badge: item.label,
+    title: item.title,
+    desc: item.description,
+    date: formatPublicDate(item),
+    hot: Number(item.is_hot),
+  };
+}
 
 function NewsCard({
   item,
@@ -46,14 +59,13 @@ function NewsCard({
   useEffect(() => {
     if (!contentRef.current) return;
 
-    const el = contentRef.current;
-    const style = window.getComputedStyle(el);
-
+    const element = contentRef.current;
+    const style = window.getComputedStyle(element);
     const lineHeight = parseFloat(style.lineHeight);
-    const collapsedHeight = lineHeight * 3; // рівно 3 рядки
+    const collapsedHeight = lineHeight * 3;
 
     if (isOpen) {
-      setHeight(el.scrollHeight + "px");
+      setHeight(element.scrollHeight + "px");
     } else {
       setHeight(collapsedHeight + "px");
     }
@@ -85,24 +97,13 @@ function NewsCard({
 
         <h3 className="font-bold text-xl mb-3">{item.title}</h3>
 
-        {/* Анімований текст */}
-        <div
-          style={{ height }}
-          className="overflow-hidden transition-all duration-300 ease-in-out"
-        >
-          <p
-            ref={contentRef}
-            className="text-sm text-muted-foreground leading-relaxed"
-          >
+        <div style={{ height }} className="overflow-hidden transition-all duration-300 ease-in-out">
+          <p ref={contentRef} className="text-sm text-muted-foreground leading-relaxed">
             {item.desc}
           </p>
         </div>
 
-        {/* КНОПКА */}
-        <button
-          onClick={onToggle}
-          className="mt-3 text-xs text-gold font-semibold text-left hover:underline"
-        >
+        <button onClick={onToggle} className="mt-3 text-xs text-gold font-semibold text-left hover:underline">
           {isOpen ? "Згорнути" : "Читати більше"}
         </button>
 
@@ -119,30 +120,22 @@ export default function NewsSection() {
   const navigate = useNavigate();
   const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [loaded, setLoaded] = useState(false);
-
   const [openId, setOpenId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/api/news`)
-      .then((r) => r.json())
-      .then((data: NewsItem[]) => {
-        setAllItems(data);
+    getPublicNews()
+      .then((data) => {
+        setAllItems(data.map(toNewsItem));
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
   }, []);
 
-  const promos = allItems.filter((i) => i.type === "promo").slice(0, 2);
-  const displayPromos =
-    promos.length >= 2 ? promos : FALLBACK_PROMOS;
+  const promos = allItems.filter((item) => item.type === "promo").slice(0, 2);
+  const displayPromos = promos.length >= 2 ? promos : FALLBACK_PROMOS;
 
-  const news = allItems.filter((i) => i.type !== "promo").slice(0, 2);
-  const displayNews =
-    news.length >= 2
-      ? news
-      : news.length === 1
-      ? [news[0], FALLBACK_NEWS[1]]
-      : FALLBACK_NEWS;
+  const news = allItems.filter((item) => item.type !== "promo").slice(0, 2);
+  const displayNews = news.length >= 2 ? news : news.length === 1 ? [news[0], FALLBACK_NEWS[1]] : FALLBACK_NEWS;
 
   const SkeletonCard = () => (
     <div className="bg-card rounded-2xl border border-border h-52 animate-pulse" />
@@ -156,9 +149,7 @@ export default function NewsSection() {
     <section id="news" className="py-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
-          <p className="text-gold text-sm tracking-[0.3em] uppercase mb-3">
-            Актуальне
-          </p>
+          <p className="text-gold text-sm tracking-[0.3em] uppercase mb-3">Актуальне</p>
           <h2 className="text-4xl md:text-5xl font-bold text-secondary gold-line-center">
             Новини та пропозиції
           </h2>
@@ -175,23 +166,13 @@ export default function NewsSection() {
           <div className="max-w-5xl mx-auto space-y-6">
             <div className="grid sm:grid-cols-2 gap-6">
               {displayPromos.map((item) => (
-                <NewsCard
-                  key={item.id}
-                  item={item}
-                  isOpen={openId === item.id}
-                  onToggle={() => handleToggle(item.id)}
-                />
+                <NewsCard key={item.id} item={item} isOpen={openId === item.id} onToggle={() => handleToggle(item.id)} />
               ))}
             </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
               {displayNews.map((item) => (
-                <NewsCard
-                  key={item.id}
-                  item={item}
-                  isOpen={openId === item.id}
-                  onToggle={() => handleToggle(item.id)}
-                />
+                <NewsCard key={item.id} item={item} isOpen={openId === item.id} onToggle={() => handleToggle(item.id)} />
               ))}
             </div>
           </div>
@@ -203,10 +184,7 @@ export default function NewsSection() {
             className="inline-flex items-center gap-2 bg-gold border-gold-light/80 text-secondary hover:border hover:border-navy px-8 py-4 rounded-full transition-all duration-200 group"
           >
             <span>Всі новини та статті</span>
-            <ArrowRight
-              size={15}
-              className="group-hover:translate-x-1 transition-transform duration-200"
-            />
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />
           </button>
         </div>
       </div>
