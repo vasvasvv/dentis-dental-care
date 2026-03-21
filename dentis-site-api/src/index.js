@@ -27,14 +27,25 @@ function getCorsHeaders(origin) {
   }
 }
 
-function json(data, status = 200, origin = '') {
+function json(data, status = 200, origin = '', extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
       ...getCorsHeaders(origin),
+      ...extraHeaders,
       ...SECURITY_HEADERS,
     },
+  })
+}
+
+function withPublicCache(response, ttl = 300, swr = 86400) {
+  const headers = new Headers(response.headers)
+  headers.set('Cache-Control', `public, max-age=${ttl}, s-maxage=${ttl}, stale-while-revalidate=${swr}`)
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
   })
 }
 
@@ -619,11 +630,11 @@ async function handleRequest(request, env, origin) {
     // ── PUBLIC: News and Doctors (read-only, no auth) ─────────────────────────
     if (p === '/api/news' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM news ORDER BY hot DESC, created_at DESC').all()
-      return json(results, 200, origin)
+      return withPublicCache(json(results, 200, origin), 300)
     }
     if (p === '/api/doctors' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM doctors ORDER BY sort_order ASC').all()
-      return json(results, 200, origin)
+      return withPublicCache(json(results, 200, origin), 1800)
     }
     if (p.startsWith('/api/doctors/photo/') && m === 'GET') {
       const obj = await env.DOCTORS_BUCKET.get(p.replace('/api/doctors/photo/', ''))

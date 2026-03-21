@@ -39,10 +39,11 @@ function formatPublicDate(item: PublicNewsItem) {
 }
 
 function toNewsItem(item: PublicNewsItem): NewsItem {
+  const fallbackBadge = item.kind === "promo" ? "Deal" : "News";
   return {
     id: item.id,
     type: item.kind,
-    badge: item.label,
+    badge: item.label?.trim() || fallbackBadge,
     title: item.title,
     desc: item.description,
     date: formatPublicDate(item),

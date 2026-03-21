@@ -5,7 +5,15 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [pathname]);
 
   return null;

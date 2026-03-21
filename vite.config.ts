@@ -56,12 +56,20 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: "es2020",
+    sourcemap: false,
+    reportCompressedSize: false,
+    cssMinify: "esbuild",
+    modulePreload: {
+      polyfill: false,
+    },
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
           "vendor-ui": ["framer-motion", "lucide-react"],
+          "vendor-helmet": ["react-helmet-async"],
         },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names?.[0] ?? "";

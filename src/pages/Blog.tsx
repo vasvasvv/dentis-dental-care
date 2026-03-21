@@ -5,8 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { Phone, Tag, CalendarDays, Download, BookOpen, CheckCircle } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
 import { useLang } from "@/contexts/LanguageContext";
-
-const API = import.meta.env.VITE_API_URL ?? "https://dentis-site-api.nesterenkovasil9.workers.dev";
+import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
 
 type NewsItem = {
   id: number;
@@ -17,6 +16,18 @@ type NewsItem = {
   date: string;
   hot: number;
 };
+
+function mapPublicNewsItem(item: PublicNewsItem): NewsItem {
+  return {
+    id: item.id,
+    type: item.kind,
+    badge: item.label?.trim() || (item.kind === "promo" ? "Deal" : "News"),
+    title: item.title,
+    desc: item.description,
+    date: item.expires_on || item.published_at?.slice(0, 10) || "",
+    hot: Number(item.is_hot),
+  };
+}
 
 const STATIC_PROMOS_UK = [
   { id: -1, type: "promo", badge: "Акція", title: "Знижка 20% на професійну чистку", desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.", date: "До 31 березня 2026", hot: 1 },
@@ -82,9 +93,8 @@ export default function Blog() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API}/api/news`)
-      .then(r => r.json())
-      .then((data: NewsItem[]) => { setAllItems(data); setLoading(false); })
+    getPublicNews()
+      .then((data) => { setAllItems(data.map(mapPublicNewsItem)); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
