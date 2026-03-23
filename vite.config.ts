@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
@@ -68,7 +69,8 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": ["framer-motion", "lucide-react"],
+          "vendor-ui": ["lucide-react"],
+          "vendor-motion": ["framer-motion"],
           "vendor-helmet": ["react-helmet-async"],
         },
         assetFileNames: (assetInfo) => {
