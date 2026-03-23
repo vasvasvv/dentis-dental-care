@@ -64,12 +64,12 @@ export default function DiagnosticsPage() {
       <Helmet>
         <title>Діагностика та рентген — Дентіс Кропивницький</title>
         <meta name="description" content="Цифровий рентген, панорамні знімки, КЛКТ (3D), внутрішньоротова камера та фотопротокол у Кропивницькому. Точна діагностика — основа якісного лікування." />
-        <link rel="canonical" href="https://dentis.pp.ua/diagnostika-zubiv" />
+        <link rel="canonical" href="https://dentis.kr.ua/diagnostika-zubiv" />
         <meta property="og:title" content="Діагностика та рентген — Дентіс Кропивницький" />
         <meta property="og:description" content="Цифровий рентген, КЛКТ 3D, панорама. Точна діагностика — основа якісного лікування." />
-        <meta property="og:url" content="https://dentis.pp.ua/diagnostika-zubiv" />
+        <meta property="og:url" content="https://dentis.kr.ua/diagnostika-zubiv" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>

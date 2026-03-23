@@ -64,12 +64,12 @@ export default function EstetychnaStomat() {
       <Helmet>
         <title>Естетична стоматологія — Дентіс Кропивницький</title>
         <meta name="description" content="Вініри, відбілювання Zoom 4, художня реставрація та дизайн посмішки у Кропивницькому. Створюємо ідеальну посмішку з індивідуальним підходом." />
-        <link rel="canonical" href="https://dentis.pp.ua/estetychna-stomatolohiya" />
+        <link rel="canonical" href="https://dentis.kr.ua/estetychna-stomatolohiya" />
         <meta property="og:title" content="Естетична стоматологія — Дентіс Кропивницький" />
         <meta property="og:description" content="Вініри, відбілювання, художня реставрація. Ваша ідеальна посмішка — наша робота." />
-        <meta property="og:url" content="https://dentis.pp.ua/estetychna-stomatolohiya" />
+        <meta property="og:url" content="https://dentis.kr.ua/estetychna-stomatolohiya" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>

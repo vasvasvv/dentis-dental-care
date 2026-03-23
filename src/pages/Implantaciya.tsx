@@ -37,12 +37,12 @@ export default function Implantation() {
       <Helmet>
         <title>Імплантація зубів — Дентіс Кропивницький</title>
         <meta name="description" content="Імплантація зубів у Кропивницькому. 19+ років досвіду, імпланти преміум-класу, приживлюваність 98%. Безкоштовна консультація." />
-        <link rel="canonical" href="https://dentis.pp.ua/implantaciya" />
+        <link rel="canonical" href="https://dentis.kr.ua/implantaciya" />
         <meta property="og:title" content="Імплантація зубів — Дентіс Кропивницький" />
         <meta property="og:description" content="Повноцінне відновлення зуба. Приживлюваність 98%, гарантія 5 років, досвідчений імплантолог." />
-        <meta property="og:url" content="https://dentis.pp.ua/implantaciya" />
+        <meta property="og:url" content="https://dentis.kr.ua/implantaciya" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>

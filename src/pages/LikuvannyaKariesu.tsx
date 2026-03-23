@@ -51,12 +51,12 @@ export default function LikuvannyaKariesu() {
       <Helmet>
         <title>Лікування карієсу — Дентіс Кропивницький</title>
         <meta name="description" content="Безболісне лікування карієсу будь-якої стадії у Кропивницькому. Сучасна анестезія, фотополімерні матеріали, мінімально інвазивний підхід." />
-        <link rel="canonical" href="https://dentis.pp.ua/likuvannya-kariesu" />
+        <link rel="canonical" href="https://dentis.kr.ua/likuvannya-kariesu" />
         <meta property="og:title" content="Лікування карієсу — Дентіс Кропивницький" />
         <meta property="og:description" content="Сучасне безболісне лікування карієсу. Зберігаємо максимум природних тканин зуба." />
-        <meta property="og:url" content="https://dentis.pp.ua/likuvannya-kariesu" />
+        <meta property="og:url" content="https://dentis.kr.ua/likuvannya-kariesu" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>

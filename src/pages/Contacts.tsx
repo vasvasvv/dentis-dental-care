@@ -10,12 +10,12 @@ export default function ContactsPage() {
       <Helmet>
         <title>Контакти — Дентіс Кропивницький</title>
         <meta name="description" content="Адреса, телефон та графік роботи клініки Дентіс. вул. Героїв-рятувальників, 9/2, Кропивницький. Пн–Пт 9:00–19:00, Сб 9:00–15:00." />
-        <link rel="canonical" href="https://dentis.pp.ua/contacts" />
+        <link rel="canonical" href="https://dentis.kr.ua/contacts" />
         <meta property="og:title" content="Контакти — Дентіс Кропивницький" />
         <meta property="og:description" content="Знайдіть нас за адресою: вул. Героїв-рятувальників, 9/2, Кропивницький. Телефон: +38 050 480 0825." />
-        <meta property="og:url" content="https://dentis.pp.ua/contacts" />
+        <meta property="og:url" content="https://dentis.kr.ua/contacts" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.pp.ua/og-image.jpg" />
+        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
       </Helmet>
