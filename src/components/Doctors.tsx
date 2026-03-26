@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import doctorVerhovsky from "@/assets/doctor-verhovsky.webp";
-import doctorFemale from "@/assets/doctor-female.webp";
+import doctorFemale from "@/assets/galch.webp";
 import { getPublicDoctors, type PublicDoctor } from "@/lib/publicApi";
 import { useLang } from "@/contexts/LanguageContext";
 
