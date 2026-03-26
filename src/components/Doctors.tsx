@@ -83,11 +83,11 @@ export default function Doctors() {
               key={doctor.name}
               className="bg-card border border-border rounded-2xl overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="aspect-[4/3] overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden bg-muted/30">
                 <img
                   src={doctor.img}
                   alt={doctor.name}
-                  className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-contain object-center p-2"
                   loading="lazy"
                 />
               </div>
