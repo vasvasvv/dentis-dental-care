@@ -19,7 +19,7 @@
     --secondary-foreground: 220 35% 14%;
 
     --accent: 38 44% 46%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 220 35% 14%;
 
     --muted: 40 20% 93%;
     --muted-foreground: 220 15% 45%;
@@ -27,11 +27,11 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --success: 151 55% 38%;
+    --success: 152 60% 36%;
     --success-foreground: 0 0% 100%;
-    --error: 0 72% 52%;
+    --error: 0 72% 50%;
     --error-foreground: 0 0% 100%;
-    --info: 207 74% 45%;
+    --info: 210 80% 45%;
     --info-foreground: 0 0% 100%;
 
     --border: 220 20% 88%;
@@ -39,16 +39,16 @@
     --ring: 38 60% 42%;
     --radius: 0.75rem;
 
-    --gold: 38 60% 42%;
-    --gold-light: 38 56% 54%;
-    --gold-dark: 38 66% 34%;
+    --gold: 42 68% 62%;
+    --gold-light: 42 68% 62%;
+    --gold-dark: 42 72% 46%;
     --navy: 180 60% 25%;
     --navy-light: 180 50% 35%;
     --cream: 40 30% 97%;
     --cream-dark: 40 20% 93%;
 
     --gradient-hero: linear-gradient(135deg, hsl(180 60% 20%) 0%, hsl(180 55% 28%) 60%, hsl(180 50% 35%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 60% 42%), hsl(38 56% 54%));
+    --gradient-gold: linear-gradient(135deg, hsl(42 72% 56%), hsl(42 66% 64%));
     --gradient-section: linear-gradient(180deg, hsl(40 20% 98%) 0%, hsl(40 25% 96%) 100%);
 
     --shadow-card: 0 4px 24px -4px hsl(180 60% 25% / 0.1);
@@ -103,6 +103,27 @@ html {
   .shadow-nav { box-shadow: var(--shadow-nav); }
 
   .section-block { padding-top: 96px; padding-bottom: 96px; }
+
+  main > .site-section:nth-of-type(odd) { background: hsl(var(--cream)); }
+  main > .site-section:nth-of-type(even) { background: hsl(var(--card)); }
+  main > section:first-of-type { background: transparent; }
+
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 font-body font-semibold text-base transition-all duration-200;
+    background: var(--gradient-gold);
+    color: hsl(var(--navy));
+    box-shadow: var(--shadow-gold);
+  }
+
+  .btn-primary:hover { transform: translateY(-1px) scale(1.01); }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 font-body font-medium text-base transition-all duration-200;
+    border: 1px solid hsl(var(--navy) / 0.35);
+    color: hsl(var(--navy));
+    background: hsl(var(--card));
+  }
 
   .section-divider { width: 60px; height: 3px; background: var(--gradient-gold); border-radius: 2px; }
   .animate-fade-up { animation: fadeUp 0.7s ease-out both; }

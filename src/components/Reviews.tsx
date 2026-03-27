@@ -36,7 +36,7 @@ export default function Reviews() {
   const reviews: Review[] = base.map((item, index) => ({ ...item, photo: photos[index % photos.length] }));
 
   return (
-    <section id="reviews" className="section-block bg-secondary">
+    <section id="reviews" className="section-block site-section">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("reviews.label")}</p>

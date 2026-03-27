@@ -28,7 +28,7 @@ export default function Services() {
   ];
 
   return (
-    <section id="services" className="section-block bg-background">
+    <section id="services" className="section-block site-section">
       <div className="container mx-auto px-4">
         <motion.div variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("services.label")}</p>
@@ -46,7 +46,7 @@ export default function Services() {
               onClick={() => navigate(link)}
               className={`rounded-2xl p-7 border shadow-card-custom transition-all duration-300 group relative overflow-hidden cursor-pointer ${
                 featured
-                  ? "bg-gradient-to-br from-navy to-navy-light text-primary-foreground border-gold/40 shadow-gold-custom"
+                  ? "bg-gradient-to-br from-card to-cream text-foreground border-gold/50 shadow-gold-custom"
                   : "bg-card border-border hover:shadow-xl"
               }`}
             >
@@ -58,11 +58,11 @@ export default function Services() {
               {tagKey && !featured && (
                 <span className="absolute top-4 right-4 text-[10px] uppercase bg-gold/15 text-gold px-2.5 py-1 rounded-full">{t(tagKey)}</span>
               )}
-              <div className={`w-12 h-12 rounded-xl transition-colors flex items-center justify-center mb-5 ${featured ? "bg-primary-foreground/10" : "bg-navy/5 group-hover:bg-gold/10"}`}>
-                <Icon size={22} className={`${featured ? "text-gold" : "text-custom-dark group-hover:text-gold"} transition-colors`} />
+              <div className={`w-12 h-12 rounded-xl transition-colors flex items-center justify-center mb-5 ${featured ? "bg-gold/20" : "bg-navy/5 group-hover:bg-gold/10"}`}>
+                <Icon size={22} className={`${featured ? "text-navy" : "text-custom-dark group-hover:text-gold"} transition-colors`} />
               </div>
               <h3 className="font-semibold text-xl mb-3">{t(titleKey)}</h3>
-              <p className={`text-sm leading-relaxed mb-4 ${featured ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{t(descKey)}</p>
+              <p className={`text-sm leading-relaxed mb-4 ${featured ? "text-foreground/75" : "text-muted-foreground"}`}>{t(descKey)}</p>
               <span className="text-gold font-body text-sm font-semibold inline-block group-hover:translate-y-0.5 transition-transform">{t("services.more")} →</span>
             </motion.div>
           ))}

@@ -12,7 +12,7 @@ export default function About() {
   ];
 
   return (
-    <section id="about" className="section-block bg-secondary">
+    <section id="about" className="section-block site-section">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
