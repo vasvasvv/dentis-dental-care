@@ -17,7 +17,7 @@ const Faq: FC = () => {
   ];
 
   return (
-    <section className="faq max-w-[900px] mx-auto px-5 py-20 md:py-24 lg:py-[80px]">
+    <section className="faq max-w-[900px] mx-auto px-5 section-block bg-background">
       <div className="text-center mb-14">
         <p className="text-gold font-body text-m tracking-[0.3em] uppercase font-medium mb-3">
           {t("faq.label")}
