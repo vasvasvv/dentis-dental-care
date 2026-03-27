@@ -11,6 +11,10 @@ import Footer from "@/components/Footer";
 import { Phone } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import AwardsSection from "@/components/AwardsSection";
+import MultiStepBookingForm from "@/components/MultiStepBookingForm";
+import PremiumDetails from "@/components/PremiumDetails";
+
+const ENABLE_EXPERIMENTAL_BLOCKS = false;
 
 const Index = () => {
   return (
@@ -38,11 +42,17 @@ const Index = () => {
         <Faq />
         <ContactsSection />
         <AwardsSection />
+
+        {ENABLE_EXPERIMENTAL_BLOCKS && (
+          <>
+            <MultiStepBookingForm />
+            <PremiumDetails />
+          </>
+        )}
       </main>
       <section className="bg-primary">
-      <Footer />
-</section>
-      {/* Floating phone CTA */}
+        <Footer />
+      </section>
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"

@@ -1,68 +1,24 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-@font-face {
-  font-family: "NueneMontreal";
-  src: url("/src/assets/fonts/NeueMontreal-Regular.woff2") format("woff2"),
-       url("/src/assets/fonts/NeueMontreal-Regular.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "NueneMontreal";
-  src: url("/src/assets/fonts/NeueMontreal-Light.woff2") format("woff2"),
-       url("/src/assets/fonts/NeueMontreal-Light.woff") format("woff");
-  font-weight: 300;
-  font-style: light;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "NueneMontreal";
-  src: url("/src/assets/fonts/NeueMontreal-Medium.woff2") format("woff2"),
-       url("/src/assets/fonts/NeueMontreal-Medium.woff") format("woff");
-  font-weight: 500;
-  font-style: medium;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "NueneMontrealBold";
-  src: url("/src/assets/fonts/NeueMontreal-Bold.woff2") format("woff2"),
-       url("/src/assets/fonts/NeueMontreal-Bold.woff") format("woff");
-  font-weight: 700;
-  font-style: bold;
-  font-display: swap;
-}
-
 @layer base {
   :root {
-    /* Core palette */
     --background: 40 20% 98%;
-    --foreground: 220 40% 12%;
-
+    --foreground: 220 35% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 12%;
-
+    --card-foreground: 220 35% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 12%;
+    --popover-foreground: 220 35% 14%;
 
-    /* Deep sapphire green — brand primary */
     --primary: 180 60% 25%;
     --primary-foreground: 40 30% 97%;
-
-    /* Soft cream secondary */
     --secondary: 34 33% 96%;
-    --secondary-foreground: 0 0% 20%;
+    --secondary-foreground: 220 35% 14%;
 
-    /* Warm gold accent */
-    --accent: 38 38% 61%;
+    --accent: 38 44% 46%;
     --accent-foreground: 0 0% 100%;
 
     --muted: 40 20% 93%;
@@ -71,53 +27,34 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
+    --success: 151 55% 38%;
+    --success-foreground: 0 0% 100%;
+    --error: 0 72% 52%;
+    --error-foreground: 0 0% 100%;
+    --info: 207 74% 45%;
+    --info-foreground: 0 0% 100%;
+
     --border: 220 20% 88%;
     --input: 220 20% 88%;
-    --ring: 38 62% 52%;
-
+    --ring: 38 60% 42%;
     --radius: 0.75rem;
 
-    /* Custom design tokens */
-    --gold: 38 62% 52%;
-    --gold-light: 38 70% 68%;
-    --gold-dark: 38 55% 38%;
+    --gold: 38 60% 42%;
+    --gold-light: 38 56% 54%;
+    --gold-dark: 38 66% 34%;
     --navy: 180 60% 25%;
     --navy-light: 180 50% 35%;
     --cream: 40 30% 97%;
     --cream-dark: 40 20% 93%;
 
-    /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(180 60% 20%) 0%, hsl(180 55% 28%) 60%, hsl(180 50% 35%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38, 74%, 58%), hsl(38, 80%, 65%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 60% 42%), hsl(38 56% 54%));
     --gradient-section: linear-gradient(180deg, hsl(40 20% 98%) 0%, hsl(40 25% 96%) 100%);
 
-    /* Shadows */
-    --shadow-card: 0 4px 24px -4px hsl(180 60% 25% / 0.10);
-    --shadow-gold: 0 4px 20px -4px hsl(38 62% 52% / 0.35);
+    --shadow-card: 0 4px 24px -4px hsl(180 60% 25% / 0.1);
+    --shadow-gold: 0 4px 20px -4px hsl(38 60% 42% / 0.35);
     --shadow-nav: 0 2px 20px hsl(180 60% 25% / 0.12);
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0px 1px 1.5px 0px hsla(0, 0%, 0%, 0.65);
-    --shadow: 0px 1px 3px 0px hsla(0, 0%, 0%, 0.65);
-    --shadow-md: 0px 1px 4.5px 0px hsla(0, 0%, 0%, 0.65);
-    --shadow-lg: 0px 1px 7.5px 0px hsla(0, 0%, 0%, 0.65);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    --font-custom: "NueneMontreal", system-ui, serif, -apple-system, BlinkMacSystemFont, sans-serif; 
-
-  }
-
-  .dark {
-    --radius: 0.75rem;
+    --font-custom: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
@@ -126,103 +63,55 @@ html {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'NueneMontreal', sans-serif;
-    font-weight: 400;
+    @apply bg-background text-foreground font-body;
     -webkit-font-smoothing: antialiased;
   }
 
-  h1{
-    font-family: 'NueneMontreal', serif;
-  } 
-  
-  h2, h3, h4, h5 {
-    font-family: 'NueneMontrealBold', serif;
-  }
+  h1, h2, h3, h4, h5 { @apply font-display; }
+
+  h1 { font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.05; }
+  h2 { font-size: clamp(2rem, 3vw, 3.5rem); line-height: 1.1; }
+  h3 { font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.2; }
+  p, li { font-size: clamp(1rem, 1.1vw, 1.125rem); line-height: 1.7; }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: 'NueneMontrealBold', serif;
-  }
+  .font-display { font-family: "Playfair Display", serif; }
+  .font-body { font-family: "Inter", sans-serif; }
+  .text-gold { color: hsl(var(--gold)); }
+  .text-navy { color: hsl(var(--navy)); }
+  .text-custom-dark { color: #333333; }
 
-  .font-body {
-    font-family: 'NueneMontreal', sans-serif;
-  }
+  .bg-navy { background-color: hsl(var(--navy)); }
+  .bg-gold { background-color: hsl(var(--gold)); }
+  .bg-cream { background-color: hsl(var(--cream)); }
 
-  .text-gold {
-    color: hsl(var(--gold-light));
-  }
+  .text-success { color: hsl(var(--success)); }
+  .text-error { color: hsl(var(--error)); }
+  .text-info { color: hsl(var(--info)); }
+  .bg-success { background-color: hsl(var(--success)); }
+  .bg-error { background-color: hsl(var(--error)); }
+  .bg-info { background-color: hsl(var(--info)); }
 
-  .text-navy {
-    color: hsl(var(--navy));
-  }
+  .gradient-hero { background: var(--gradient-hero); }
+  .gradient-gold { background: var(--gradient-gold); }
+  .shadow-card-custom { box-shadow: var(--shadow-card); }
+  .shadow-gold-custom { box-shadow: var(--shadow-gold); }
+  .shadow-nav { box-shadow: var(--shadow-nav); }
 
-  /* Custom override used for selected components' dark text */
-  .text-custom-dark {
-    color: #333333;
-  }
+  .section-block { padding-top: 96px; padding-bottom: 96px; }
 
-  .bg-navy {
-    background-color: hsl(var(--navy));
-  }
-
-  .bg-gold {
-    background-color: hsl(var(--gold-light));
-  }
-
-  .bg-cream {
-    background-color: hsl(var(--cream));
-  }
-
-  .gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  .gradient-gold {
-    background: var(--gradient-gold);
-  }
-
-  .shadow-card-custom {
-    box-shadow: var(--shadow-card);
-  }
-
-  .shadow-gold-custom {
-    box-shadow: var(--shadow-gold);
-  }
-
-  .section-divider {
-    width: 60px;
-    height: 3px;
-    background: var(--gradient-gold);
-    border-radius: 2px;
-  }
-
-  /* Animations */
-  .animate-fade-up {
-    animation: fadeUp 0.7s ease-out both;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out both;
-  }
+  .section-divider { width: 60px; height: 3px; background: var(--gradient-gold); border-radius: 2px; }
+  .animate-fade-up { animation: fadeUp 0.7s ease-out both; }
+  .animate-fade-in { animation: fadeIn 0.6s ease-out both; }
 
   @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -232,30 +121,20 @@ html {
   .delay-200 { animation-delay: 0.2s; }
   .delay-300 { animation-delay: 0.3s; }
   .delay-400 { animation-delay: 0.4s; }
-  .delay-500 { animation-delay: 0.5s; }
 
-  /* Gold line accent */
-  .gold-line::after {
-    content: '';
-    display: block;
-    width: 50px;
-    height: 2px;
-    background: hsl(var(--gold-light));
-    margin-top: 12px;
-  }
-
+  .gold-line::after,
   .gold-line-center::after {
     content: '';
     display: block;
     width: 50px;
     height: 2px;
-    background: hsl(var(--gold-light));
-    margin: 12px auto 0;
+    background: hsl(var(--gold));
+    margin-top: 12px;
   }
+
+  .gold-line-center::after { margin: 12px auto 0; }
 }
-/* iOS: prevent zoom on input focus (font-size must be >= 16px) */
+
 @supports (-webkit-touch-callout: none) {
-  input, textarea, select {
-    font-size: 16px !important;
-  }
+  input, textarea, select { font-size: 16px !important; }
 }

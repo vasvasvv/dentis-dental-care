@@ -63,7 +63,7 @@ export default function Doctors() {
   }, []);
 
   return (
-    <section id="doctors" className="py-24 bg-background">
+    <section id="doctors" className="section-block bg-cream">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">
