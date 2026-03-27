@@ -66,14 +66,14 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300">
             <a
               href="tel:+380504800825"
-              className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity duration-200"
+              className="btn-primary"
             >
               <Phone size={18} />
               {t("hero.cta")}
             </a>
             <button
               onClick={() => handleScroll("#services")}
-              className="flex items-center justify-center gap-2 border border-gold-light/80 text-gold-light hover:bg-gold hover:border-gold hover:text-secondary px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              className="btn-secondary"
             >
               {t("hero.services")}
             </button>
