@@ -37,14 +37,8 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="robots" content="index, follow" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
-    <link rel="dns-prefetch" href="//pagead2.googlesyndication.com" />
-    <link rel="dns-prefetch" href="//googleads.g.doubleclick.net" />
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
-    <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin />
-    <link rel="preload" as="font" href="src/assets/fonts/font-bold.woff2" type="font/woff2" crossorigin />
-    <link rel="preload" as="font" href="src/assets/fonts/font-medium.woff2" type="font/woff2" crossorigin />
-    <link rel="preload" as="image" href="src/assets/logo-white.webp" fetchpriority="high" type="image/webp" />
+    <link rel="preload" as="image" href="/src/assets/logo-white.webp" fetchpriority="high" type="image/webp" />
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8WNNDVF5QN"></script>
 <script>
@@ -54,29 +48,7 @@
 
   gtag('config', 'G-8WNNDVF5QN');
 </script>
-    <script>
-      (function () {
-        var adsSrc = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5473444406257357";
-        function loadAds() {
-          if (document.querySelector('script[data-adsense-loader="true"]')) return;
-          var script = document.createElement("script");
-          script.async = true;
-          script.src = adsSrc;
-          script.crossOrigin = "anonymous";
-          script.setAttribute("data-adsense-loader", "true");
-          document.head.appendChild(script);
-        }
-        function schedule() {
-          if ("requestIdleCallback" in window) {
-            window.requestIdleCallback(loadAds, { timeout: 5000 });
-          } else {
-            window.setTimeout(loadAds, 3500);
-          }
-        }
-        if (document.readyState === "complete") schedule();
-        else window.addEventListener("load", schedule, { once: true });
-      })();
-    </script>
+    <!-- AdSense loader intentionally disabled (console noise with blockers; enable only with active ad slots). -->
 
     <!-- Structured Data: Dentist -->
     <script type="application/ld+json">
@@ -185,7 +157,7 @@
     <!-- LCP placeholder: shown immediately, hidden once React mounts -->
     <div id="lcp-header-placeholder" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:10px 16px;background:transparent;pointer-events:none;">
       <img
-        src="src/assets/logo-white.webp"
+        src="/src/assets/logo-white.webp"
         alt="Dentis Logo"
         width="400"
         height="140"
