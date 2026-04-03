@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, isSsrBuild }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -67,12 +67,14 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": ["lucide-react"],
-          "vendor-motion": ["framer-motion"],
-          "vendor-helmet": ["react-helmet-async"],
-        },
+        manualChunks: isSsrBuild
+          ? undefined
+          : {
+              "vendor-react": ["react", "react-dom", "react-router-dom"],
+              "vendor-ui": ["lucide-react"],
+              "vendor-motion": ["framer-motion"],
+              "vendor-helmet": ["react-helmet-async"],
+            },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names?.[0] ?? "";
           if (name.includes("Dentis_with_Text") && !name.includes("g.")) return "assets/logo-white.webp";
@@ -91,5 +93,29 @@ export default defineConfig(({ mode }) => ({
     },
     cssCodeSplit: true,
     chunkSizeWarningLimit: 600,
+  },
+  ssgOptions: {
+    includedRoutes: () => [
+      "/",
+      "/en",
+      "/implantaciya",
+      "/en/implantaciya",
+      "/protezuvannya",
+      "/en/protezuvannya",
+      "/likuvannya-kariesu",
+      "/en/likuvannya-kariesu",
+      "/profesijne-ochischennya",
+      "/en/profesijne-ochischennya",
+      "/estetychna-stomatolohiya",
+      "/en/estetychna-stomatolohiya",
+      "/diagnostika-zubiv",
+      "/en/diagnostika-zubiv",
+      "/contacts",
+      "/en/contacts",
+      "/blog",
+      "/en/blog",
+    ],
+    // Runtime already accepts `minify`; current beta typings still lag behind.
+    formatting: "minify" as never,
   },
 }));

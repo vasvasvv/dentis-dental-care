@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import Header from "@/components/Header";
+import { useEffect, useRef, useState } from "react";
+import { BookOpen, CalendarDays, CheckCircle, Download, Phone, Tag } from "lucide-react";
 import Footer from "@/components/Footer";
-import { Helmet } from "react-helmet-async";
-import { Phone, Tag, CalendarDays, Download, BookOpen, CheckCircle } from "lucide-react";
-import heroVideo from "@/assets/hero-video.mp4";
+import Header from "@/components/Header";
+import PageSeo from "@/components/SEO/PageSeo";
+import Schema from "@/components/SEO/Schema";
 import { useLang } from "@/contexts/LanguageContext";
+import heroVideo from "@/assets/hero-video.mp4";
 import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
+import { buildCanonical } from "@/utils/seo";
 
 type NewsItem = {
   id: number;
@@ -29,55 +31,94 @@ function mapPublicNewsItem(item: PublicNewsItem): NewsItem {
   };
 }
 
-const STATIC_PROMOS_UK = [
-  { id: -1, type: "promo", badge: "Акція", title: "Знижка 20% на професійну чистку", desc: "Запишіться на комплексну гігієну (ультразвук + полірування) та отримайте знижку 20% на процедуру.", date: "До 31 березня 2026", hot: 1 },
-  { id: -2, type: "promo", badge: "Акція", title: "Відбілювання зубів — 20% знижка", desc: "Отримайте сяючу посмішку зі знижкою 20% на процедуру відбілювання Zoom4 у березні–квітні.", date: "Березень — Квітень 2026", hot: 0 },
-];
-const STATIC_PROMOS_EN = [
-  { id: -1, type: "promo", badge: "Deal", title: "20% off professional cleaning", desc: "Book a comprehensive hygiene appointment (ultrasound + polishing) and get 20% off the procedure.", date: "Until 31 March 2026", hot: 1 },
-  { id: -2, type: "promo", badge: "Deal", title: "Teeth whitening — 20% off", desc: "Get a radiant smile with 20% off the Zoom4 whitening procedure in March–April.", date: "March — April 2026", hot: 0 },
-];
-
-const hygieneStepsUk = [
-  { icon: "🪥", title: "Чистіть зуби двічі на день", desc: "Мінімум 2 хвилини — вранці після сніданку та ввечері перед сном. М'яка щітина, рухи від ясен до краю зуба." },
-  { icon: "🦷", title: "Використовуйте зубну нитку", desc: "Щодня, бажано ввечері. Очищає міжзубні проміжки, де щітка не дістається." },
-  { icon: "💧", title: "Іригатор — щодня", desc: "Чудово доповнює нитку. Незамінний при брекетах, коронках та імплантах." },
-  { icon: "🍎", title: "Харчування", desc: "Обмежуйте цукор і кислі напої. Після їжі — ополоскуйте рот водою." },
-  { icon: "🚫", title: "Без куріння", desc: "Нікотин руйнує ясна, фарбує зуби і знижує приживлюваність імплантів." },
-  { icon: "📅", title: "Огляд кожні 6 місяців", desc: "Регулярна профілактика — найефективніший спосіб уникнути серйозного лікування." },
-];
-const hygieneStepsEn = [
-  { icon: "🪥", title: "Brush twice a day", desc: "At least 2 minutes — morning after breakfast and evening before bed. Soft bristles, brush from gum to tooth edge." },
-  { icon: "🦷", title: "Floss daily", desc: "Preferably in the evening. Cleans between teeth where a brush can't reach." },
-  { icon: "💧", title: "Use a water flosser daily", desc: "A great complement to floss. Essential with braces, crowns and implants." },
-  { icon: "🍎", title: "Diet", desc: "Limit sugar and acidic drinks. After eating — rinse your mouth with water." },
-  { icon: "🚫", title: "No smoking", desc: "Nicotine damages gums, stains teeth and reduces implant osseointegration rates." },
-  { icon: "📅", title: "Check-up every 6 months", desc: "Regular prevention is the most effective way to avoid serious dental treatment." },
+const STATIC_PROMOS_UK: NewsItem[] = [
+  {
+    id: -1,
+    type: "promo",
+    badge: "Акція",
+    title: "Знижка 20% на професійну чистку зубів",
+    desc: "Комплексна професійна гігієна у Кропивницькому зі зняттям каменю, Air Flow та поліруванням за акційною ціною.",
+    date: "До 31 травня 2026",
+    hot: 1,
+  },
+  {
+    id: -2,
+    type: "promo",
+    badge: "Акція",
+    title: "Відбілювання зубів Zoom зі знижкою",
+    desc: "Безпечне клінічне відбілювання зубів у Кропивницькому з підбором відтінку та рекомендаціями по догляду.",
+    date: "Квітень 2026",
+    hot: 0,
+  },
 ];
 
-function BlogCard({ item, isPromo = false }: { item: NewsItem; isPromo?: boolean }) {
-  const isHot = item.hot === 1 || (item.hot as unknown as boolean) === true;
+const STATIC_PROMOS_EN: NewsItem[] = [
+  {
+    id: -1,
+    type: "promo",
+    badge: "Deal",
+    title: "20% off professional dental cleaning",
+    desc: "Comprehensive hygiene in Kropyvnytskyi with tartar removal, Air Flow and polishing at a promotional price.",
+    date: "Until 31 May 2026",
+    hot: 1,
+  },
+  {
+    id: -2,
+    type: "promo",
+    badge: "Deal",
+    title: "Zoom teeth whitening special",
+    desc: "Safe in-clinic whitening in Kropyvnytskyi with shade matching and aftercare recommendations.",
+    date: "April 2026",
+    hot: 0,
+  },
+];
+
+const HYGIENE_GUIDE = {
+  uk: {
+    headline: "Як доглядати за зубами щодня: поради стоматолога у Кропивницькому",
+    description:
+      "Короткий гід від стоматології Дентіс: як чистити зуби, коли використовувати нитку та як часто проходити професійну гігієну.",
+    bullets: [
+      "Чистіть зуби двічі на день по 2 хвилини м’якою щіткою.",
+      "Використовуйте зубну нитку або іригатор щодня.",
+      "Записуйтесь на професійну гігієну раз на 6 місяців.",
+    ],
+  },
+  en: {
+    headline: "How to care for your teeth every day: dentist tips in Kropyvnytskyi",
+    description:
+      "A concise Dentis guide on brushing, flossing and scheduling professional hygiene to keep your smile healthy.",
+    bullets: [
+      "Brush twice daily for 2 minutes with a soft toothbrush.",
+      "Use floss or a water flosser every day.",
+      "Book professional hygiene every 6 months.",
+    ],
+  },
+};
+
+function BlogCard({ item }: { item: NewsItem }) {
   const { t } = useLang();
+  const isPromo = item.type === "promo";
+
   return (
-    <div className={`bg-card rounded-2xl border overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full ${isHot ? "border-gold/40" : "border-border"}`}>
-      {isHot && (
-        <div className="gradient-gold px-5 py-2 flex items-center gap-2 flex-shrink-0">
-          <Tag size={13} className="text-accent-foreground" />
-          <span className="font-body text-xs text-accent-foreground font-semibold tracking-widest uppercase">{t("news.hot")}</span>
+    <article className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-card-custom">
+      {item.hot === 1 && (
+        <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-gold px-3 py-1 text-xs font-semibold uppercase tracking-widest text-accent-foreground">
+          <Tag size={12} />
+          {t("news.hot")}
         </div>
       )}
-      <div className="p-6 flex flex-col flex-1">
-        <span className={`inline-block font-body text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full mb-4 ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/8 text-custom-dark"}`}>
-          {item.badge}
-        </span>
-        <h3 className="font-display font-bold text-custom-dark text-xl mb-3">{item.title}</h3>
-        <p className="font-body text-muted-foreground text-sm leading-relaxed mb-4 flex-1">{item.desc}</p>
-        <div className="flex items-center gap-2 text-muted-foreground text-xs font-body mt-auto">
-          <CalendarDays size={13} />
-          <span>{item.date}</span>
-        </div>
+
+      <span className={`mb-4 inline-block w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/8 text-custom-dark"}`}>
+        {item.badge}
+      </span>
+      <h3 className="mb-3 font-display text-xl font-bold text-custom-dark">{item.title}</h3>
+      <p className="mb-5 flex-1 font-body text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+      <div className="mt-auto flex items-center gap-2 font-body text-xs text-muted-foreground">
+        <CalendarDays size={13} />
+        <span>{item.date}</span>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -85,103 +126,107 @@ export default function Blog() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { lang, t } = useLang();
+  const { lang, localizePath, t } = useLang();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) { video.play().catch(() => {}); video.playbackRate = 0.6; }
+    if (!video) return;
+
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
   }, []);
 
   useEffect(() => {
     getPublicNews()
-      .then((data) => { setAllItems(data.map(mapPublicNewsItem)); setLoading(false); })
+      .then((data) => {
+        setAllItems(data.map(mapPublicNewsItem));
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
-  const STATIC_PROMOS = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;
-
-  const apiPromos = allItems.filter(i => i.type === "promo");
-  const displayPromos: NewsItem[] = apiPromos.length > 0 ? apiPromos : STATIC_PROMOS as NewsItem[];
-  const newsOnly = allItems.filter(i => i.type !== "promo");
-  const hygieneSteps = lang === "uk" ? hygieneStepsUk : hygieneStepsEn;
-
-  const guidePoints = lang === "uk"
-    ? ["Щоденна гігієна порожнини рота", "Харчування та шкідливі звички", "Графік профілактичних оглядів"]
-    : ["Daily oral hygiene", "Diet and bad habits", "Preventive check-up schedule"];
+  const copy = HYGIENE_GUIDE[lang];
+  const staticPromos = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;
+  const promos = allItems.filter((item) => item.type === "promo");
+  const news = allItems.filter((item) => item.type !== "promo");
+  const displayPromos = promos.length > 0 ? promos : staticPromos;
 
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>{lang === "uk" ? "Блог та новини — Дентіс Кропивницький" : "Blog & News — Dentis Kropyvnytskyi"}</title>
-        <meta name="description" content={lang === "uk" ? "Корисні статті про стоматологію, акції та новини клініки Дентіс у Кропивницькому." : "Useful dental articles, deals and news from Dentis clinic in Kropyvnytskyi."} />
-        <link rel="canonical" href="https://dentis.kr.ua/blog" />
-        <meta property="og:title" content={lang === "uk" ? "Блог та новини — Дентіс Кропивницький" : "Blog & News — Dentis Kropyvnytskyi"} />
-        <meta property="og:url" content="https://dentis.kr.ua/blog" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/blog"
+        title={{
+          uk: "Блог стоматології у Кропивницькому | Поради, акції — Дентіс",
+          en: "Dental blog in Kropyvnytskyi | Tips, offers — Dentis",
+        }}
+        description={{
+          uk: "Блог стоматології Дентіс: поради стоматолога, новини клініки, акції на лікування зубів та професійну гігієну у Кропивницькому.",
+          en: "Dentis blog with dentist tips, clinic updates and offers for dental treatment and hygiene in Kropyvnytskyi.",
+        }}
+        type="article"
+      />
+      <Schema
+        type="Article"
+        lang={lang}
+        data={{
+          headline: copy.headline,
+          description: copy.description,
+          url: buildCanonical("/blog", lang),
+          datePublished: "2026-04-03",
+          dateModified: "2026-04-03",
+          authorName: lang === "uk" ? "Команда Dentis" : "Dentis team",
+        }}
+      />
 
       <Header />
 
-      {/* Hero */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
+      <section className="relative overflow-hidden pb-24 pt-36">
         <div className="fixed inset-0 -z-10">
-          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="w-full h-full object-cover" />
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">{t("blog.hero.label")}</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            {t("blog.hero.h1")}
-          </h1>
-          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl">
-            {t("blog.hero.desc")}
-          </p>
+
+        <div className="container relative z-10 mx-auto px-4">
+          <p className="mb-4 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("blog.hero.label")}</p>
+          <h1 className="mb-6 max-w-3xl font-display text-5xl font-bold leading-tight text-secondary md:text-6xl">{t("blog.hero.h1")}</h1>
+          <p className="max-w-2xl font-body text-lg leading-relaxed text-primary-foreground/70">{t("blog.hero.desc")}</p>
         </div>
       </section>
 
-      {/* Promos */}
-      <section className="py-20 bg-background">
+      <section className="bg-background py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("news.label")}</p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">
-              {t("blog.promos.h2")}
-            </h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("news.label")}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center md:text-5xl">{t("blog.promos.h2")}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {displayPromos.map(item => (
-              <BlogCard key={item.id} item={item} isPromo />
+
+          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2">
+            {displayPromos.map((item) => (
+              <BlogCard key={item.id} item={item} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* News */}
-      <section className="py-20 bg-muted/30">
+      <section className="bg-muted/30 py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("news.label")}</p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">
-              {t("blog.news.h2")}
-            </h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("news.label")}</p>
+            <h2 className="font-display text-4xl font-bold text-secondary gold-line-center md:text-5xl">{t("blog.news.h2")}</h2>
           </div>
 
           {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-card rounded-2xl border border-border h-56 animate-pulse" />
+            <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-56 rounded-2xl border border-border bg-card animate-pulse" />
               ))}
             </div>
-          ) : newsOnly.length === 0 ? (
-            <p className="text-center text-muted-foreground font-body py-12">{t("blog.no_news")}</p>
+          ) : news.length === 0 ? (
+            <p className="py-12 text-center font-body text-muted-foreground">{t("blog.no_news")}</p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {newsOnly.map(item => (
+            <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {news.map((item) => (
                 <BlogCard key={item.id} item={item} />
               ))}
             </div>
@@ -189,64 +234,59 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Oral care guide */}
-      <section className="py-20 bg-background">
+      <section className="bg-background py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center mb-14">
-              <div>
-                <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("blog.hygiene.desc")}</p>
-                <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-5 leading-tight">
-                  {t("blog.hygiene.h2")}
-                </h2>
-                <p className="font-body text-muted-foreground text-base leading-relaxed mb-8">
-                  {t("blog.hygiene.desc")}
-                </p>
+          <div className="mx-auto grid max-w-5xl items-center gap-12 md:grid-cols-2">
+            <div>
+              <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("blog.hygiene.h2")}</p>
+              <h2 className="mb-5 font-display text-4xl font-bold text-navy md:text-5xl">{copy.headline}</h2>
+              <p className="mb-8 font-body text-base leading-relaxed text-muted-foreground">{copy.description}</p>
+              <div className="space-y-3">
+                {copy.bullets.map((bullet) => (
+                  <div key={bullet} className="flex items-start gap-3">
+                    <CheckCircle size={18} className="mt-0.5 shrink-0 text-gold" />
+                    <p className="font-body text-sm leading-7 text-foreground/80">{bullet}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 flex flex-wrap gap-4">
                 <a
                   href="/oral-care-guide.pdf"
                   download="Dentis-oral-care-guide.pdf"
-                  className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-medium text-sm shadow-gold-custom hover:scale-105 transition-all duration-200"
+                  className="inline-flex items-center gap-3 rounded-full gradient-gold px-7 py-3.5 font-body text-sm font-medium text-accent-foreground shadow-gold-custom transition-all duration-200 hover:scale-105"
                 >
                   <Download size={16} />
                   {t("blog.hygiene.download")}
                 </a>
-              </div>
-
-              <div className="bg-navy rounded-2xl p-8 shadow-card-custom relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-gold/10 blur-2xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-gold/10 blur-2xl pointer-events-none" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center flex-shrink-0">
-                      <BookOpen size={18} className="text-accent-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-display font-bold text-secondary text-base">{t("blog.hygiene.h2")}</p>
-                      <p className="font-body text-primary-foreground/50 text-xs">1 {lang === "uk" ? "сторінка" : "page"} · PDF</p>
-                    </div>
-                  </div>
-                  <ul className="space-y-3">
-                    {guidePoints.map(point => (
-                      <li key={point} className="flex items-center gap-3">
-                        <CheckCircle size={15} className="text-gold flex-shrink-0" />
-                        <span className="font-body text-primary-foreground/80 text-sm">{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <a
+                  href={localizePath("/contacts")}
+                  className="inline-flex items-center gap-3 rounded-full border border-gold/50 px-7 py-3.5 font-body text-sm font-medium text-gold transition-all duration-200 hover:bg-gold/10"
+                >
+                  <BookOpen size={16} />
+                  {lang === "uk" ? "Записатися на гігієну" : "Book hygiene visit"}
+                </a>
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {hygieneSteps.map(step => (
-                <div key={step.title} className="bg-card rounded-xl border border-border p-5 hover:border-gold/30 hover:shadow-sm transition-all duration-200">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xl mb-4">
-                    {step.icon}
+            <div className="relative overflow-hidden rounded-2xl bg-navy p-8 shadow-card-custom">
+              <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-gold/10 blur-2xl" />
+              <div className="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-gold/10 blur-2xl" />
+              <div className="relative z-10">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full gradient-gold">
+                    <BookOpen size={18} className="text-accent-foreground" />
                   </div>
-                  <h3 className="font-display font-bold text-custom-dark text-base mb-2">{step.title}</h3>
-                  <p className="font-body text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                  <div>
+                    <p className="font-display text-base font-bold text-secondary">{t("blog.hygiene.h2")}</p>
+                    <p className="font-body text-xs text-primary-foreground/50">PDF</p>
+                  </div>
                 </div>
-              ))}
+                <p className="mb-6 font-body text-sm leading-7 text-primary-foreground/80">{copy.description}</p>
+                <a href="tel:+380504800825" className="inline-flex items-center gap-3 rounded-full bg-secondary px-6 py-3 font-body text-sm font-semibold text-navy transition-opacity hover:opacity-90">
+                  <Phone size={16} />
+                  +38 050 480 08 25
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -256,7 +296,11 @@ export default function Blog() {
         <Footer />
       </section>
 
-      <a href="tel:+380504800825" className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden" aria-label="Зателефонувати">
+      <a
+        href="tel:+380504800825"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
+        aria-label="Call Dentis"
+      >
         <Phone size={22} />
       </a>
     </div>

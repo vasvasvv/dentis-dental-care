@@ -123,7 +123,7 @@ function NewsCard({
 
 export default function NewsSection() {
   const navigate = useNavigate();
-  const { lang, t } = useLang();
+  const { lang, localizePath, t } = useLang();
   const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [openId, setOpenId] = useState<number | null>(null);
@@ -188,7 +188,7 @@ export default function NewsSection() {
 
         <div className="text-center mt-10">
           <button
-            onClick={() => navigate("/blog")}
+            onClick={() => navigate(localizePath("/blog"))}
             className="inline-flex items-center gap-2 bg-gold border-gold-light/80 text-secondary hover:border hover:border-navy px-8 py-4 rounded-full transition-all duration-200 group"
           >
             <span>{t("news.allblog")}</span>

@@ -1,10 +1,15 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useEffect, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getLangFromPath, localizePath, stripLangFromPath } from "@/utils/seo";
 
 export type Lang = "uk" | "en";
 
 interface LanguageContextType {
   lang: Lang;
   toggleLang: () => void;
+  setLang: (lang: Lang) => void;
+  localizePath: (path: string, targetLang?: Lang) => string;
+  currentPath: string;
   t: (key: string) => string;
 }
 
@@ -287,21 +292,33 @@ const translations: Record<Lang, Record<string, string>> = {
 
 // ─── PROVIDER ────────────────────────────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(() => {
-    const saved = localStorage.getItem("dentis-lang");
-    if (saved === "uk" || saved === "en") return saved;
-    // browser language hint
-    const browser = navigator.language.toLowerCase();
-    return browser.startsWith("en") ? "en" : "uk";
-  });
+  const location = useLocation();
+  const navigate = useNavigate();
+  const lang = getLangFromPath(location.pathname) as Lang;
+  const currentPath = stripLangFromPath(location.pathname);
 
   const toggleLang = useCallback(() => {
-    setLang((prev) => {
-      const next: Lang = prev === "uk" ? "en" : "uk";
-      localStorage.setItem("dentis-lang", next);
-      return next;
-    });
-  }, []);
+    const next: Lang = lang === "uk" ? "en" : "uk";
+    navigate(localizePath(location.pathname, next));
+  }, [lang, location.pathname, navigate]);
+
+  const setLang = useCallback(
+    (nextLang: Lang) => {
+      navigate(localizePath(location.pathname, nextLang));
+    },
+    [location.pathname, navigate]
+  );
+
+  const getLocalizedPath = useCallback(
+    (path: string, targetLang: Lang = lang) => localizePath(path, targetLang),
+    [lang]
+  );
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    document.documentElement.lang = lang === "uk" ? "uk" : "en";
+  }, [lang]);
 
   const t = useCallback(
     (key: string) => translations[lang][key] ?? key,
@@ -309,7 +326,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <LanguageContext.Provider value={{ lang, toggleLang, t }}>
+    <LanguageContext.Provider value={{ lang, toggleLang, setLang, localizePath: getLocalizedPath, currentPath, t }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -16,15 +16,15 @@ const cardVariants: Variants = {
 
 export default function Services() {
   const navigate = useNavigate();
-  const { t } = useLang();
+  const { localizePath, t } = useLang();
 
   const services = [
-    { icon: Smile, titleKey: "services.s1title", descKey: "services.s1desc", tagKey: "services.s1tag", link: "/likuvannya-kariesu", featured: false },
-    { icon: Sparkles, titleKey: "services.s2title", descKey: "services.s2desc", tagKey: null, link: "/estetychna-stomatolohiya", featured: true },
-    { icon: Layers, titleKey: "services.s3title", descKey: "services.s3desc", tagKey: null, link: "/protezuvannya", featured: false },
-    { icon: Zap, titleKey: "services.s4title", descKey: "services.s4desc", tagKey: null, link: "/implantaciya", featured: false },
-    { icon: HeartPulse, titleKey: "services.s5title", descKey: "services.s5desc", tagKey: null, link: "/profesijne-ochischennya", featured: false },
-    { icon: ScanLine, titleKey: "services.s6title", descKey: "services.s6desc", tagKey: null, link: "/diagnostika-zubiv", featured: false },
+    { icon: Smile, titleKey: "services.s1title", descKey: "services.s1desc", tagKey: "services.s1tag", link: localizePath("/likuvannya-kariesu"), featured: false },
+    { icon: Sparkles, titleKey: "services.s2title", descKey: "services.s2desc", tagKey: null, link: localizePath("/estetychna-stomatolohiya"), featured: true },
+    { icon: Layers, titleKey: "services.s3title", descKey: "services.s3desc", tagKey: null, link: localizePath("/protezuvannya"), featured: false },
+    { icon: Zap, titleKey: "services.s4title", descKey: "services.s4desc", tagKey: null, link: localizePath("/implantaciya"), featured: false },
+    { icon: HeartPulse, titleKey: "services.s5title", descKey: "services.s5desc", tagKey: null, link: localizePath("/profesijne-ochischennya"), featured: false },
+    { icon: ScanLine, titleKey: "services.s6title", descKey: "services.s6desc", tagKey: null, link: localizePath("/diagnostika-zubiv"), featured: false },
   ];
 
   return (

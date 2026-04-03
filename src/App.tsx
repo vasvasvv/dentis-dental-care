@@ -1,29 +1,19 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import type { RouteRecord } from "vite-react-ssg";
 import { HelmetProvider } from "react-helmet-async";
+import { Outlet, useLocation } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import RouteSeo from "@/components/SEO/RouteSeo";
+import ScrollToTop from "@/components/ScrollToTop";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-
-const ScrollToTop = lazy(() => import("./components/ScrollToTop"));
-const Index = lazy(() => import("./pages/Index"));
-const Implantaciya = lazy(() => import("./pages/Implantaciya"));
-const Protezuvannya = lazy(() => import("./pages/Protezuvannya"));
-const LikuvannyaKariesu = lazy(() => import("./pages/LikuvannyaKariesu"));
-const ProfesijneOchischennya = lazy(() => import("./pages/ProfesijneOchischennya"));
-const EstetychnaStomatologiya = lazy(() => import("./pages/EstetychnaStomatologiya"));
-const DiagnostikaZubiv = lazy(() => import("./pages/DiagnostikaZubiv"));
-const Contacts = lazy(() => import("./pages/Contacts"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const PWAInstallBanner = lazy(() => import("./components/Pwainstallbanner"));
-const Blog = lazy(() => import("./pages/Blog"));
-const Admin = lazy(() => import("./pages/Admin"));
+import PWAInstallBanner from "./components/Pwainstallbanner";
 import { PushBanner } from "./components/PushBanner";
-import { useLocation } from "react-router-dom";
 
 function AppBanners() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/d-panel");
+
   if (isAdmin) return null;
+
   return (
     <>
       <PWAInstallBanner />
@@ -32,31 +22,111 @@ function AppBanners() {
   );
 }
 
-export default function App() {
+function Layout() {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <LanguageProvider>
-          <ScrollToTop />
-          <Suspense fallback={<div>Завантаження</div>}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/implantaciya" element={<Implantaciya />} />
-              <Route path="/protezuvannya" element={<Protezuvannya />} />
-              <Route path="/likuvannya-kariesu" element={<LikuvannyaKariesu />} />
-              <Route path="/profesijne-ochischennya" element={<ProfesijneOchischennya />} />
-              <Route path="/estetychna-stomatolohiya" element={<EstetychnaStomatologiya />} />
-              <Route path="/diagnostika-zubiv" element={<DiagnostikaZubiv />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/d-panel" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-          <AppBanners />
-          <ScrollToTopButton />
-        </LanguageProvider>
-      </BrowserRouter>
+      <LanguageProvider>
+        <RouteSeo />
+        <ScrollToTop />
+        <Outlet />
+        <AppBanners />
+        <ScrollToTopButton />
+      </LanguageProvider>
     </HelmetProvider>
   );
 }
+
+const publicRoutes = [
+  {
+    index: true,
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Index");
+      return { Component };
+    },
+  },
+  {
+    path: "implantaciya",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Implantaciya");
+      return { Component };
+    },
+  },
+  {
+    path: "protezuvannya",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Protezuvannya");
+      return { Component };
+    },
+  },
+  {
+    path: "likuvannya-kariesu",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/LikuvannyaKariesu");
+      return { Component };
+    },
+  },
+  {
+    path: "profesijne-ochischennya",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/ProfesijneOchischennya");
+      return { Component };
+    },
+  },
+  {
+    path: "estetychna-stomatolohiya",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/EstetychnaStomatologiya");
+      return { Component };
+    },
+  },
+  {
+    path: "diagnostika-zubiv",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/DiagnostikaZubiv");
+      return { Component };
+    },
+  },
+  {
+    path: "contacts",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Contacts");
+      return { Component };
+    },
+  },
+  {
+    path: "blog",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Blog");
+      return { Component };
+    },
+  },
+  {
+    path: "*",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/NotFound");
+      return { Component };
+    },
+  },
+] satisfies RouteRecord[];
+
+export const routes: RouteRecord[] = [
+  {
+    path: "/",
+    element: <Layout />,
+    children: publicRoutes,
+  },
+  {
+    path: "/en",
+    element: <Layout />,
+    children: publicRoutes,
+  },
+  {
+    path: "/d-panel",
+    lazy: async () => {
+      const { default: Component } = await import("./pages/Admin");
+      return { Component };
+    },
+  },
+];
+
+export default routes;
