@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import ReviewSchema from "@/components/SEO/ReviewSchema";
 import { useLang } from "@/contexts/LanguageContext";
 
 type Review = { name: string; rating: number; text: string; service: string; photo: string };
@@ -36,33 +37,37 @@ export default function Reviews() {
   const reviews: Review[] = base.map((item, index) => ({ ...item, photo: photos[index % photos.length] }));
 
   return (
-    <section id="reviews" className="section-block site-section">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-14">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("reviews.label")}</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">{t("reviews.h2")}</h2>
-        </div>
+    <>
+      <ReviewSchema id="homepage-reviews" reviews={reviews.map((rev) => ({ author: rev.name, rating: rev.rating, text: rev.text }))} />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviews.map((rev) => (
-            <div key={rev.name} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <img src={rev.photo} alt={rev.name} className="w-12 h-12 rounded-full object-cover border border-gold/30" loading="lazy" />
-                <div>
-                  <div className="font-display font-semibold text-custom-dark text-sm">{rev.name}</div>
-                  <div className="font-body text-xs text-muted-foreground">{rev.service}</div>
+      <section id="reviews" className="section-block site-section">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("reviews.label")}</p>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">{t("reviews.h2")}</h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reviews.map((rev) => (
+              <div key={rev.name} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={rev.photo} alt={`${rev.name} review for Dentis clinic`} className="w-12 h-12 rounded-full object-cover border border-gold/30" loading="lazy" />
+                  <div>
+                    <div className="font-display font-semibold text-custom-dark text-sm">{rev.name}</div>
+                    <div className="font-body text-xs text-muted-foreground">{rev.service}</div>
+                  </div>
                 </div>
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={14} className={i < rev.rating ? "fill-gold text-gold" : "text-muted"} />
+                  ))}
+                </div>
+                <p className="font-body text-foreground/80 text-sm leading-relaxed italic">"{rev.text}"</p>
               </div>
-              <div className="flex gap-0.5 mb-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} className={i < rev.rating ? "fill-gold text-gold" : "text-muted"} />
-                ))}
-              </div>
-              <p className="font-body text-foreground/80 text-sm leading-relaxed italic">«{rev.text}»</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

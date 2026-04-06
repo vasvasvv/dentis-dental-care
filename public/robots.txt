@@ -1,10 +1,7 @@
 User-agent: *
 Allow: /
-
-Disallow: /admin/
-Disallow: /test/
-Disallow: /private/
-Disallow: /login/
+Disallow: /admin
+Disallow: /api/
 
 Sitemap: https://dentis.kr.ua/sitemap.xml
-Crawl-delay: 1
+Sitemap: https://dentis.kr.ua/sitemap-en.xml

@@ -1,70 +1,111 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedServices from "@/components/RelatedServices";
+import PageSeo from "@/components/SEO/PageSeo";
+import ServiceSchema from "@/components/SEO/ServiceSchema";
 import { Phone, CheckCircle, Clock, Shield, Star } from "lucide-react";
-import { Helmet } from "react-helmet-async";
 import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { useLang } from "@/contexts/LanguageContext";
+import { trackServiceView } from "@/lib/gtmTracking";
+import { toAbsoluteUrl } from "@/utils/seo";
 
 const steps = [
-  { num: "01", title: "Консультація та діагностика", desc: "Оцінка стану кістки, планування імплантації." },
-  { num: "02", title: "Підготовка", desc: "Санація порожнини рота, за потреби — нарощування кістки (синус-ліфтинг)." },
-  { num: "03", title: "Встановлення імпланту", desc: "Хірургічний етап під місцевою анестезією. Займає 30–60 хвилин." },
-  { num: "04", title: "Остеоінтеграція", desc: "Імплант зростається з кісткою протягом 2–6 місяців." },
-  { num: "05", title: "Коронка", desc: "Виготовлення та фіксація коронки — відновлення повної функції зуба." },
+  {
+    num: "01",
+    title: "Консультація та діагностика",
+    desc: "Оцінка стану кістки, діагностика та планування імплантації з урахуванням вашої клінічної ситуації.",
+  },
+  {
+    num: "02",
+    title: "Підготовка",
+    desc: "Санація порожнини рота, а за потреби нарощування кістки або синус-ліфтинг перед встановленням імпланта.",
+  },
+  {
+    num: "03",
+    title: "Встановлення імпланта",
+    desc: "Хірургічний етап під місцевою анестезією. Зазвичай процедура триває близько 30-60 хвилин.",
+  },
+  {
+    num: "04",
+    title: "Остеоінтеграція",
+    desc: "Імплант зростається з кісткою протягом 2-6 місяців, після чого можна переходити до ортопедичного етапу.",
+  },
+  {
+    num: "05",
+    title: "Коронка",
+    desc: "Виготовлення та фіксація коронки для повного відновлення функції та естетики зуба.",
+  },
 ];
 
 const benefits = [
   "Імпланти від провідних світових виробників",
-  "19+ років досвіду імплантолога",
-  "Гарантія на імплант та роботу",
-  "Сучасна  діагностика",
-  "Безболісна анестезія",
+  "19+ років досвіду лікаря-імплантолога",
+  "Гарантія на імплант та виконану роботу",
+  "Сучасна цифрова діагностика",
+  "Безболісна місцева анестезія",
   "Індивідуальний план лікування",
 ];
 
 export default function Implantation() {
-        const videoRef = useRef<HTMLVideoElement>(null);
-  
-    useEffect(() => {
-      const video = videoRef.current;
-      if (video) {
-        video.play().catch(() => {});
-        video.playbackRate = 0.6;
-      }
-    }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { lang, localizePath } = useLang();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+      video.playbackRate = 0.6;
+    }
+  }, []);
+
+  useEffect(() => {
+    trackServiceView(lang === "uk" ? "Імплантація зубів" : "Dental implants", "implantaciya");
+  }, [lang]);
+
+  const description =
+    lang === "uk"
+      ? "Імплантація зубів у Кропивницькому в клініці Dentis: цифрова діагностика, сучасні імпланти та індивідуальний план відновлення посмішки."
+      : "Dental implants in Kropyvnytskyi at Dentis with digital diagnostics, modern implant systems and a tailored restoration plan.";
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>Імплантація зубів — Дентіс Кропивницький</title>
-        <meta name="description" content="Імплантація зубів у Кропивницькому. 19+ років досвіду, імпланти преміум-класу, приживлюваність 98%. Безкоштовна консультація." />
-        <link rel="canonical" href="https://dentis.kr.ua/implantaciya" />
-        <meta property="og:title" content="Імплантація зубів — Дентіс Кропивницький" />
-        <meta property="og:description" content="Повноцінне відновлення зуба. Приживлюваність 98%, гарантія 5 років, досвідчений імплантолог." />
-        <meta property="og:url" content="https://dentis.kr.ua/implantaciya" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/implantaciya"
+        title={{
+          uk: "Імплантація зубів у Кропивницькому | Ціни, відгуки — Dentis",
+          en: "Dental implants in Kropyvnytskyi | Prices, reviews — Dentis",
+        }}
+        description={{
+          uk: description,
+          en: description,
+        }}
+      />
+      <ServiceSchema
+        id="implantaciya-schema"
+        name={lang === "uk" ? "Імплантація зубів" : "Dental implants"}
+        description={description}
+        image={toAbsoluteUrl("/og-image-implantaciya.jpg")}
+      />
+
       <Header />
 
-      {/* Hero */}
       <section className="relative pt-36 pb-24 overflow-hidden">
-                              {/* Фіксований фон з відео */}
-      <div className="fixed inset-0 -z-10">
-        <video
-          ref={videoRef}
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 gradient-hero opacity-70" />
-      </div>
+        <div className="fixed inset-0 -z-10">
+          <video
+            ref={videoRef}
+            src={heroVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster="/hero-poster.webp"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 gradient-hero opacity-70" />
+        </div>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
@@ -75,7 +116,9 @@ export default function Implantation() {
             Імплантація зубів
           </h1>
           <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Повноцінне відновлення зуба, що виглядає та відчувається як рідний. Імплантація — найнадійніший довгостроковий спосіб замінити втрачений зуб.
+            Повноцінне відновлення зуба, що виглядає та відчувається як природний. Імплантація є
+            найнадійнішим довгостроковим способом замінити втрачений зуб і повернути комфорт під час
+            жування та усмішки.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
@@ -86,7 +129,7 @@ export default function Implantation() {
               Записатися на консультацію
             </a>
             <a
-              href="/contacts"
+              href={localizePath("/contacts")}
               className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
             >
               Контакти
@@ -95,14 +138,15 @@ export default function Implantation() {
         </div>
       </section>
 
-      {/* Benefits */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center max-w-5xl mx-auto">
             <div>
               <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Переваги</p>
               <h2 className="font-display text-4xl font-bold text-navy mb-8 gold-line">
-                Чому обирають<br />імплантацію у нас?
+                Чому обирають
+                <br />
+                імплантацію у нас?
               </h2>
               <ul className="space-y-3">
                 {benefits.map((b) => (
@@ -131,7 +175,6 @@ export default function Implantation() {
         </div>
       </section>
 
-      {/* Steps */}
       <section className="py-20 bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -152,12 +195,12 @@ export default function Implantation() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 bg-background text-center">
         <div className="container mx-auto px-4">
           <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Готові відновити посмішку?</h2>
           <p className="font-body text-primary-text-custom-dark/60 mb-8 max-w-md mx-auto">
-            Запишіться на безкоштовну консультацію та дізнайтесь план лікування для вашого випадку.
+            Запишіться на консультацію та дізнайтеся, який план імплантації буде оптимальним саме для
+            вашого випадку.
           </p>
           <a
             href="tel:+380504800825"
@@ -169,9 +212,9 @@ export default function Implantation() {
         </div>
       </section>
 
+      <RelatedServices currentService="implantaciya" />
 
       <Footer />
-
 
       <a
         href="tel:+380504800825"

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import doctorVerhovsky from "@/assets/doctor-verhovsky.webp";
 import doctorFemale from "@/assets/galch.webp";
 import { getPublicDoctors, type PublicDoctor } from "@/lib/publicApi";
+import { generateImageUrl } from "@/lib/imageOptimization";
 import { useLang } from "@/contexts/LanguageContext";
 
 type DoctorCard = {
@@ -66,15 +67,9 @@ export default function Doctors() {
     <section id="doctors" className="section-block site-section">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">
-            {t("doctors.label")}
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-2 gold-line-center">
-            {t("doctors.h2")}
-          </h2>
-          <p className="font-body text-muted-foreground max-w-xl mx-auto mt-5">
-            {t("doctors.desc")}
-          </p>
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("doctors.label")}</p>
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy mb-2 gold-line-center">{t("doctors.h2")}</h2>
+          <p className="font-body text-muted-foreground max-w-xl mx-auto mt-5">{t("doctors.desc")}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -84,19 +79,23 @@ export default function Doctors() {
               className="bg-card border border-border rounded-2xl overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
               <div className="aspect-[4/3] overflow-hidden bg-muted/30">
-                <img
-                  src={doctor.img}
-                  alt={doctor.name}
-                  className="w-full h-full object-contain object-center p-2"
-                  loading="lazy"
-                />
+                <picture>
+                  <source srcSet={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 82 })} type="image/webp" />
+                  <img
+                    src={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 85 })}
+                    alt={`${doctor.name} стоматолог Dentis у Кропивницькому`}
+                    className="w-full h-full object-contain object-center p-2"
+                    loading="lazy"
+                    decoding="async"
+                    width={640}
+                    height={480}
+                  />
+                </picture>
               </div>
               <div className="p-6">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-display font-bold text-custom-dark text-xl leading-tight">
-                      {doctor.name}
-                    </h3>
+                    <h3 className="font-display font-bold text-custom-dark text-xl leading-tight">{doctor.name}</h3>
                     <p className="font-body text-gold text-sm font-medium mt-1">{doctor.title}</p>
                   </div>
                 </div>

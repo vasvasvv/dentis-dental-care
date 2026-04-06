@@ -10,7 +10,7 @@ export const createApp = ViteReactSSG({ routes }, ({ isClient }) => {
       if (placeholder) placeholder.style.display = "none";
     });
 
-    // Register SW after page is idle вЂ” keeps it off the critical path
+    // Register SW after page is idle to keep it off the critical path
     if ("serviceWorker" in navigator) {
       const registerSW = () => {
         import("virtual:pwa-register").then(({ registerSW }) => {

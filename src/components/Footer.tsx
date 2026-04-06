@@ -99,7 +99,7 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-gold/70 pt-7 md:flex-row">
           <p className="font-body text-xs text-primary-foreground/60">
-            В© {new Date().getFullYear()} Дентіс. {t("footer.rights")}
+            © {new Date().getFullYear()} Дентіс. {t("footer.rights")}
           </p>
           <p className="font-body text-xs text-primary-foreground/60">Верховський Олександр Олександрович</p>
         </div>

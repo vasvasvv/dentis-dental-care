@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 
 import {
   Plus, Pencil, Trash2, Send, X, Check, LogOut,
@@ -30,7 +29,7 @@ function validatePhone(raw: string): string | null {
   return null
 }
 
-// ─── Shared ───────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Shared в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function TabButton({ active, onClick, icon, label }: {
   active: boolean; onClick: () => void; icon: React.ReactNode; label: string;
@@ -112,7 +111,7 @@ function ModalShell({ title, onClose, children }: { title: string; onClose: () =
   );
 }
 
-// ─── News Tab ─────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ News Tab в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function NewsTab({ token }: { token: string }) {
   const [items, setItems] = useState<NewsItem[]>([]);
@@ -263,7 +262,7 @@ function NewsTab({ token }: { token: string }) {
   );
 }
 
-// ─── Doctors Tab ──────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Doctors Tab в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function DoctorsTab({ token }: { token: string }) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -456,7 +455,7 @@ function ManualPushModal({ appt, token, onClose, onSent }: {
           <BellRing size={16} className="text-[hsl(38_62%_52%)] flex-shrink-0" />
           <div className="min-w-0">
             <p className="text-[hsl(40_30%_90%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{appt.patient_name}</p>
-            <p className="text-[hsl(180_20%_50%)] text-xs">{appt.phone} · {date} {time}</p>
+            <p className="text-[hsl(180_20%_50%)] text-xs">{appt.phone} В· {date} {time}</p>
           </div>
         </div>
 
@@ -489,7 +488,7 @@ function ManualPushModal({ appt, token, onClose, onSent }: {
   );
 }
 
-// ─── Appointments Tab ─────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Appointments Tab в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 type Appointment = {
   id: number;
@@ -523,7 +522,7 @@ function formatApptDt(dt: string) {
   };
 }
 
-// ─── iOS-style drum roller picker ─────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ iOS-style drum roller picker в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function DrumColumn({
   items, selectedIndex, onSelect, width,
@@ -888,12 +887,12 @@ function AppointmentsTab({ token }: { token: string }) {
   );
 }
 
-// ─── Push Tab ─────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Push Tab в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function PushTab({ token }: { token: string }) {
   const [pushTab, setPushTab] = useState<'all' | 'phone'>('all');
 
-  // ── Broadcast ──
+  // в”Ђв”Ђ Broadcast в”Ђв”Ђ
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("/");
@@ -902,7 +901,7 @@ function PushTab({ token }: { token: string }) {
   const [subCount, setSubCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Send to phone ──
+  // в”Ђв”Ђ Send to phone в”Ђв”Ђ
   const [pPhone, setPPhone] = useState("");
   const [pTitle, setPTitle] = useState("");
   const [pBody, setPBody] = useState("");
@@ -1067,7 +1066,7 @@ function PushTab({ token }: { token: string }) {
 }
 
 
-// ─── Telegram Tab ─────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Telegram Tab в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 type TgPending = { id: number; chat_id: string; first_name: string; created_at: string };
 
@@ -1225,7 +1224,7 @@ function TelegramTab({ token }: { token: string }) {
         <button style={subTabStyle(subTab === 'settings')} onClick={() => setSubTab('settings')}>Налаштування</button>
       </div>
 
-      {/* ── Appointments sub-tab ── */}
+      {/* в”Ђв”Ђ Appointments sub-tab в”Ђв”Ђ */}
       {subTab === 'appointments' && (
         <div>
           <div className="flex items-center justify-between mb-5">
@@ -1328,7 +1327,7 @@ function TelegramTab({ token }: { token: string }) {
                   <MessageCircle size={16} className="flex-shrink-0" style={{ color: 'hsl(200 80% 65%)' }} />
                   <div className="min-w-0">
                     <p className="text-[hsl(40_30%_90%)] text-sm font-medium truncate" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>{sendModal.patient_name}</p>
-                    <p className="text-[hsl(180_20%_50%)] text-xs">{sendModal.phone} · chat_id: {sendModal.telegram_chat_id}</p>
+                    <p className="text-[hsl(180_20%_50%)] text-xs">{sendModal.phone} В· chat_id: {sendModal.telegram_chat_id}</p>
                   </div>
                 </div>
                 <div>
@@ -1356,7 +1355,7 @@ function TelegramTab({ token }: { token: string }) {
         </div>
       )}
 
-      {/* ── Pending sub-tab ── */}
+      {/* в”Ђв”Ђ Pending sub-tab в”Ђв”Ђ */}
       {subTab === 'pending' && (
         <div>
           <div className="flex items-center justify-between mb-5">
@@ -1422,8 +1421,8 @@ function TelegramTab({ token }: { token: string }) {
                   )}
                 </div>
                 {linkResult && (
-                  <div className={`rounded-xl px-3 py-2.5 text-sm text-center ${linkResult.startsWith('✓') ? 'text-green-400' : 'text-[hsl(38_62%_55%)]'}`}
-                    style={{ background: linkResult.startsWith('✓') ? 'hsl(150 50% 12%)' : 'hsl(38 40% 12%)', border: `1px solid ${linkResult.startsWith('✓') ? 'hsl(150 50% 25%)' : 'hsl(38 40% 25%)'}` }}>
+                  <div className={`rounded-xl px-3 py-2.5 text-sm text-center ${linkResult.startsWith('вњ“') ? 'text-green-400' : 'text-[hsl(38_62%_55%)]'}`}
+                    style={{ background: linkResult.startsWith('вњ“') ? 'hsl(150 50% 12%)' : 'hsl(38 40% 12%)', border: `1px solid ${linkResult.startsWith('вњ“') ? 'hsl(150 50% 25%)' : 'hsl(38 40% 25%)'}` }}>
                     {linkResult}
                   </div>
                 )}
@@ -1441,7 +1440,7 @@ function TelegramTab({ token }: { token: string }) {
         </div>
       )}
 
-      {/* ── Settings sub-tab ── */}
+      {/* в”Ђв”Ђ Settings sub-tab в”Ђв”Ђ */}
       {subTab === 'settings' && (
         <div className="max-w-xl space-y-5">
           {/* Bot link */}
@@ -1477,7 +1476,7 @@ function TelegramTab({ token }: { token: string }) {
   );
 }
 
-// ─── Login ────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Login в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
   const [password, setPassword] = useState("");
@@ -1547,7 +1546,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђв”Ђ Main в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 const SESSION_KEY = 'dentis-admin-jwt'
 
@@ -1563,6 +1562,22 @@ export default function Admin() {
     }
   }, []);
 
+  useEffect(() => {
+    const previousTitle = document.title;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    const previousThemeColor = themeMeta?.getAttribute("content") ?? null;
+
+    document.title = "Керування";
+    themeMeta?.setAttribute("content", "#0d1f1f");
+
+    return () => {
+      document.title = previousTitle;
+      if (themeMeta && previousThemeColor) {
+        themeMeta.setAttribute("content", previousThemeColor);
+      }
+    };
+  }, []);
+
   const handleLogin = (jwtToken: string) => {
     localStorage.setItem(SESSION_KEY, jwtToken);
     setToken(jwtToken);
@@ -1576,11 +1591,6 @@ export default function Admin() {
   if (!token) return <LoginScreen onLogin={handleLogin} />;
 
   return (
-    <>
-      <Helmet>
-        <title>Керування</title>
-        <meta name="theme-color" content="#0d1f1f" />
-      </Helmet>
     <div className="min-h-screen" style={{ background: "hsl(180 60% 8%)" }}>
       <div className="sticky top-0 z-30" style={{
         background: "hsl(180 60% 10% / 0.95)", backdropFilter: "blur(12px)",
@@ -1618,9 +1628,7 @@ export default function Admin() {
         {tab === "doctors" && <DoctorsTab token={token} />}
         {tab === "appointments" && <AppointmentsTab token={token} />}
         {tab === "push" && <PushTab token={token} />}
-        {tab === "telegram" && <TelegramTab token={token} />}
       </div>
     </div>
-    </>
   );
 }

@@ -1,161 +1,181 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Phone, CheckCircle } from "lucide-react";
-import { Helmet } from "react-helmet-async";
-import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { CheckCircle, Phone } from "lucide-react";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import RelatedServices from "@/components/RelatedServices";
+import PageSeo from "@/components/SEO/PageSeo";
+import ServiceSchema from "@/components/SEO/ServiceSchema";
+import { useLang } from "@/contexts/LanguageContext";
+import heroVideo from "@/assets/hero-video.mp4";
+import { trackServiceCtaClick, trackServiceView } from "@/lib/gtmTracking";
+import { toAbsoluteUrl } from "@/utils/seo";
 
-const types = [
-  {
-    title: "Металокерамічні коронки",
-    desc: "Надійні, доступні, з металевим каркасом та керамічним покриттям. Відмінне поєднання міцності та естетики.",
-    tag: "Популярно",
-  },
-  {
-    title: "Безметалова кераміка",
-    desc: "Найприродніший вигляд. Ідеально підходить для фронтальних зубів. Повністю прозора та природна.",
-    tag: "Преміум",
-  },
-  {
-    title: "Цирконієві коронки",
-    desc: "Максимальна міцність та естетика. Не окислюються, не викликають алергії, виглядають як рідні зуби.",
-    tag: "Рекомендуємо",
-  },
-  {
-    title: "Мостоподібні протези",
-    desc: "Відновлення кількох відсутніх зубів поспіль. Спирається на сусідні зуби або імпланти.",
-  },
-  {
-    title: "Знімні протези",
-    desc: "Повне або часткове відновлення зубного ряду. Сучасні матеріали забезпечують комфорт та природний вигляд.",
-  },
-  {
-    title: "Протезування на імплантах",
-    desc: "Найстабільніше рішення — коронка або міст, що кріпиться до імплантів. Не потребує препарування сусідніх зубів.",
-    tag: "Оптимально",
-  },
-];
+const types = {
+  uk: [
+    { title: "Металокерамічні коронки", desc: "Надійне рішення для відновлення жувальних зубів із хорошим балансом міцності, естетики та вартості.", tag: "Популярно" },
+    { title: "Безметалева кераміка", desc: "Максимально природний вигляд для фронтальної групи зубів із точним відтінком та прозорістю.", tag: "Преміум" },
+    { title: "Цирконієві коронки", desc: "Висока міцність, біосумісність і стабільна естетика для довготривалого відновлення.", tag: "Рекомендуємо" },
+    { title: "Мостоподібні протези", desc: "Відновлення одного або кількох відсутніх зубів із фіксацією на сусідні опори або імпланти." },
+    { title: "Знімні протези", desc: "Сучасні конструкції для часткової або повної адентії з комфортною адаптацією." },
+    { title: "Протезування на імплантах", desc: "Стабільне функціональне рішення без перевантаження сусідніх зубів.", tag: "Оптимально" },
+  ],
+  en: [
+    { title: "Metal-ceramic crowns", desc: "A dependable option for restoring chewing teeth with a strong balance of durability, aesthetics and cost.", tag: "Popular" },
+    { title: "All-ceramic crowns", desc: "A natural-looking choice for front teeth with precise shade matching and translucency.", tag: "Premium" },
+    { title: "Zirconia crowns", desc: "High strength, biocompatibility and stable aesthetics for long-term restoration.", tag: "Recommended" },
+    { title: "Bridges", desc: "Restoration of one or several missing teeth supported by adjacent teeth or implants." },
+    { title: "Removable dentures", desc: "Modern full or partial dentures designed for comfortable daily adaptation." },
+    { title: "Implant-supported prosthetics", desc: "A stable functional solution that avoids overloading neighbouring teeth.", tag: "Optimal" },
+  ],
+};
 
-const steps = [
-  { num: "01", title: "Огляд і консультація", desc: "Оцінка стану зубів, вибір матеріалу та конструкції протеза." },
-  { num: "02", title: "Підготовка зубів", desc: "Препарування опорних зубів, зняття відбитків або цифровий скан." },
-  { num: "03", title: "Виготовлення", desc: "Тимчасова коронка на час виготовлення постійної в зуботехнічній лабораторії." },
-  { num: "04", title: "Фіксація", desc: "Примірка, корекція за потреби та постійна цементація коронки." },
-];
+const steps = {
+  uk: [
+    { num: "01", title: "Огляд і планування", desc: "Лікар оцінює стан зубів, прикус і підбирає оптимальний тип ортопедичної конструкції." },
+    { num: "02", title: "Підготовка зубів", desc: "Проводиться препарування опорних зубів, зняття відбитків або цифрове сканування." },
+    { num: "03", title: "Виготовлення", desc: "Технік створює конструкцію в лабораторії, а за потреби встановлюється тимчасова коронка." },
+    { num: "04", title: "Фіксація", desc: "Після примірки та корекції протез фіксується, перевіряється комфорт і контакт у прикусі." },
+  ],
+  en: [
+    { num: "01", title: "Assessment and planning", desc: "The dentist evaluates tooth condition, bite and chooses the appropriate prosthetic option." },
+    { num: "02", title: "Tooth preparation", desc: "Supporting teeth are prepared and impressions or a digital scan are taken." },
+    { num: "03", title: "Fabrication", desc: "The restoration is made in the lab, and a temporary crown can be placed if needed." },
+    { num: "04", title: "Placement", desc: "After try-in and adjustments, the restoration is fixed and bite comfort is checked." },
+  ],
+};
+
+const advantages = {
+  uk: [
+    "Матеріали від перевірених виробників",
+    "Точний підбір кольору та форми під усмішку пацієнта",
+    "Цифрове сканування замість дискомфортних відбитків у багатьох випадках",
+    "Контроль прикусу та функціональності після фіксації",
+    "Планування як для одиночних коронок, так і для повної реабілітації",
+    "Зрозуміле пояснення варіантів до початку лікування",
+  ],
+  en: [
+    "Materials from trusted manufacturers",
+    "Precise shade and shape matching for each smile",
+    "Digital scanning instead of uncomfortable impressions in many cases",
+    "Bite and function control after placement",
+    "Planning for both single crowns and full-mouth rehabilitation",
+    "Clear explanation of options before treatment begins",
+  ],
+};
 
 export default function Protezuvannya() {
-        const videoRef = useRef<HTMLVideoElement>(null);
-    
-      useEffect(() => {
-        const video = videoRef.current;
-        if (video) {
-          video.play().catch(() => {});
-          video.playbackRate = 0.6;
-        }
-      }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { lang, localizePath } = useLang();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
+  }, []);
+
+  useEffect(() => {
+    trackServiceView(lang === "uk" ? "Протезування зубів" : "Dental prosthetics", "protezuvannya");
+  }, [lang]);
+
+  const description =
+    lang === "uk"
+      ? "Протезування зубів у Кропивницькому в Dentis: коронки, мости, знімні та незнімні конструкції для відновлення функції й естетики."
+      : "Dental prosthetics in Kropyvnytskyi at Dentis: crowns, bridges and removable or fixed restorations for function and aesthetics.";
+
+  const pageTypes = types[lang];
+  const pageSteps = steps[lang];
+  const pageAdvantages = advantages[lang];
+  const serviceName = lang === "uk" ? "Протезування зубів" : "Dental prosthetics";
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>Протезування зубів — Дентіс Кропивницький</title>
-        <meta name="description" content="Протезування зубів у Кропивницькому: коронки, мости, знімні протези, протезування на імплантах. Цирконій, металокераміка, безметалова кераміка." />
-        <link rel="canonical" href="https://dentis.kr.ua/protezuvannya" />
-        <meta property="og:title" content="Протезування зубів — Дентіс Кропивницький" />
-        <meta property="og:description" content="Відновлюємо функцію та красу зубів. Коронки, мости, знімні та незнімні протези від досвідчених фахівців." />
-        <meta property="og:url" content="https://dentis.kr.ua/protezuvannya" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/protezuvannya"
+        title={{
+          uk: "Протезування зубів у Кропивницькому | Коронки, мости — Dentis",
+          en: "Dental prosthetics in Kropyvnytskyi | Crowns, bridges — Dentis",
+        }}
+        description={{
+          uk: description,
+          en: description,
+        }}
+      />
+      <ServiceSchema
+        id="protezuvannya-schema"
+        name={serviceName}
+        description={description}
+        image={toAbsoluteUrl("/og-image-protezuvannya.jpg")}
+      />
+
       <Header />
 
-      {/* Hero */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
-                              {/* Фіксований фон з відео */}
-      <div className="fixed inset-0 -z-10">
-        <video
-          ref={videoRef}
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 gradient-hero opacity-70" />
-      </div>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
+      <section className="relative overflow-hidden pb-24 pt-36">
+        <div className="fixed inset-0 -z-10">
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Протезування зубів
-          </h1>
-          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Відновлюємо функцію та красу зубів за допомогою сучасних матеріалів та технологій. Від одиночних коронок до повного протезування.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-gold blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-gold blur-3xl" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
+          <p className="mb-4 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Послуги" : "Services"}</p>
+          <h1 className="mb-6 max-w-2xl font-display text-5xl font-bold leading-tight text-secondary md:text-6xl">{lang === "uk" ? "Протезування зубів" : "Dental prosthetics"}</h1>
+          <p className="mb-10 max-w-xl font-body text-lg leading-relaxed text-primary-foreground/70">{description}</p>
+          <div className="flex flex-col gap-4 sm:flex-row">
             <a
               href="tel:+380504800825"
-              className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+              onClick={() => trackServiceCtaClick(serviceName, "protezuvannya", "phone", "hero")}
+              className="flex items-center justify-center gap-3 rounded-full gradient-gold px-8 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
             >
               <Phone size={18} />
-              Записатися на консультацію
+              {lang === "uk" ? "Записатися на консультацію" : "Book consultation"}
             </a>
             <a
-              href="/contacts"
-              className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              href={localizePath("/contacts")}
+              onClick={() => trackServiceCtaClick(serviceName, "protezuvannya", "contacts", "hero")}
+              className="flex items-center justify-center gap-2 rounded-full border border-gold/60 px-8 py-4 font-body text-base font-medium text-gold transition-all duration-200 hover:bg-gold/10"
             >
-              Контакти
+              {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
           </div>
         </div>
       </section>
 
-      {/* Types */}
-      <section className="py-20 bg-background">
+      <section className="bg-background py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Варіанти</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Види протезування</h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Варіанти" : "Options"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Види протезування" : "Types of prosthetics"}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {types.map((t) => (
-              <div
-                key={t.title}
-                className="bg-card border border-border rounded-2xl p-7 shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative"
-              >
-                {t.tag && (
-                  <span className="absolute top-4 right-4 text-[10px] uppercase bg-gold/15 text-gold px-2.5 py-1 rounded-full font-body font-semibold">
-                    {t.tag}
-                  </span>
-                )}
-                <h3 className="font-display font-bold text-custom-dark text-lg mb-3 pr-16">{t.title}</h3>
-                <p className="font-body text-muted-foreground text-sm leading-relaxed">{t.desc}</p>
+          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pageTypes.map((item) => (
+              <div key={item.title} className="relative rounded-2xl border border-border bg-card p-7 shadow-card-custom transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                {item.tag && <span className="absolute right-4 top-4 rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-body font-semibold uppercase text-gold">{item.tag}</span>}
+                <h3 className="mb-3 pr-16 font-display text-lg font-bold text-custom-dark">{item.title}</h3>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="py-20 bg-cream-dark">
+      <section className="bg-cream-dark py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Процес</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Як проходить протезування</h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Процес" : "Process"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Як проходить протезування" : "How prosthetics works"}</h2>
           </div>
-          <div className="max-w-3xl mx-auto space-y-6">
-            {steps.map((step) => (
-              <div key={step.num} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom flex gap-6 items-start">
-                <span className="font-display text-4xl font-bold text-gold/30 shrink-0 leading-none">{step.num}</span>
+          <div className="mx-auto max-w-3xl space-y-6">
+            {pageSteps.map((step) => (
+              <div key={step.num} className="flex items-start gap-6 rounded-2xl border border-border bg-card p-6 shadow-card-custom">
+                <span className="shrink-0 font-display text-4xl font-bold leading-none text-gold/30">{step.num}</span>
                 <div>
-                  <h3 className="font-display font-bold text-custom-dark text-lg mb-2">{step.title}</h3>
-                  <p className="font-body text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="mb-2 font-display text-lg font-bold text-custom-dark">{step.title}</h3>
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -163,23 +183,15 @@ export default function Protezuvannya() {
         </div>
       </section>
 
-      {/* Why us */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Наші переваги</h2>
+      <section className="bg-background py-20">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Наші переваги" : "Why patients choose Dentis"}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              "Матеріали від перевірених виробників",
-              "Власна зуботехнічна мережа партнерів",
-              "Цифровий скан — без неприємних відбитків",
-              "Тимчасова коронка на весь час виготовлення",
-              "Гарантія на коронку та роботу",
-              "Безвідсоткова розстрочка",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3 bg-card border border-border rounded-xl p-4">
-                <CheckCircle size={18} className="text-gold shrink-0 mt-0.5" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pageAdvantages.map((item) => (
+              <div key={item} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+                <CheckCircle size={18} className="mt-0.5 shrink-0 text-gold" />
                 <span className="font-body text-sm text-foreground/80">{item}</span>
               </div>
             ))}
@@ -187,31 +199,32 @@ export default function Protezuvannya() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-cream-dark text-center">
+      <section className="bg-cream-dark py-20 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Відновіть посмішку сьогодні</h2>
-          <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
-            Безкоштовна консультація — оберіть найкращий варіант протезування разом з лікарем.
+          <h2 className="mb-4 font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Потрібно відновити зуб або усмішку?" : "Need to restore a tooth or your smile?"}</h2>
+          <p className="mx-auto mb-8 max-w-md font-body text-primary-custom-dark/60">
+            {lang === "uk" ? "Запишіться на консультацію, щоб отримати зрозумілий план протезування з підбором оптимальної конструкції." : "Book a consultation to receive a clear prosthetic treatment plan tailored to your case."}
           </p>
           <a
             href="tel:+380504800825"
-            className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-10 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+            onClick={() => trackServiceCtaClick(serviceName, "protezuvannya", "phone", "footer_cta")}
+            className="inline-flex items-center gap-3 rounded-full gradient-gold px-10 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
           >
             <Phone size={18} />
-            Зателефонувати
+            {lang === "uk" ? "Зателефонувати" : "Call now"}
           </a>
         </div>
       </section>
 
+      <RelatedServices currentService="protezuvannya" />
 
       <Footer />
 
-
       <a
         href="tel:+380504800825"
-        className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"
-        aria-label="Зателефонувати"
+        onClick={() => trackServiceCtaClick(serviceName, "protezuvannya", "phone", "mobile_fab")}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
+        aria-label={lang === "uk" ? "Зателефонувати" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>

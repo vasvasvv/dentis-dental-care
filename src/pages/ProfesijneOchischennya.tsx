@@ -1,134 +1,184 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Phone, CheckCircle, Clock, Star } from "lucide-react";
-import { Helmet } from "react-helmet-async";
-import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { CheckCircle, Clock, Phone, Star } from "lucide-react";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import RelatedServices from "@/components/RelatedServices";
+import PageSeo from "@/components/SEO/PageSeo";
+import ServiceSchema from "@/components/SEO/ServiceSchema";
+import { useLang } from "@/contexts/LanguageContext";
+import heroVideo from "@/assets/hero-video.mp4";
+import { trackServiceCtaClick, trackServiceView } from "@/lib/gtmTracking";
+import { toAbsoluteUrl } from "@/utils/seo";
 
-const steps = [
-  { num: "01", title: "Огляд", desc: "Стоматолог оцінює стан ясен та зубів, наявність каменю та нальоту." },
-  { num: "02", title: "Ультразвукова чистка", desc: "Видалення зубного каменю за допомогою ультразвукового скейлера." },
-  { num: "03", title: "Air Flow", desc: "Очищення нальоту між зубами та в ясеневих кишенях струменем повітря та порошку." },
-  { num: "04", title: "Полірування", desc: "Полірування поверхонь зубів спеціальними пастами — зуби стають гладенькими." },
-  { num: "05", title: "Фторування", desc: "Нанесення фторвмісного лаку для зміцнення емалі та захисту від карієсу." },
-];
+const steps = {
+  uk: [
+    { num: "01", title: "Огляд", desc: "Стоматолог оцінює стан ясен, наліт, зубний камінь та індивідуальні показання до процедури." },
+    { num: "02", title: "Ультразвукова чистка", desc: "Знімаємо твердий зубний камінь з емалі та пришийкових ділянок." },
+    { num: "03", title: "Air Flow", desc: "Прибираємо пігментований наліт і поліруємо важкодоступні зони дрібнодисперсним порошком." },
+    { num: "04", title: "Полірування", desc: "Гладка поверхня зуба менше утримує наліт і довше зберігає відчуття чистоти." },
+    { num: "05", title: "Рекомендації", desc: "Пояснюємо домашній догляд, інтервали повторної гігієни та профілактику карієсу." },
+  ],
+  en: [
+    { num: "01", title: "Examination", desc: "The dentist evaluates gums, plaque, tartar and your individual indications for hygiene." },
+    { num: "02", title: "Ultrasonic scaling", desc: "Hard tartar is removed from enamel and cervical areas." },
+    { num: "03", title: "Air Flow", desc: "Pigmented plaque is removed and difficult areas are polished with fine powder." },
+    { num: "04", title: "Polishing", desc: "A smooth tooth surface helps reduce plaque retention and keeps the clean feeling longer." },
+    { num: "05", title: "Recommendations", desc: "You receive home-care advice, repeat hygiene timing and prevention guidance." },
+  ],
+};
 
-const benefits = [
-  "Видалення зубного каменю та нальоту",
-  "Профілактика карієсу та хвороб ясен",
-  "Освіжає дихання",
-  "Зуби стають на 1–2 тони світлішими",
-  "Рекомендовано кожні 6 місяців",
-  "Безболісно та комфортно",
-];
+const benefits = {
+  uk: [
+    "Видалення зубного каменю та м'якого нальоту",
+    "Профілактика карієсу та захворювань ясен",
+    "Свіжіше дихання та чистіша емаль",
+    "Підготовка до лікування, відбілювання чи протезування",
+    "Рекомендований інтервал повторення кожні 6 місяців",
+    "Комфортна процедура з видимим результатом одразу",
+  ],
+  en: [
+    "Removal of tartar and soft plaque",
+    "Prevention of caries and gum disease",
+    "Fresher breath and cleaner enamel",
+    "Preparation for treatment, whitening or prosthetics",
+    "Recommended repeat interval every 6 months",
+    "A comfortable procedure with immediate visible results",
+  ],
+};
 
-export default function ProfessionalCleaning() {
-        const videoRef = useRef<HTMLVideoElement>(null);
-  
-    useEffect(() => {
-      const video = videoRef.current;
-      if (video) {
-        video.play().catch(() => {});
-        video.playbackRate = 0.6;
-      }
-    }, []);
+const targetGroups = {
+  uk: [
+    { title: "Курці", desc: "Нікотиновий наліт майже неможливо прибрати домашніми засобами." },
+    { title: "Любителі кави та чаю", desc: "Пігментація від напоїв поступово накопичується навіть при хорошій гігієні." },
+    { title: "Пацієнти з брекетами", desc: "Професійна чистка допомагає контролювати наліт у складних зонах навколо системи." },
+    { title: "Перед відбілюванням", desc: "Чиста поверхня емалі потрібна для прогнозованого естетичного результату." },
+    { title: "Перед протезуванням", desc: "Здорова та очищена ротова порожнина покращує старт ортопедичного лікування." },
+    { title: "Усім раз на 6 місяців", desc: "Базова профілактика для підтримки здоров'я зубів та ясен." },
+  ],
+  en: [
+    { title: "Smokers", desc: "Nicotine staining is difficult to remove with home care alone." },
+    { title: "Coffee and tea drinkers", desc: "Beverage pigmentation accumulates gradually even with decent brushing habits." },
+    { title: "Patients with braces", desc: "Professional hygiene helps control plaque in hard-to-clean areas around the appliance." },
+    { title: "Before whitening", desc: "Clean enamel is essential for a predictable aesthetic result." },
+    { title: "Before prosthetics", desc: "A clean and healthy oral environment improves the start of restorative treatment." },
+    { title: "Everyone every 6 months", desc: "A basic prevention step for maintaining healthy teeth and gums." },
+  ],
+};
+
+export default function ProfesijneOchischennya() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { lang, localizePath } = useLang();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
+  }, []);
+
+  useEffect(() => {
+    trackServiceView(lang === "uk" ? "Професійне чищення зубів" : "Professional teeth cleaning", "profesijne-ochischennya");
+  }, [lang]);
+
+  const description =
+    lang === "uk"
+      ? "Професійне чищення зубів у Кропивницькому в Dentis: ультразвук, Air Flow, полірування та профілактика карієсу й захворювань ясен."
+      : "Professional teeth cleaning in Kropyvnytskyi at Dentis: ultrasonic scaling, Air Flow, polishing and prevention of caries and gum disease.";
+
+  const pageSteps = steps[lang];
+  const pageBenefits = benefits[lang];
+  const pageTargetGroups = targetGroups[lang];
+  const serviceName = lang === "uk" ? "Професійне чищення зубів" : "Professional teeth cleaning";
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>Професійна гігієна зубів — Дентіс Кропивницький</title>
-        <meta name="description" content="Професійна чистка зубів у Кропивницькому: ультразвук, Air Flow, полірування, фторування. Акція — знижка 15% до 31 березня 2026." />
-        <link rel="canonical" href="https://dentis.kr.ua/profesijne-ochischennya" />
-        <meta property="og:title" content="Професійна гігієна зубів — Дентіс Кропивницький" />
-        <meta property="og:description" content="Комплексне очищення зубів. Видалення каменю, Air Flow, полірування, фторування. Результат помітний відразу." />
-        <meta property="og:url" content="https://dentis.kr.ua/profesijne-ochischennya" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/profesijne-ochischennya"
+        title={{
+          uk: "Професійне чищення зубів у Кропивницькому | Air Flow, ультразвук — Dentis",
+          en: "Professional teeth cleaning in Kropyvnytskyi | Air Flow, scaling — Dentis",
+        }}
+        description={{
+          uk: description,
+          en: description,
+        }}
+      />
+      <ServiceSchema
+        id="profesijne-ochischennya-schema"
+        name={serviceName}
+        description={description}
+        image={toAbsoluteUrl("/og-image-profesijne-ochischennya.jpg")}
+      />
+
       <Header />
 
-      {/* Hero */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
-                              {/* Фіксований фон з відео */}
-      <div className="fixed inset-0 -z-10">
-        <video
-          ref={videoRef}
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 gradient-hero opacity-70" />
-      </div>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
+      <section className="relative overflow-hidden pb-24 pt-36">
+        <div className="fixed inset-0 -z-10">
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Професійна гігієна зубів
-          </h1>
-          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Комплексне очищення, якого неможливо досягти вдома. Захист від карієсу та ясенних хвороб, свіже дихання та природне відбілювання.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-gold blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-gold blur-3xl" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
+          <p className="mb-4 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Послуги" : "Services"}</p>
+          <h1 className="mb-6 max-w-2xl font-display text-5xl font-bold leading-tight text-secondary md:text-6xl">{lang === "uk" ? "Професійне чищення зубів" : "Professional teeth cleaning"}</h1>
+          <p className="mb-10 max-w-xl font-body text-lg leading-relaxed text-primary-foreground/70">{description}</p>
+          <div className="flex flex-col gap-4 sm:flex-row">
             <a
               href="tel:+380504800825"
-              className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+              onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "hero")}
+              className="flex items-center justify-center gap-3 rounded-full gradient-gold px-8 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
             >
               <Phone size={18} />
-              Записатися на чистку
+              {lang === "uk" ? "Записатися на гігієну" : "Book hygiene visit"}
             </a>
             <a
-              href="/contacts"
-              className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              href={localizePath("/contacts")}
+              onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "contacts", "hero")}
+              className="flex items-center justify-center gap-2 rounded-full border border-gold/60 px-8 py-4 font-body text-base font-medium text-gold transition-all duration-200 hover:bg-gold/10"
             >
-              Контакти
+              {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-14 bg-cream-dark border-b border-border">
+      <section className="border-b border-border bg-cream-dark py-14">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center">
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
             {[
-              { icon: Clock, value: "60–90 хв", label: "Тривалість процедури" },
-              { icon: Star, value: "1–2 тони", label: "Освітлення зубів" },
-              { icon: CheckCircle, value: "6 міс", label: "Рекомендована частота" },
-              { icon: Phone, value: "100%", label: "Комфорт та безпека" },
+              { icon: Clock, value: "60-90 хв", label: lang === "uk" ? "тривалість процедури" : "procedure duration" },
+              { icon: Star, value: "1-2 тони", label: lang === "uk" ? "візуальне освітлення емалі" : "visual enamel brightening" },
+              { icon: CheckCircle, value: "6 міс", label: lang === "uk" ? "рекомендований інтервал" : "recommended interval" },
+              { icon: Phone, value: "100%", label: lang === "uk" ? "контроль комфорту" : "comfort control" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label}>
-                <Icon size={24} className="text-gold mx-auto mb-3" />
-                <div className="font-display text-2xl font-bold text-navy mb-1">{value}</div>
-                <div className="font-body text-xs text-muted-foreground tracking-wide">{label}</div>
+                <Icon size={24} className="mx-auto mb-3 text-gold" />
+                <div className="mb-1 font-display text-2xl font-bold text-navy">{value}</div>
+                <div className="font-body text-xs tracking-wide text-muted-foreground">{label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="py-20 bg-background">
+      <section className="bg-background py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Протокол</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Етапи гігієни</h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Протокол" : "Protocol"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Етапи гігієни" : "Cleaning stages"}</h2>
           </div>
-          <div className="max-w-3xl mx-auto space-y-6">
-            {steps.map((step) => (
-              <div key={step.num} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom flex gap-6 items-start">
-                <span className="font-display text-4xl font-bold text-gold/30 shrink-0 leading-none">{step.num}</span>
+          <div className="mx-auto max-w-3xl space-y-6">
+            {pageSteps.map((step) => (
+              <div key={step.num} className="flex items-start gap-6 rounded-2xl border border-border bg-card p-6 shadow-card-custom">
+                <span className="shrink-0 font-display text-4xl font-bold leading-none text-gold/30">{step.num}</span>
                 <div>
-                  <h3 className="font-display font-bold text-custom-dark text-lg mb-2">{step.title}</h3>
-                  <p className="font-body text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="mb-2 font-display text-lg font-bold text-custom-dark">{step.title}</h3>
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -136,34 +186,34 @@ export default function ProfessionalCleaning() {
         </div>
       </section>
 
-            {/* Promo banner */}
-            <div className="bg-background">
-      <section className="py-12 bg-gold/10 border-y border-gold/20">
-        <div className="container mx-auto px-4 max-w-3xl flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="bg-gold/10 py-12">
+        <div className="container mx-auto flex max-w-3xl flex-col items-center justify-between gap-6 px-4 text-center md:flex-row md:text-left">
           <div>
-            <p className="font-display text-2xl font-bold text-custom-dark mb-1">Акція: знижка 15% на гігієну</p>
-            <p className="font-body text-muted-foreground text-sm">Діє до 31 березня 2026. Не пропустіть!</p>
+            <p className="mb-1 font-display text-2xl font-bold text-custom-dark">{lang === "uk" ? "Регулярна гігієна знижує ризик складного лікування" : "Regular hygiene lowers the risk of complex treatment"}</p>
+            <p className="font-body text-sm text-muted-foreground">
+              {lang === "uk" ? "Профілактика працює краще й дешевше, ніж лікування наслідків нальоту та каменю." : "Prevention is simpler and more affordable than treating the consequences of plaque and tartar."}
+            </p>
           </div>
           <a
             href="tel:+380504800825"
-            className="shrink-0 inline-flex items-center gap-2 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
+            onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "promo")}
+            className="inline-flex shrink-0 items-center gap-2 rounded-full gradient-gold px-7 py-3.5 font-body text-sm font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
           >
             <Phone size={16} />
-            Записатися зі знижкою
+            {lang === "uk" ? "Записатися" : "Book now"}
           </a>
         </div>
       </section>
-</div>
-      {/* Benefits */}
-      <section className="py-20 bg-cream-dark">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Що ви отримуєте</h2>
+
+      <section className="bg-cream-dark py-20">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Що ви отримуєте" : "What you get"}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {benefits.map((item) => (
-              <div key={item} className="flex items-start gap-3 bg-card border border-border rounded-xl p-4">
-                <CheckCircle size={18} className="text-gold shrink-0 mt-0.5" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pageBenefits.map((item) => (
+              <div key={item} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+                <CheckCircle size={18} className="mt-0.5 shrink-0 text-gold" />
                 <span className="font-body text-sm text-foreground/80">{item}</span>
               </div>
             ))}
@@ -171,55 +221,46 @@ export default function ProfessionalCleaning() {
         </div>
       </section>
 
-
-
-      {/* Who needs */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <h2 className="font-display text-4xl font-bold text-navy mb-8 gold-line-center">Кому особливо рекомендується</h2>
-          <div className="grid sm:grid-cols-3 gap-4 mt-10">
-            {[
-              { title: "Курці", desc: "Нікотиновий наліт видаляється лише професійно." },
-              { title: "Любителі кави", desc: "Темний наліт від кави та чаю не піддається щітці." },
-              { title: "Носії брекетів", desc: "Очищення під дужками та замками — критично важливо." },
-              { title: "Вагітні", desc: "Гормональні зміни підвищують ризик ясенних хвороб." },
-              { title: "Перед протезуванням", desc: "Чисті зуби — запорука міцної фіксації коронки." },
-              { title: "Всі раз на 6 місяців", desc: "Профілактика карієсу та ясенних захворювань." },
-            ].map((item) => (
-              <div key={item.title} className="bg-card border border-border rounded-2xl p-5 shadow-card-custom text-left">
-                <h3 className="font-display font-bold text-custom-dark text-base mb-2">{item.title}</h3>
-                <p className="font-body text-muted-foreground text-sm">{item.desc}</p>
+      <section className="bg-background py-20">
+        <div className="container mx-auto max-w-4xl px-4 text-center">
+          <h2 className="mb-8 font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Кому особливо рекомендована процедура" : "Who benefits most from this procedure"}</h2>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pageTargetGroups.map((item) => (
+              <div key={item.title} className="rounded-2xl border border-border bg-card p-5 text-left shadow-card-custom">
+                <h3 className="mb-2 font-display text-base font-bold text-custom-dark">{item.title}</h3>
+                <p className="font-body text-sm text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-
-
-      {/* CTA */}
-      <section className="py-20 text-center bg-cream-dark">
+      <section className="bg-cream-dark py-20 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Подбайте про здоров'я ясен</h2>
-          <p className="font-body text-custom-dark/60 mb-8 max-w-md mx-auto">
-            Зателефонуйте та запишіться на зручний час. Процедура займає лише годину.
+          <h2 className="mb-4 font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Подбайте про здоров'я ясен і емалі" : "Take care of your gums and enamel"}</h2>
+          <p className="mx-auto mb-8 max-w-md font-body text-primary-custom-dark/60">
+            {lang === "uk" ? "Запишіться на професійну гігієну в зручний час і отримайте базу для здорової усмішки." : "Book professional hygiene at a convenient time and build the foundation for a healthy smile."}
           </p>
           <a
             href="tel:+380504800825"
-            className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-10 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+            onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "footer_cta")}
+            className="inline-flex items-center gap-3 rounded-full gradient-gold px-10 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
           >
             <Phone size={18} />
-            Зателефонувати
+            {lang === "uk" ? "Зателефонувати" : "Call now"}
           </a>
         </div>
       </section>
+
+      <RelatedServices currentService="profesijne-ochischennya" />
 
       <Footer />
 
       <a
         href="tel:+380504800825"
-        className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"
-        aria-label="Зателефонувати"
+        onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "mobile_fab")}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
+        aria-label={lang === "uk" ? "Зателефонувати" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>

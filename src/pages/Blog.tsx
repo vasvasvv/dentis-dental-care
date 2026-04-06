@@ -3,11 +3,11 @@ import { BookOpen, CalendarDays, CheckCircle, Download, Phone, Tag } from "lucid
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PageSeo from "@/components/SEO/PageSeo";
-import Schema from "@/components/SEO/Schema";
+import ArticleSchema from "@/components/SEO/ArticleSchema";
 import { useLang } from "@/contexts/LanguageContext";
 import heroVideo from "@/assets/hero-video.mp4";
 import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
-import { buildCanonical } from "@/utils/seo";
+import { toAbsoluteUrl } from "@/utils/seo";
 
 type NewsItem = {
   id: number;
@@ -36,18 +36,18 @@ const STATIC_PROMOS_UK: NewsItem[] = [
     id: -1,
     type: "promo",
     badge: "Акція",
-    title: "Знижка 20% на професійну чистку зубів",
-    desc: "Комплексна професійна гігієна у Кропивницькому зі зняттям каменю, Air Flow та поліруванням за акційною ціною.",
-    date: "До 31 травня 2026",
+    title: "Спеціальна пропозиція на професійну гігієну",
+    desc: "Комплексне професійне чищення зубів у Dentis з Air Flow, ультразвуком та поліруванням за вигідними умовами.",
+    date: "Актуально зараз",
     hot: 1,
   },
   {
     id: -2,
     type: "promo",
     badge: "Акція",
-    title: "Відбілювання зубів Zoom зі знижкою",
-    desc: "Безпечне клінічне відбілювання зубів у Кропивницькому з підбором відтінку та рекомендаціями по догляду.",
-    date: "Квітень 2026",
+    title: "Консультація щодо естетичного лікування",
+    desc: "Підбір оптимального сценарію для відбілювання, вінірів або художньої реставрації з планом дій.",
+    date: "Запитуйте у адміністратора",
     hot: 0,
   },
 ];
@@ -57,18 +57,18 @@ const STATIC_PROMOS_EN: NewsItem[] = [
     id: -1,
     type: "promo",
     badge: "Deal",
-    title: "20% off professional dental cleaning",
-    desc: "Comprehensive hygiene in Kropyvnytskyi with tartar removal, Air Flow and polishing at a promotional price.",
-    date: "Until 31 May 2026",
+    title: "Professional hygiene special offer",
+    desc: "Comprehensive cleaning at Dentis with Air Flow, ultrasonic scaling and polishing on favourable terms.",
+    date: "Available now",
     hot: 1,
   },
   {
     id: -2,
     type: "promo",
     badge: "Deal",
-    title: "Zoom teeth whitening special",
-    desc: "Safe in-clinic whitening in Kropyvnytskyi with shade matching and aftercare recommendations.",
-    date: "April 2026",
+    title: "Cosmetic treatment consultation",
+    desc: "A tailored plan for whitening, veneers or artistic restorations with clear next steps.",
+    date: "Ask the administrator",
     hot: 0,
   },
 ];
@@ -76,18 +76,16 @@ const STATIC_PROMOS_EN: NewsItem[] = [
 const HYGIENE_GUIDE = {
   uk: {
     headline: "Як доглядати за зубами щодня: поради стоматолога у Кропивницькому",
-    description:
-      "Короткий гід від стоматології Дентіс: як чистити зуби, коли використовувати нитку та як часто проходити професійну гігієну.",
+    description: "Короткий гід від стоматології Dentis: як чистити зуби, коли використовувати нитку та як часто проходити професійну гігієну.",
     bullets: [
-      "Чистіть зуби двічі на день по 2 хвилини м’якою щіткою.",
+      "Чистіть зуби двічі на день по 2 хвилини м'якою щіткою.",
       "Використовуйте зубну нитку або іригатор щодня.",
-      "Записуйтесь на професійну гігієну раз на 6 місяців.",
+      "Проходьте професійну гігієну раз на 6 місяців.",
     ],
   },
   en: {
     headline: "How to care for your teeth every day: dentist tips in Kropyvnytskyi",
-    description:
-      "A concise Dentis guide on brushing, flossing and scheduling professional hygiene to keep your smile healthy.",
+    description: "A concise Dentis guide on brushing, flossing and scheduling professional hygiene to keep your smile healthy.",
     bullets: [
       "Brush twice daily for 2 minutes with a soft toothbrush.",
       "Use floss or a water flosser every day.",
@@ -157,26 +155,23 @@ export default function Blog() {
         lang={lang}
         path="/blog"
         title={{
-          uk: "Блог стоматології у Кропивницькому | Поради, акції — Дентіс",
+          uk: "Блог стоматології у Кропивницькому | Поради, акції — Dentis",
           en: "Dental blog in Kropyvnytskyi | Tips, offers — Dentis",
         }}
         description={{
-          uk: "Блог стоматології Дентіс: поради стоматолога, новини клініки, акції на лікування зубів та професійну гігієну у Кропивницькому.",
-          en: "Dentis blog with dentist tips, clinic updates and offers for dental treatment and hygiene in Kropyvnytskyi.",
+          uk: "Блог Dentis: поради стоматолога, новини клініки та актуальні пропозиції щодо лікування, гігієни й естетичної стоматології.",
+          en: "Dentis blog with dentist tips, clinic updates and current offers for treatment, hygiene and cosmetic dentistry.",
         }}
         type="article"
       />
-      <Schema
-        type="Article"
-        lang={lang}
-        data={{
-          headline: copy.headline,
-          description: copy.description,
-          url: buildCanonical("/blog", lang),
-          datePublished: "2026-04-03",
-          dateModified: "2026-04-03",
-          authorName: lang === "uk" ? "Команда Dentis" : "Dentis team",
-        }}
+      <ArticleSchema
+        id="blog-article-schema"
+        title={copy.headline}
+        description={copy.description}
+        author={lang === "uk" ? "Команда Dentis" : "Dentis team"}
+        datePublished="2026-04-06"
+        dateModified="2026-04-06"
+        image={toAbsoluteUrl("/og-image-blog.jpg")}
       />
 
       <Header />
@@ -219,7 +214,7 @@ export default function Blog() {
           {loading ? (
             <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((item) => (
-                <div key={item} className="h-56 rounded-2xl border border-border bg-card animate-pulse" />
+                <div key={item} className="h-56 animate-pulse rounded-2xl border border-border bg-card" />
               ))}
             </div>
           ) : news.length === 0 ? (

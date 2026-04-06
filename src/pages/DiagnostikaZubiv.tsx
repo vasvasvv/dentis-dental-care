@@ -1,97 +1,134 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import RelatedServices from "@/components/RelatedServices";
+import PageSeo from "@/components/SEO/PageSeo";
+import ServiceSchema from "@/components/SEO/ServiceSchema";
 import { Phone, CheckCircle, ScanLine, Shield, Zap } from "lucide-react";
-import { Helmet } from "react-helmet-async";
 import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { useLang } from "@/contexts/LanguageContext";
+import { trackServiceView } from "@/lib/gtmTracking";
+import { toAbsoluteUrl } from "@/utils/seo";
 
 const methods = [
   {
     title: "Цифровий прицільний рентген",
-    desc: "Комплексний огляд ротової порожнини, оцінка стану зубів, ясен та прикусу. Лікар визначає основні проблеми та складає попередній план лікування.",
+    desc: "Швидкий локальний знімок для оцінки конкретного зуба, коренів або ділянки, яка викликає скарги.",
     tag: "Базовий",
   },
   {
     title: "Первинна консультація стоматолога",
-    desc: "Панорамний знімок всіх зубів, щелеп та суглобів. Незамінний для планування імплантації, ортодонтії та хірургії.",
+    desc: "Огляд ротової порожнини, аналіз симптомів і попередній план лікування після візиту до лікаря.",
   },
   {
     title: "Пародонтологічна діагностика",
-    desc: "Оцінка стану ясен і тканин, що утримують зуб. Вимірювання пародонтальних кишень, перевірка кровоточивості та рухомості зубів.",    
-},
+    desc: "Оцінка стану ясен, пародонтальних кишень, кровоточивості та рухомості зубів при підозрі на захворювання тканин.",
+  },
   {
     title: "Діагностика карієсу",
-    desc: "Оцінка взаємного положення зубів верхньої та нижньої щелепи. Виявлення порушень прикусу та рекомендації щодо ортодонтичного лікування.",
+    desc: "Виявлення прихованих уражень емалі та дентину, оцінка глибини каріозного процесу та ризику ускладнень.",
   },
   {
     title: "Діагностика прикусу",
-    desc: "Клінічна фотографія до, під час та після лікування. Документація змін, планування естетичних робіт, контроль результату.",
+    desc: "Оцінка взаємного положення зубів і щелеп для планування ортодонтичного, ортопедичного або комплексного лікування.",
   },
   {
     title: "Тест життєздатності зуба",
-    desc: "Перевірка реакції зуба на холод або інші подразники для визначення стану пульпи. Допомагає встановити потребу в ендодонтичному лікуванні.",
+    desc: "Перевірка реакції зуба на подразники для визначення стану пульпи та потреби в ендодонтичному лікуванні.",
   },
 ];
 
 const steps = [
-  { num: "01", title: "Скарги та огляд", desc: "Лікар збирає анамнез, оглядає порожнину рота, визначає необхідний вид діагностики." },
-  { num: "02", title: "Знімок або сканування", desc: "Залежно від клінічного завдання — прицільний рентген. Займає 1–3 хвилини." },
-  { num: "03", title: "Аналіз та опис", desc: "Лікар аналізує знімки, описує патології, формує план лікування." },
-  { num: "04", title: "Пояснення пацієнту", desc: "Лікар пояснює, що виявлено, які є варіанти лікування та їх вартість." },
+  {
+    num: "01",
+    title: "Скарги та огляд",
+    desc: "Лікар збирає анамнез, уточнює симптоми, оглядає ротову порожнину та визначає необхідний обсяг діагностики.",
+  },
+  {
+    num: "02",
+    title: "Знімок або сканування",
+    desc: "Залежно від клінічного завдання виконується рентген або інше дослідження. Зазвичай це займає 1-3 хвилини.",
+  },
+  {
+    num: "03",
+    title: "Аналіз та опис",
+    desc: "Лікар аналізує знімки, пояснює виявлені зміни та формує обґрунтований план подальших дій.",
+  },
+  {
+    num: "04",
+    title: "Пояснення пацієнту",
+    desc: "Ви отримуєте зрозуміле пояснення результатів, варіантів лікування, послідовності етапів та орієнтовної вартості.",
+  },
 ];
 
 const advantages = [
-  "Цифровий рентген — мінімальна доза опромінення",
-  "Діагностика тріщин зуба",
+  "Цифровий рентген з мінімальним променевим навантаженням",
+  "Швидка діагностика тріщин, карієсу та прихованих уражень",
   "Результати знімків одразу на екрані",
-  "Знімки зберігаються в цифровому архіві",
-  "Безпечно для вагітних (за направленням лікаря)",
-  "Повна документація лікування",
+  "Цифровий архів досліджень для контролю динаміки",
+  "Безпечно за клінічними показаннями та сучасними протоколами",
+  "Повна документація для планування лікування",
 ];
 
 export default function DiagnosticsPage() {
-    const videoRef = useRef<HTMLVideoElement>(null);
-  
-    useEffect(() => {
-      const video = videoRef.current;
-      if (video) {
-        video.play().catch(() => {});
-        video.playbackRate = 0.6;
-      }
-    }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { lang, localizePath } = useLang();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+      video.playbackRate = 0.6;
+    }
+  }, []);
+
+  useEffect(() => {
+    trackServiceView(lang === "uk" ? "Діагностика зубів" : "Dental diagnostics", "diagnostika-zubiv");
+  }, [lang]);
+
+  const description =
+    lang === "uk"
+      ? "Діагностика зубів у Кропивницькому: цифровий рентген, консультація стоматолога та точний план лікування в Dentis."
+      : "Dental diagnostics in Kropyvnytskyi with digital X-ray, consultation and treatment planning at Dentis.";
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>Діагностика та рентген — Дентіс Кропивницький</title>
-        <meta name="description" content="Цифровий рентген, панорамні знімки, КЛКТ (3D), внутрішньоротова камера та фотопротокол у Кропивницькому. Точна діагностика — основа якісного лікування." />
-        <link rel="canonical" href="https://dentis.kr.ua/diagnostika-zubiv" />
-        <meta property="og:title" content="Діагностика та рентген — Дентіс Кропивницький" />
-        <meta property="og:description" content="Цифровий рентген, КЛКТ 3D, панорама. Точна діагностика — основа якісного лікування." />
-        <meta property="og:url" content="https://dentis.kr.ua/diagnostika-zubiv" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/diagnostika-zubiv"
+        title={{
+          uk: "Діагностика зубів у Кропивницькому | Рентген, консультація — Dentis",
+          en: "Dental diagnostics in Kropyvnytskyi | X-ray, consultation — Dentis",
+        }}
+        description={{
+          uk: description,
+          en: description,
+        }}
+      />
+      <ServiceSchema
+        id="diagnostika-schema"
+        name={lang === "uk" ? "Діагностика зубів" : "Dental diagnostics"}
+        description={description}
+        image={toAbsoluteUrl("/og-image-diagnostika-zubiv.jpg")}
+      />
+
       <Header />
 
-      {/* Hero */}
       <section className="relative pt-36 pb-24 overflow-hidden">
-              {/* Фіксований фон з відео */}
-      <div className="fixed inset-0 -z-10">
-        <video
-          ref={videoRef}
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 gradient-hero opacity-70" />
-      </div>
+        <div className="fixed inset-0 -z-10">
+          <video
+            ref={videoRef}
+            src={heroVideo}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster="/hero-poster.webp"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 gradient-hero opacity-70" />
+        </div>
 
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
@@ -100,10 +137,13 @@ export default function DiagnosticsPage() {
         <div className="container mx-auto px-4 relative z-10">
           <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Діагностика<br />та рентген
+            Діагностика
+            <br />
+            та рентген
           </h1>
           <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Точна діагностика — фундамент правильного лікування. Цифровий рентген, 3D-сканування та сучасні технології візуалізації для повної картини вашого здоров'я.
+            Точна діагностика є фундаментом правильного лікування. Цифровий рентген та клінічний огляд
+            допомагають швидко побачити реальну картину та обрати оптимальну тактику для вашого випадку.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
@@ -114,7 +154,7 @@ export default function DiagnosticsPage() {
               Записатися на діагностику
             </a>
             <a
-              href="/contacts"
+              href={localizePath("/contacts")}
               className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
             >
               Контакти
@@ -123,14 +163,13 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
-      {/* Key stats */}
       <section className="py-14 bg-cream-dark border-b border-border">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center">
             {[
-              { icon: Zap, value: "×10", label: "менше опромінення" },
+              { icon: Zap, value: "x10", label: "менше опромінення" },
               { icon: Shield, value: "100%", label: "цифровий архів знімків" },
-              { icon: CheckCircle, value: "1–3 хв", label: "час сканування" },
+              { icon: CheckCircle, value: "1-3 хв", label: "час обстеження" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label}>
                 <Icon size={22} className="text-gold mx-auto mb-3" />
@@ -142,7 +181,6 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
-      {/* Methods */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -171,7 +209,6 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
-      {/* Steps */}
       <section className="py-20 bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -192,7 +229,6 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
-      {/* Advantages */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-10">
@@ -209,12 +245,12 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 bg-background text-center">
         <div className="container mx-auto px-4">
           <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Не знаєте, з чого почати?</h2>
           <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
-            Запишіться на первинну консультацію з діагностикою — лікар оцінить стан зубів та складе план лікування.
+            Запишіться на первинну консультацію з діагностикою, щоб отримати зрозумілий план лікування та
+            пріоритети саме для вашого клінічного випадку.
           </p>
           <a
             href="tel:+380504800825"
@@ -226,9 +262,9 @@ export default function DiagnosticsPage() {
         </div>
       </section>
 
+      <RelatedServices currentService="diagnostika-zubiv" />
 
       <Footer />
-
 
       <a
         href="tel:+380504800825"

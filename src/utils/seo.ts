@@ -1,10 +1,14 @@
 export type SeoLang = "uk" | "en";
+export type LocalizedValue = {
+  uk: string;
+  en: string;
+};
 
 export const SITE_URL = "https://dentis.kr.ua";
 
 export const CLINIC_CONTACT = {
-  brandName: "Дентіс",
-  legalName: "Стоматологія Дентіс",
+  brandName: "Dentis",
+  legalName: "Стоматологія Dentis",
   phone: "+380504800825",
   displayPhone: "+38 050 480 0825",
   email: "dentis.verhovsky@gmail.com",
@@ -16,17 +20,13 @@ export const CLINIC_CONTACT = {
   longitude: 32.220454197265816,
 } as const;
 
-type LocalizedValue = {
-  uk: string;
-  en: string;
-};
-
 type SeoInput = {
   lang: SeoLang;
   path: string;
   title: LocalizedValue;
   description: LocalizedValue;
   type?: "website" | "article";
+  ogImage?: string;
 };
 
 export function normalizePath(path: string) {
@@ -102,6 +102,24 @@ export function createPageSeo(input: SeoInput) {
     alternates,
     ogType: input.type ?? "website",
     locale: input.lang === "uk" ? "uk_UA" : "en_US",
-    image: `${SITE_URL}/og-image.jpg`,
+    image: input.ogImage ?? getOgImageForPage(input.path),
   };
+}
+
+export function getOgImageForPage(path: string) {
+  const neutralPath = stripLangFromPath(path);
+
+  const pageMap: Record<string, string> = {
+    "/": "/og-image.jpg",
+    "/implantaciya": "/og-image-implantaciya.jpg",
+    "/protezuvannya": "/og-image-protezuvannya.jpg",
+    "/likuvannya-kariesu": "/og-image-likuvannya-kariesu.jpg",
+    "/profesijne-ochischennya": "/og-image-profesijne-ochischennya.jpg",
+    "/estetychna-stomatolohiya": "/og-image-estetychna-stomatolohiya.jpg",
+    "/diagnostika-zubiv": "/og-image-diagnostika-zubiv.jpg",
+    "/blog": "/og-image-blog.jpg",
+    "/contacts": "/og-image-contacts.jpg",
+  };
+
+  return toAbsoluteUrl(pageMap[neutralPath] ?? "/og-image.jpg");
 }

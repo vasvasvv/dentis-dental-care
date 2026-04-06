@@ -13,7 +13,7 @@ import Reviews from "@/components/Reviews";
 import Services from "@/components/Services";
 import MultiStepBookingForm from "@/components/MultiStepBookingForm";
 import PageSeo from "@/components/SEO/PageSeo";
-import Schema from "@/components/SEO/Schema";
+import JsonLdScript from "@/components/SEO/JsonLdScript";
 import { useLang } from "@/contexts/LanguageContext";
 import { buildCanonical } from "@/utils/seo";
 
@@ -22,32 +22,32 @@ const ENABLE_EXPERIMENTAL_BLOCKS = false;
 const Index = () => {
   const { lang } = useLang();
 
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    name: lang === "uk" ? "Стоматологія Dentis у Кропивницькому" : "Dentis dental clinic in Kropyvnytskyi",
+    description:
+      lang === "uk"
+        ? "Приватна стоматологія у Кропивницькому з лікуванням карієсу, імплантацією, протезуванням і професійною гігієною."
+        : "Private dental clinic in Kropyvnytskyi offering caries treatment, implants, prosthetics and professional hygiene.",
+    url: buildCanonical("/", lang),
+  };
+
   return (
     <div className="min-h-screen">
       <PageSeo
         lang={lang}
         path="/"
         title={{
-          uk: "Стоматологія у Кропивницькому | Імплантація, лікування зубів — Дентіс",
+          uk: "Стоматологія у Кропивницькому | Імплантація, лікування зубів — Dentis",
           en: "Dentistry in Kropyvnytskyi | Implants, dental treatment — Dentis",
         }}
         description={{
-          uk: "Стоматологія Дентіс у Кропивницькому: лікування зубів, імплантація, протезування, професійна гігієна та консультації без черг.",
+          uk: "Стоматологія Dentis у Кропивницькому: лікування зубів, імплантація, протезування, професійна гігієна та консультації без довгого очікування.",
           en: "Dentis dental clinic in Kropyvnytskyi: dental treatment, implants, prosthetics, professional hygiene and consultations without long waits.",
         }}
       />
-      <Schema
-        type="MedicalWebPage"
-        lang={lang}
-        data={{
-          name: lang === "uk" ? "Стоматологія Дентіс у Кропивницькому" : "Dentis dental clinic in Kropyvnytskyi",
-          description:
-            lang === "uk"
-              ? "Приватна стоматологія у Кропивницькому з лікуванням карієсу, імплантацією, протезуванням і професійною гігієною."
-              : "Private dental clinic in Kropyvnytskyi offering caries treatment, implants, prosthetics and professional hygiene.",
-          url: buildCanonical("/", lang),
-        }}
-      />
+      <JsonLdScript id="index-medical-webpage" data={webPageSchema} />
 
       <Header />
 

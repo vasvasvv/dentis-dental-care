@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CalendarCheck2, Menu, Phone, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@assets/logo-white.webp";
 import logogold from "@assets/logo-gold.webp";
@@ -72,26 +72,6 @@ export default function Header() {
         scrolled ? "bg-navy/95 backdrop-blur-lg shadow-nav" : "bg-navy/85"
       }`}
     >
-      <div className="border-b border-primary-foreground/15">
-        <div className="container mx-auto flex items-center justify-between gap-2 px-4 py-2 text-xs text-primary-foreground sm:text-sm">
-          <a href="tel:+380504800825" className="inline-flex items-center gap-2 transition-colors hover:text-gold">
-            <Phone size={14} />
-            +38 (050) 480 08 25
-          </a>
-
-          <a
-            href="#contacts"
-            onClick={(event) => {
-              event.preventDefault();
-              handleNav("#contacts", true);
-            }}
-            className="btn-primary px-4 py-2 text-sm"
-          >
-            <CalendarCheck2 size={14} /> {t("hero.cta")}
-          </a>
-        </div>
-      </div>
-
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <a
           href={homePath}

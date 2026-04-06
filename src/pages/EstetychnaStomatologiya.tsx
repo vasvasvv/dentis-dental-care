@@ -1,185 +1,214 @@
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Phone, CheckCircle, Sparkles, Star } from "lucide-react";
-import { Helmet } from "react-helmet-async";
-import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
+import { CheckCircle, Phone, Sparkles, Star } from "lucide-react";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import RelatedServices from "@/components/RelatedServices";
+import PageSeo from "@/components/SEO/PageSeo";
+import ServiceSchema from "@/components/SEO/ServiceSchema";
+import { useLang } from "@/contexts/LanguageContext";
+import heroVideo from "@/assets/hero-video.mp4";
+import { trackServiceCtaClick, trackServiceView } from "@/lib/gtmTracking";
+import { toAbsoluteUrl } from "@/utils/seo";
 
-const services = [
-  {
-    title: "Відбілювання Zoom 4",
-    desc: "Клінічне відбілювання під LED-лампою. Зуби світлішають на 6–10 тонів за одну годину. Найефективніший спосіб освітлення емалі.",
-    tag: "Хіт",
-  },
-  {
-    title: "Керамічні вініри",
-    desc: "Тонкі керамічні накладки на фронтальні зуби. Маскують сколи, щілини, нерівності, стійке знебарвлення. Результат — як у зірок.",
-    tag: "Преміум",
-  },
-  {
-    title: "Композитні вініри",
-    desc: "Пряма реставрація фотополімером за одне відвідування. Доступна альтернатива керамічним вінірам без препарування.",
-  },
-  {
-    title: "Художня реставрація",
-    desc: "Відновлення сколотих, зруйнованих або деформованих зубів з точним підбором кольору та форми під ваш прикус.",
-  },
-  {
-    title: "Відновлення діастеми",
-    desc: "Закриття щілини між зубами за допомогою композиту або вінірів — без брекетів та хірургічного втручання.",
-  },
-  {
-    title: "Дизайн посмішки",
-    desc: "Цифровий smile design: планування форми, розміру та кольору зубів з попереднім візуальним результатом до початку лікування.",
-    tag: "Новинка",
-  },
-];
+const services = {
+  uk: [
+    { title: "Відбілювання Zoom 4", desc: "Клінічне освітлення емалі під контролем лікаря з помітним результатом за одне відвідування.", tag: "Хіт" },
+    { title: "Керамічні вініри", desc: "Тонкі накладки для корекції форми, кольору та пропорцій фронтальних зубів.", tag: "Преміум" },
+    { title: "Композитні вініри", desc: "Швидка естетична корекція за один візит без складного ортопедичного етапу." },
+    { title: "Художня реставрація", desc: "Відновлення сколів, тріщин та нерівностей із природною анатомією зуба." },
+    { title: "Закриття діастеми", desc: "Корекція щілини між зубами без довгого ортодонтичного лікування в окремих клінічних випадках." },
+    { title: "Smile design", desc: "Попереднє планування майбутньої усмішки з фокусом на гармонію форми та кольору.", tag: "Новинка" },
+  ],
+  en: [
+    { title: "Zoom 4 whitening", desc: "In-clinic enamel whitening under dentist supervision with visible results in a single visit.", tag: "Top service" },
+    { title: "Ceramic veneers", desc: "Thin restorations to improve the shape, colour and proportions of front teeth.", tag: "Premium" },
+    { title: "Composite veneers", desc: "Fast aesthetic improvement in one visit without a complex prosthetic stage." },
+    { title: "Artistic restorations", desc: "Repair of chips, cracks and shape imperfections with natural tooth anatomy." },
+    { title: "Diastema closure", desc: "Correction of gaps between teeth without lengthy orthodontic treatment in selected cases." },
+    { title: "Smile design", desc: "Preview-oriented planning of your future smile with focus on shape and colour harmony.", tag: "New" },
+  ],
+};
 
-const steps = [
-  { num: "01", title: "Консультація та фото", desc: "Аналіз посмішки, обговорення очікувань, цифрове планування результату." },
-  { num: "02", title: "Підбір кольору та форми", desc: "Вибір відтінку за шкалою Vita, визначення форми зубів під обличчя пацієнта." },
-  { num: "03", title: "Підготовка", desc: "Мінімальне або нульове препарування залежно від методу. Тимчасові реставрації на час виготовлення." },
-  { num: "04", title: "Фіксація", desc: "Примірка, корекція та постійна фіксація. Фінальне полірування та фотоконтроль результату." },
-];
+const steps = {
+  uk: [
+    { num: "01", title: "Консультація і фотоаналіз", desc: "Обговорюємо ваш запит, робимо фото та визначаємо сильні й слабкі сторони усмішки." },
+    { num: "02", title: "Підбір форми й кольору", desc: "Погоджуємо відтінок, пропорції та очікуваний результат ще до початку роботи." },
+    { num: "03", title: "Підготовка", desc: "Залежно від методу проводиться мінімальна підготовка зубів або пряма реставрація." },
+    { num: "04", title: "Фіналізація", desc: "Фіксуємо реставрації, поліруємо поверхні та перевіряємо гармонію усмішки." },
+  ],
+  en: [
+    { num: "01", title: "Consultation and photo analysis", desc: "We discuss your goals, take photos and assess the current aesthetics of the smile." },
+    { num: "02", title: "Shape and shade selection", desc: "We align on colour, proportions and the expected outcome before treatment begins." },
+    { num: "03", title: "Preparation", desc: "Depending on the method, teeth receive minimal preparation or direct restoration." },
+    { num: "04", title: "Finalisation", desc: "The restorations are fixed, polished and checked for symmetry and harmony." },
+  ],
+};
 
-const results = [
-  { value: "6–10", label: "тонів освітлення при Zoom 4" },
-  { value: "1", label: "відвідування для композитних вінірів" },
-  { value: "15+", label: "років служби кераміки" },
-  { value: "100%", label: "індивідуальний підбір кольору" },
-];
+const results = {
+  uk: [
+    { value: "6-10", label: "тонів освітлення при Zoom 4" },
+    { value: "1", label: "візит для композитної корекції" },
+    { value: "15+", label: "років служби якісної кераміки" },
+    { value: "100%", label: "індивідуальний підбір кольору" },
+  ],
+  en: [
+    { value: "6-10", label: "shades lighter with Zoom 4" },
+    { value: "1", label: "visit for composite correction" },
+    { value: "15+", label: "years of service for quality ceramics" },
+    { value: "100%", label: "individual shade matching" },
+  ],
+};
 
-export default function EstetychnaStomat() {
-      const videoRef = useRef<HTMLVideoElement>(null);
-  
-    useEffect(() => {
-      const video = videoRef.current;
-      if (video) {
-        video.play().catch(() => {});
-        video.playbackRate = 0.6;
-      }
-    }, []);
+const advantages = {
+  uk: [
+    "Делікатний підхід до природних тканин зуба",
+    "Цифрове планування естетичного результату",
+    "Робота з формою, кольором і пропорціями як єдиною системою",
+    "Матеріали преміального рівня для реставрацій",
+    "Точний підбір рішень під обличчя та прикус пацієнта",
+    "Зрозумілий маршрут від консультації до фінального результату",
+  ],
+  en: [
+    "Conservative approach to natural tooth tissues",
+    "Digital planning of the aesthetic outcome",
+    "Integrated work on shape, colour and proportions",
+    "Premium-level restorative materials",
+    "Solutions tailored to facial features and bite",
+    "A clear path from consultation to final result",
+  ],
+};
+
+export default function EstetychnaStomatologiya() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { lang, localizePath } = useLang();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
+  }, []);
+
+  useEffect(() => {
+    trackServiceView(lang === "uk" ? "Естетична стоматологія" : "Cosmetic dentistry", "estetychna-stomatolohiya");
+  }, [lang]);
+
+  const description =
+    lang === "uk"
+      ? "Естетична стоматологія у Кропивницькому в Dentis: вініри, відбілювання, художня реставрація та дизайн усмішки з індивідуальним підходом."
+      : "Cosmetic dentistry in Kropyvnytskyi at Dentis: veneers, whitening, artistic restorations and smile design with a tailored approach.";
+
+  const pageServices = services[lang];
+  const pageSteps = steps[lang];
+  const pageResults = results[lang];
+  const pageAdvantages = advantages[lang];
+  const serviceName = lang === "uk" ? "Естетична стоматологія" : "Cosmetic dentistry";
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>Естетична стоматологія — Дентіс Кропивницький</title>
-        <meta name="description" content="Вініри, відбілювання Zoom 4, художня реставрація та дизайн посмішки у Кропивницькому. Створюємо ідеальну посмішку з індивідуальним підходом." />
-        <link rel="canonical" href="https://dentis.kr.ua/estetychna-stomatolohiya" />
-        <meta property="og:title" content="Естетична стоматологія — Дентіс Кропивницький" />
-        <meta property="og:description" content="Вініри, відбілювання, художня реставрація. Ваша ідеальна посмішка — наша робота." />
-        <meta property="og:url" content="https://dentis.kr.ua/estetychna-stomatolohiya" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://dentis.kr.ua/og-image.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-      </Helmet>
+      <PageSeo
+        lang={lang}
+        path="/estetychna-stomatolohiya"
+        title={{
+          uk: "Естетична стоматологія у Кропивницькому | Вініри, відбілювання — Dentis",
+          en: "Cosmetic dentistry in Kropyvnytskyi | Veneers, whitening — Dentis",
+        }}
+        description={{
+          uk: description,
+          en: description,
+        }}
+      />
+      <ServiceSchema
+        id="estetychna-stomatolohiya-schema"
+        name={serviceName}
+        description={description}
+        image={toAbsoluteUrl("/og-image-estetychna-stomatolohiya.jpg")}
+      />
+
       <Header />
 
-      {/* Hero */}
-      <section className="relative pt-36 pb-24 overflow-hidden">
-                      {/* Фіксований фон з відео */}
-      <div className="fixed inset-0 -z-10">
-        <video
-          ref={videoRef}
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 gradient-hero opacity-70" />
-      </div>
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
+      <section className="relative overflow-hidden pb-24 pt-36">
+        <div className="fixed inset-0 -z-10">
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Естетична<br />стоматологія
-          </h1>
-          <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Перетворюємо посмішки. Вініри, відбілювання, художня реставрація — сучасні методи для бездоганного естетичного результату.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-gold blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-gold blur-3xl" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
+          <p className="mb-4 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Послуги" : "Services"}</p>
+          <h1 className="mb-6 max-w-2xl font-display text-5xl font-bold leading-tight text-secondary md:text-6xl">{lang === "uk" ? "Естетична стоматологія" : "Cosmetic dentistry"}</h1>
+          <p className="mb-10 max-w-xl font-body text-lg leading-relaxed text-primary-foreground/70">{description}</p>
+          <div className="flex flex-col gap-4 sm:flex-row">
             <a
               href="tel:+380504800825"
-              className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+              onClick={() => trackServiceCtaClick(serviceName, "estetychna-stomatolohiya", "phone", "hero")}
+              className="flex items-center justify-center gap-3 rounded-full gradient-gold px-8 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
             >
               <Phone size={18} />
-              Записатися на консультацію
+              {lang === "uk" ? "Записатися на консультацію" : "Book consultation"}
             </a>
             <a
-              href="/contacts"
-              className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              href={localizePath("/contacts")}
+              onClick={() => trackServiceCtaClick(serviceName, "estetychna-stomatolohiya", "contacts", "hero")}
+              className="flex items-center justify-center gap-2 rounded-full border border-gold/60 px-8 py-4 font-body text-base font-medium text-gold transition-all duration-200 hover:bg-gold/10"
             >
-              Контакти
+              {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-14 bg-cream-dark border-b border-border">
+      <section className="border-b border-border bg-cream-dark py-14">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center">
-            {results.map(({ value, label }) => (
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
+            {pageResults.map(({ value, label }) => (
               <div key={label}>
-                <Sparkles size={22} className="text-gold mx-auto mb-3" />
-                <div className="font-display text-2xl font-bold text-navy mb-1">{value}</div>
-                <div className="font-body text-xs text-muted-foreground tracking-wide">{label}</div>
+                <Sparkles size={22} className="mx-auto mb-3 text-gold" />
+                <div className="mb-1 font-display text-2xl font-bold text-navy">{value}</div>
+                <div className="font-body text-xs tracking-wide text-muted-foreground">{label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Services grid */}
-      <section className="py-20 bg-background">
+      <section className="bg-background py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Що ми пропонуємо</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Естетичні процедури</h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Що ми пропонуємо" : "What we offer"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Естетичні процедури" : "Cosmetic procedures"}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {services.map((s) => (
-              <div
-                key={s.title}
-                className="bg-card border border-border rounded-2xl p-7 shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative"
-              >
-                {s.tag && (
-                  <span className="absolute top-4 right-4 text-[10px] uppercase bg-gold/15 text-gold px-2.5 py-1 rounded-full font-body font-semibold">
-                    {s.tag}
-                  </span>
-                )}
-                <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-4">
+          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pageServices.map((item) => (
+              <div key={item.title} className="relative rounded-2xl border border-border bg-card p-7 shadow-card-custom transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                {item.tag && <span className="absolute right-4 top-4 rounded-full bg-gold/15 px-2.5 py-1 text-[10px] font-body font-semibold uppercase text-gold">{item.tag}</span>}
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10">
                   <Star size={18} className="text-gold" />
                 </div>
-                <h3 className="font-display font-bold text-custom-dark text-lg mb-3 pr-16">{s.title}</h3>
-                <p className="font-body text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
+                <h3 className="mb-3 pr-16 font-display text-lg font-bold text-custom-dark">{item.title}</h3>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="py-20 bg-cream-dark">
+      <section className="bg-cream-dark py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Процес</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Як проходить лікування</h2>
+          <div className="mb-14 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{lang === "uk" ? "Процес" : "Process"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Як проходить лікування" : "How treatment works"}</h2>
           </div>
-          <div className="max-w-3xl mx-auto space-y-6">
-            {steps.map((step) => (
-              <div key={step.num} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom flex gap-6 items-start">
-                <span className="font-display text-4xl font-bold text-gold/30 shrink-0 leading-none">{step.num}</span>
+          <div className="mx-auto max-w-3xl space-y-6">
+            {pageSteps.map((step) => (
+              <div key={step.num} className="flex items-start gap-6 rounded-2xl border border-border bg-card p-6 shadow-card-custom">
+                <span className="shrink-0 font-display text-4xl font-bold leading-none text-gold/30">{step.num}</span>
                 <div>
-                  <h3 className="font-display font-bold text-custom-dark text-lg mb-2">{step.title}</h3>
-                  <p className="font-body text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="mb-2 font-display text-lg font-bold text-custom-dark">{step.title}</h3>
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -187,23 +216,15 @@ export default function EstetychnaStomat() {
         </div>
       </section>
 
-      {/* Why us */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-10">
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Наші переваги</h2>
+      <section className="bg-background py-20">
+        <div className="container mx-auto max-w-3xl px-4">
+          <div className="mb-10 text-center">
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Наші переваги" : "Why patients choose Dentis"}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              "Досвідчений фахівець з естетичної реставрації",
-              "Цифровий дизайн посмішки перед лікуванням",
-              "Матеріали провідних світових брендів",
-              "Точний підбір кольору під натуральні зуби",
-              "Мінімально інвазивний підхід",
-              "Гарантія на всі естетичні роботи",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3 bg-card border border-border rounded-xl p-4">
-                <CheckCircle size={18} className="text-gold shrink-0 mt-0.5" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {pageAdvantages.map((item) => (
+              <div key={item} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+                <CheckCircle size={18} className="mt-0.5 shrink-0 text-gold" />
                 <span className="font-body text-sm text-foreground/80">{item}</span>
               </div>
             ))}
@@ -211,31 +232,32 @@ export default function EstetychnaStomat() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-background text-center">
+      <section className="bg-background py-20 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Мрієте про ідеальну посмішку?</h2>
-          <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
-            Запишіться на консультацію — разом оберемо найкращий метод для вашого випадку.
+          <h2 className="mb-4 font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Хочете оновити усмішку?" : "Want to upgrade your smile?"}</h2>
+          <p className="mx-auto mb-8 max-w-md font-body text-primary-custom-dark/60">
+            {lang === "uk" ? "Запишіться на консультацію, щоб разом обрати найкращий естетичний сценарій для вашого випадку." : "Book a consultation and choose the right cosmetic treatment plan for your case."}
           </p>
           <a
             href="tel:+380504800825"
-            className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-10 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+            onClick={() => trackServiceCtaClick(serviceName, "estetychna-stomatolohiya", "phone", "footer_cta")}
+            className="inline-flex items-center gap-3 rounded-full gradient-gold px-10 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
           >
             <Phone size={18} />
-            Зателефонувати
+            {lang === "uk" ? "Зателефонувати" : "Call now"}
           </a>
         </div>
       </section>
 
+      <RelatedServices currentService="estetychna-stomatolohiya" />
 
       <Footer />
 
-
       <a
         href="tel:+380504800825"
-        className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"
-        aria-label="Зателефонувати"
+        onClick={() => trackServiceCtaClick(serviceName, "estetychna-stomatolohiya", "phone", "mobile_fab")}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
+        aria-label={lang === "uk" ? "Зателефонувати" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>
