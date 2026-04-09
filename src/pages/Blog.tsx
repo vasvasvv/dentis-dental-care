@@ -31,6 +31,78 @@ function mapPublicNewsItem(item: PublicNewsItem): NewsItem {
   };
 }
 
+const STATIC_NEWS_UK: NewsItem[] = [
+  {
+    id: -3,
+    type: "news",
+    badge: "Новини",
+    title: "Нові імплантаційні системи преміум-класу",
+    desc: "У клініці з'явилися нові імплантаційні системи від провідних світових виробників з приживлюваністю 98%.",
+    date: "Січень 2026",
+    hot: 0,
+  },
+  {
+    id: -4,
+    type: "news",
+    badge: "Інформація",
+    title: "Чому важливо регулярно відвідувати стоматолога",
+    desc: "Регулярні профілактичні огляди допомагають уникнути серйозних стоматологічних проблем.",
+    date: "Січень 2026",
+    hot: 0,
+  },
+  {
+    id: -5,
+    type: "news",
+    badge: "Поради",
+    title: "Як підготуватися до професійної гігієни",
+    desc: "Перед процедурою достатньо стандартної гігієни вдома, а після візиту лікар підкаже оптимальний домашній догляд.",
+    date: "Лютий 2026",
+    hot: 0,
+  },
+];
+
+const STATIC_NEWS_EN: NewsItem[] = [
+  {
+    id: -3,
+    type: "news",
+    badge: "News",
+    title: "New premium implant systems",
+    desc: "The clinic now offers new implant systems from world-leading manufacturers with a 98% osseointegration rate.",
+    date: "January 2026",
+    hot: 0,
+  },
+  {
+    id: -4,
+    type: "news",
+    badge: "Info",
+    title: "Why regular dental check-ups matter",
+    desc: "Regular preventive visits help prevent serious dental issues and keep treatment simpler.",
+    date: "January 2026",
+    hot: 0,
+  },
+  {
+    id: -5,
+    type: "news",
+    badge: "Tips",
+    title: "How to prepare for professional hygiene",
+    desc: "Before the appointment you only need routine home care, and after the visit your doctor will tailor aftercare advice.",
+    date: "February 2026",
+    hot: 0,
+  },
+];
+
+function fillWithFallback(items: NewsItem[], fallback: NewsItem[], limit: number) {
+  const normalized = items.slice(0, limit);
+
+  if (normalized.length >= limit) {
+    return normalized;
+  }
+
+  const usedIds = new Set(normalized.map((item) => item.id));
+  const missing = fallback.filter((item) => !usedIds.has(item.id)).slice(0, limit - normalized.length);
+  return [...normalized, ...missing];
+}
+
 const STATIC_PROMOS_UK: NewsItem[] = [
   {
     id: -1,
@@ -123,7 +195,6 @@ function BlogCard({ item }: { item: NewsItem }) {
 export default function Blog() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [allItems, setAllItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const { lang, localizePath, t } = useLang();
 
   useEffect(() => {
@@ -138,16 +209,17 @@ export default function Blog() {
     getPublicNews()
       .then((data) => {
         setAllItems(data.map(mapPublicNewsItem));
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => setAllItems([]));
   }, []);
 
   const copy = HYGIENE_GUIDE[lang];
   const staticPromos = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;
+  const staticNews = lang === "uk" ? STATIC_NEWS_UK : STATIC_NEWS_EN;
   const promos = allItems.filter((item) => item.type === "promo");
   const news = allItems.filter((item) => item.type !== "promo");
-  const displayPromos = promos.length > 0 ? promos : staticPromos;
+  const displayPromos = fillWithFallback(promos, staticPromos, 2);
+  const displayNews = fillWithFallback(news, staticNews, 3);
 
   return (
     <div className="min-h-screen">
@@ -211,21 +283,11 @@ export default function Blog() {
             <h2 className="font-display text-4xl font-bold text-secondary gold-line-center md:text-5xl">{t("blog.news.h2")}</h2>
           </div>
 
-          {loading ? (
-            <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="h-56 animate-pulse rounded-2xl border border-border bg-card" />
-              ))}
-            </div>
-          ) : news.length === 0 ? (
-            <p className="py-12 text-center font-body text-muted-foreground">{t("blog.no_news")}</p>
-          ) : (
-            <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.map((item) => (
-                <BlogCard key={item.id} item={item} />
-              ))}
-            </div>
-          )}
+          <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {displayNews.map((item) => (
+              <BlogCard key={item.id} item={item} />
+            ))}
+          </div>
         </div>
       </section>
 

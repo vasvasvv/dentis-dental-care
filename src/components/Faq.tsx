@@ -21,7 +21,7 @@ const Faq: FC = () => {
     <>
       <FaqSchema id="homepage-faq" faqs={faqItems.map((item) => ({ question: item.question, answer: item.answer }))} />
 
-      <section className="faq max-w-[900px] mx-auto px-5 section-block bg-background">
+      <section className="faq max-w-[900px] mx-auto px-5 section-block">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-m tracking-[0.3em] uppercase font-medium mb-3">{t("faq.label")}</p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">{t("faq.h2")}</h2>
@@ -36,14 +36,14 @@ const Faq: FC = () => {
               onChange={() => setOpenIndex(openIndex === index ? null : index)}
             >
               <summary className="bg-card flex items-center justify-between cursor-pointer py-5 text-lg text-center md:text-xl font-semibold text-[#2b6f73] hover:text-[#1e5559] transition-colors duration-300">
-                <div className="w-12 h-12 rounded-xl bg-gold/20 group-hover:bg-gold/10 transition-colors flex items-center justify-center">
+                <span className="w-12 h-12 rounded-xl bg-gold/20 group-hover:bg-gold/10 transition-colors inline-flex items-center justify-center shrink-0">
                   <item.icon className="text-gold hover:text-navy transition-colors" />
-                </div>
-                {t(item.questionKey)}
-                <span className="ml-4 text-2xl text-center font-bold transition-transform duration-300 group-open:rotate-180">
-                  <div className="w-12 h-12 rounded-xl bg-navy/20 group-hover:bg-navy/10 transition-colors flex items-center justify-center">
+                </span>
+                <span className="mx-4 flex-1">{t(item.questionKey)}</span>
+                <span className="text-2xl text-center font-bold transition-transform duration-300 group-open:rotate-180">
+                  <span className="w-12 h-12 rounded-xl bg-navy/20 group-hover:bg-navy/10 transition-colors inline-flex items-center justify-center shrink-0">
                     {openIndex === index ? "-" : "+"}
-                  </div>
+                  </span>
                 </span>
               </summary>
               <div className="pb-6 pt-3 text-center text-normal md:text-lg text-navy leading-relaxed">{t(item.answerKey)}</div>

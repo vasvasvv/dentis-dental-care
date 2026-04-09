@@ -63,17 +63,17 @@ export default function Hero() {
             {t("hero.desc")}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300">
+          <div className="flex flex-col sm:flex-row gap-4 animate-fade-up text-white delay-300">
             <a
               href="tel:+380504800825"
-              className="btn-primary"
+              className="bg-gold/80 border-gold/50 text-white hover:bg-gold/95 transition-colors rounded-3xl px-5 py-3 font-medium flex items-center justify-center"
             >
               <Phone size={18} />
               {t("hero.cta")}
             </a>
             <button
               onClick={() => handleScroll("#services")}
-              className="btn-secondary"
+              className="bg-gold/90 border-gold/50 text-white hover:bg-gold/30 transition-colors rounded-3xl px-5 py-3 font-medium flex items-center justify-center"
             >
               {t("hero.services")}
             </button>

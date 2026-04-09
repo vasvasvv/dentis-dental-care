@@ -15,10 +15,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Playfair Display", "serif"],
-        body: ["Inter", "sans-serif"],
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["Playfair Display", "ui-serif", "Georgia", "serif"],
+        display: ["TT Hoves", "ui-sans-serif", "system-ui", "sans-serif"],
+        body: ["TT Norms Pro", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["TT Norms Pro", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["TT Hoves", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       fontSize: {
         xs: ["12px", { lineHeight: "1.5" }],

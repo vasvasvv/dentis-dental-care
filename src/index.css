@@ -1,8 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "TT Hoves";
+  src: url("./assets/fonts/TTHoves-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Hoves";
+  src: url("./assets/fonts/TTHoves-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("./assets/fonts/TTNormsPro-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Norms Pro";
+  src: url("./assets/fonts/TTNormsPro-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
   :root {
@@ -54,7 +84,7 @@
     --shadow-card: 0 4px 24px -4px hsl(180 60% 25% / 0.1);
     --shadow-gold: 0 4px 20px -4px hsl(38 60% 42% / 0.35);
     --shadow-nav: 0 2px 20px hsl(180 60% 25% / 0.12);
-    --font-custom: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-custom: "TT Norms Pro", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
@@ -79,8 +109,8 @@ html {
 }
 
 @layer utilities {
-  .font-display { font-family: "Playfair Display", serif; }
-  .font-body { font-family: "Inter", sans-serif; }
+  .font-display { font-family: "TT Hoves", system-ui, sans-serif; }
+  .font-body { font-family: "TT Norms Pro", system-ui, sans-serif; }
   .text-gold { color: hsl(var(--gold)); }
   .text-navy { color: hsl(var(--navy)); }
   .text-custom-dark { color: #333333; }
