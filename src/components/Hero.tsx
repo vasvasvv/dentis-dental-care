@@ -15,10 +15,25 @@ export default function Hero() {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
+    if (!video) return;
+
+    // Гарантуємо, що відео грає та встановлюємо playbackRate
+    const playVideo = () => {
       video.play().catch(() => {});
       video.playbackRate = 0.99;
+    };
+
+    // Якщо відео вже готово, грати відразу
+    if (video.readyState >= 3) {
+      playVideo();
+    } else {
+      // Чекаємо на `canplay` для запуску
+      video.addEventListener("canplay", playVideo, { once: true });
     }
+
+    return () => {
+      video.removeEventListener("canplay", playVideo);
+    };
   }, []);
 
   return (
@@ -27,11 +42,10 @@ export default function Hero() {
         <video
           ref={videoRef}
           src={heroVideo}
-          autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="metadata"
           poster="/hero-poster.webp"
           className="w-full h-full object-cover"
         />
