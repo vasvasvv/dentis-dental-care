@@ -12,25 +12,23 @@ export default function JsonLdScript({ id, data }: JsonLdScriptProps) {
       return;
     }
 
+    // Видалити стару версію скрипту, якщо вона існує
     const selector = `script[data-seo-jsonld="${id}"]`;
-    document.querySelectorAll(selector).forEach((node) => node.remove());
-
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.setAttribute("data-seo-jsonld", id);
-    script.textContent = JSON.stringify(data);
-    document.head.appendChild(script);
-
-    return () => {
-      script.remove();
-    };
-  }, [data, id]);
+    document.querySelectorAll(selector).forEach((node, index) => {
+      // Залишити только перший (quello у Head з SSG), видалити дублікати
+      if (index > 0) {
+        node.remove();
+      }
+    });
+  }, [id]);
 
   return (
     <Head>
-      <script type="application/ld+json" data-seo-jsonld={id}>
-        {JSON.stringify(data)}
-      </script>
+      <script 
+        type="application/ld+json" 
+        data-seo-jsonld={id}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      />
     </Head>
   );
 }
