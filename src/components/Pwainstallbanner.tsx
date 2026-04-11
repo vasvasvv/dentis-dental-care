@@ -11,7 +11,7 @@ const STORAGE_KEY = 'dentis-pwa-banner-dismissed'
 export default function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
+  const [isIOS] = useState(() => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent))
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -25,8 +25,7 @@ export default function PWAInstallBanner() {
       ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true)
     if (isStandalone) return
 
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
-    setIsIOS(ios)
+    const ios = isIOS
 
     if (ios) {
       // iOS не підтримує beforeinstallprompt — показуємо ручну інструкцію

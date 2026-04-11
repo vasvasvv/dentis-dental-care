@@ -137,7 +137,11 @@ function NewsTab({ token }: { token: string }) {
     setSaving(true); setError(null);
     try {
       const p = { type: editing.type, badge: editing.badge, title: editing.title, desc: editing.desc, date: editing.date, hot: editing.hot };
-      isNew ? await createNews(p, token) : await updateNews(editing.id!, p, token);
+      if (isNew) {
+        await createNews(p, token);
+      } else {
+        await updateNews(editing.id!, p, token);
+      }
       await load(); setEditing(null);
     } catch (e: unknown) {
       setError(e instanceof Error && e.message === 'UNAUTHORIZED' ? 'Сесія закінчилась — увійдіть знову' : 'Помилка збереження');
@@ -313,7 +317,11 @@ function DoctorsTab({ token }: { token: string }) {
       }
 
       const p = { name: editing.name, title: editing.title, speciality: editing.speciality, experience: editing.experience, desc: editing.desc, img_url, sort_order: editing.sort_order };
-      isNew ? await createDoctor(p, token) : await updateDoctor(editing.id!, p, token);
+      if (isNew) {
+        await createDoctor(p, token);
+      } else {
+        await updateDoctor(editing.id!, p, token);
+      }
       await load();
       setEditing(null);
       setPendingFile(null);
@@ -533,13 +541,17 @@ function DrumColumn({
   const itemH = 44;
   const touchRef = React.useRef<{ startY: number; startScroll: number } | null>(null);
   const selectRef = React.useRef(onSelect);
-  selectRef.current = onSelect;
   const itemsRef = React.useRef(items);
-  itemsRef.current = items;
+  const snapTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    selectRef.current = onSelect;
+    itemsRef.current = items;
+  }, [onSelect, items]);
 
   React.useEffect(() => {
     if (ref.current) ref.current.scrollTop = selectedIndex * itemH;
-  }, []);
+  }, [selectedIndex]);
 
   // Attach wheel listener as non-passive so preventDefault works
   React.useEffect(() => {
@@ -566,8 +578,10 @@ function DrumColumn({
 
   const onScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
-    clearTimeout((el as any)._snap);
-    (el as any)._snap = setTimeout(() => snapToIndex(el), 150);
+    if (snapTimeoutRef.current) {
+      clearTimeout(snapTimeoutRef.current);
+    }
+    snapTimeoutRef.current = setTimeout(() => snapToIndex(el), 150);
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -579,6 +593,14 @@ function DrumColumn({
     ref.current.scrollTop = touchRef.current.startScroll + dy;
   };
   const onTouchEnd = () => { if (ref.current) snapToIndex(ref.current); touchRef.current = null; };
+
+  React.useEffect(() => {
+    return () => {
+      if (snapTimeoutRef.current) {
+        clearTimeout(snapTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const visibleH = itemH * 5;
   const padV = itemH * 2;
@@ -1136,7 +1158,9 @@ function TelegramTab({ token }: { token: string }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPending(await res.json() as TgPending[]);
-    } catch {}
+    } catch {
+      setPending([]);
+    }
     finally { setLoadingPending(false); }
   };
 
@@ -1628,6 +1652,7 @@ export default function Admin() {
         {tab === "doctors" && <DoctorsTab token={token} />}
         {tab === "appointments" && <AppointmentsTab token={token} />}
         {tab === "push" && <PushTab token={token} />}
+        {tab === "telegram" && <TelegramTab token={token} />}
       </div>
     </div>
   );

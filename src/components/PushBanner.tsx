@@ -20,8 +20,7 @@ export function PushBanner() {
 
   // PWA install state
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isIOS, setIsIOS] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
+  const [isIOS] = useState(() => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent))
 
   // Banner flow: 'pwa' | 'push' | null
   const [step, setStep] = useState<'pwa' | 'push' | null>(null)
@@ -36,10 +35,7 @@ export function PushBanner() {
     if (pushSeen) return
 
     const installed = isPWA()
-    setIsInstalled(installed)
-
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
-    setIsIOS(ios)
+    const ios = isIOS
 
     if (installed) {
       // PWA вже встановлено — одразу показуємо push банер

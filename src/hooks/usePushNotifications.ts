@@ -5,14 +5,18 @@ const API = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkov
 export type PushState = 'unsupported' | 'loading' | 'denied' | 'subscribed' | 'unsubscribed'
 
 export function usePushNotifications() {
-  const [state, setState] = useState<PushState>('loading')
+  const [state, setState] = useState<PushState>(() => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
+    if (Notification.permission === 'denied') return 'denied'
+    return 'loading'
+  })
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setState('unsupported'); return
+      return
     }
     if (Notification.permission === 'denied') {
-      setState('denied'); return
+      return
     }
     navigator.serviceWorker.ready.then(reg =>
       reg.pushManager.getSubscription()
