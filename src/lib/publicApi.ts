@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-univ-api.nesterenkovasil9.workers.dev';
+const BASE = import.meta.env.VITE_API_URL ?? 'https://dentis-site-api.nesterenkovasil9.workers.dev';
 
 export type PublicDoctor = {
   id: number;
