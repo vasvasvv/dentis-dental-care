@@ -60,7 +60,7 @@ export function PushBanner() {
     }
 
     return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [state])
+  }, [state, isIOS])
 
   const handleInstall = useCallback(async () => {
     if (deferredPrompt) {

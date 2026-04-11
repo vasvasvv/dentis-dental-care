@@ -670,7 +670,7 @@ function IOSDatePicker({ value, onChange }: { value: string; onChange: (v: strin
     const m = String(month + 1).padStart(2, '0');
     const d = String(clampedDay + 1).padStart(2, '0');
     onChange(`${y}-${m}-${d}T${HOURS[hour]}:${MINUTES[minute]}`);
-  }, [clampedDay, month, year, hour, minute]);
+  }, [clampedDay, month, year, hour, minute, currentYear, onChange]);
 
   return (
     <div style={{ borderRadius: 16, overflow: 'hidden', background: 'hsl(180 60% 12%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
@@ -768,7 +768,7 @@ function AppointmentsTab({ token }: { token: string }) {
   const [sentId, setSentId] = useState<number | null>(null);
   const [pushModal, setPushModal] = useState<Appointment | null>(null);
 
-  const load = async () => {
+  const load = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/appointments?date=${filterDate}`, {
@@ -778,9 +778,9 @@ function AppointmentsTab({ token }: { token: string }) {
       setItems(await res.json() as Appointment[]);
     } catch { setError('Не вдалося завантажити записи'); }
     finally { setLoading(false); }
-  };
+  }, [filterDate, token]);
 
-  useEffect(() => { load(); }, [filterDate]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSave = async (data: Omit<Appointment, 'id' | 'reminded_24h' | 'reminded_1h'>) => {
     setSaving(true); setError(null);
@@ -1139,7 +1139,7 @@ function TelegramTab({ token }: { token: string }) {
   const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
   const [settingWebhook, setSettingWebhook] = useState(false);
 
-  const loadAppts = async () => {
+  const loadAppts = React.useCallback(async () => {
     setLoadingAppts(true); setError(null);
     try {
       const res = await fetch(`${BASE}/api/appointments?date=${filterDate}`, {
@@ -1149,9 +1149,9 @@ function TelegramTab({ token }: { token: string }) {
       setAppts(await res.json() as TgAppointment[]);
     } catch { setError('Не вдалося завантажити записи'); }
     finally { setLoadingAppts(false); }
-  };
+  }, [filterDate, token]);
 
-  const loadPending = async () => {
+  const loadPending = React.useCallback(async () => {
     setLoadingPending(true);
     try {
       const res = await fetch(`${BASE}/api/telegram/pending`, {
@@ -1162,10 +1162,10 @@ function TelegramTab({ token }: { token: string }) {
       setPending([]);
     }
     finally { setLoadingPending(false); }
-  };
+  }, [token]);
 
-  useEffect(() => { loadAppts(); }, [filterDate]);
-  useEffect(() => { if (subTab === 'pending') loadPending(); }, [subTab]);
+  useEffect(() => { loadAppts(); }, [loadAppts]);
+  useEffect(() => { if (subTab === 'pending') loadPending(); }, [subTab, loadPending]);
 
   const handleSave = async (data: Omit<TgAppointment, 'id' | 'tg_reminded_24h' | 'tg_reminded_1h'>) => {
     setSaving(true); setError(null);

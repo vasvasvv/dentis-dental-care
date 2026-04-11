@@ -44,7 +44,7 @@ export default function AdminPWABanner() {
 
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
+  }, [isIOS])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
