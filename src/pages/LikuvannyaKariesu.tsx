@@ -98,8 +98,8 @@ export default function LikuvannyaKariesu() {
   const pageStandards = standards[lang];
   const description =
     lang === "uk"
-      ? "Лікування карієсу у Кропивницькому в Dentis: безболісне пломбування зубів, точна діагностика та фотополімерні реставрації."
-      : "Caries treatment in Kropyvnytskyi at Dentis: comfortable fillings, precise diagnostics and photopolymer restorations.";
+      ? "Сучасне лікування карієсу без болю. Композитні матеріали світового рівня. Гарантія якості, дружелюбний сервіс. Запишіться онлайн за 1 хвилину."
+      : "Painless cavity treatment with world-class composite materials. Quality guarantee, friendly service. Book online in 1 minute.";
   const serviceName = lang === "uk" ? "Лікування карієсу" : "Caries treatment";
 
   return (
@@ -107,16 +107,17 @@ export default function LikuvannyaKariesu() {
       <PageSeo
         lang={lang}
         path="/likuvannya-kariesu"
+        ogImage="/og-images/likuvannya-kariesu.jpg"
         title={{
-          uk: "Лікування карієсу у Кропивницькому | Пломбування зубів — Dentis",
-          en: "Caries treatment in Kropyvnytskyi | Fillings — Dentis",
+          uk: "Лікування карієсу в Кропивницькому — Дентіс",
+          en: "Cavity Treatment in Kropyvnytskyi | Dentis Clinic",
         }}
         description={{
           uk: description,
           en: description,
         }}
       />
-      <ServiceSchema id="likuvannya-kariesu-schema" name={serviceName} description={description} image={toAbsoluteUrl("/og-image-likuvannya-kariesu.jpg")} />
+      <ServiceSchema id="likuvannya-kariesu-schema" name={serviceName} description={description} image={toAbsoluteUrl("/og-images/likuvannya-kariesu.jpg")} />
       <FaqSchema id="likuvannya-kariesu-faq" faqs={faqItems} />
 
       <Header />

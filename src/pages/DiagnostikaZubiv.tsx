@@ -88,17 +88,18 @@ export default function DiagnosticsPage() {
 
   const description =
     lang === "uk"
-      ? "Діагностика зубів у Кропивницькому: цифровий рентген, консультація стоматолога та точний план лікування в Dentis."
-      : "Dental diagnostics in Kropyvnytskyi with digital X-ray, consultation and treatment planning at Dentis.";
+      ? "Комп'ютерна діагностика зубів. Цифрові знімки високої якості. Точна діагностика карієсу, запалення, патологій."
+      : "Computer dental diagnostics. high-quality digital imaging. Precise diagnosis of cavities and inflammation.";
 
   return (
     <div className="min-h-screen">
       <PageSeo
         lang={lang}
         path="/diagnostika-zubiv"
+        ogImage="/og-images/diagnostika-zubiv.jpg"
         title={{
-          uk: "Діагностика зубів у Кропивницькому | Рентген, консультація — Dentis",
-          en: "Dental diagnostics in Kropyvnytskyi | X-ray, consultation — Dentis",
+          uk: "Діагностика зубів у Кропивницькому — Дентіс",
+          en: "Dental Diagnostics in Kropyvnytskyi — Dentis",
         }}
         description={{
           uk: description,
@@ -109,7 +110,7 @@ export default function DiagnosticsPage() {
         id="diagnostika-schema"
         name={lang === "uk" ? "Діагностика зубів" : "Dental diagnostics"}
         description={description}
-        image={toAbsoluteUrl("/og-image-diagnostika-zubiv.jpg")}
+        image={toAbsoluteUrl("/og-images/diagnostika-zubiv.jpg")}
       />
 
       <Header />

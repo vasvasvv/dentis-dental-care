@@ -83,8 +83,8 @@ export default function ProfesijneOchischennya() {
 
   const description =
     lang === "uk"
-      ? "Професійне чищення зубів у Кропивницькому в Dentis: ультразвук, Air Flow, полірування та профілактика карієсу й захворювань ясен."
-      : "Professional teeth cleaning in Kropyvnytskyi at Dentis: ultrasonic scaling, Air Flow, polishing and prevention of caries and gum disease.";
+      ? "Гігієнічна чистка зубів ультразвуком. Видалення каменю та нальоту. Профілактика карієсу та захворювань ясен. Процедура займає 1 годину."
+      : "Ultrasonic teeth cleaning. Removal of tartar and plaque. Prevention of cavities and gum disease. Procedure takes 1 hour.";
 
   const pageSteps = steps[lang];
   const pageBenefits = benefits[lang];
@@ -96,9 +96,10 @@ export default function ProfesijneOchischennya() {
       <PageSeo
         lang={lang}
         path="/profesijne-ochischennya"
+        ogImage="/og-images/profesiyne-ochyschennya.jpg"
         title={{
-          uk: "Професійне чищення зубів у Кропивницькому | Air Flow, ультразвук — Dentis",
-          en: "Professional teeth cleaning in Kropyvnytskyi | Air Flow, scaling — Dentis",
+          uk: "Професійне очищення зубів у Кропивницькому — Дентіс",
+          en: "Professional Teeth Cleaning in Kropyvnytskyi — Dentis",
         }}
         description={{
           uk: description,
@@ -109,7 +110,7 @@ export default function ProfesijneOchischennya() {
         id="profesijne-ochischennya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-image-profesijne-ochischennya.jpg")}
+        image={toAbsoluteUrl("/og-images/profesiyne-ochyschennya.jpg")}
       />
 
       <Header />

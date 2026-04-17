@@ -226,13 +226,14 @@ export default function Blog() {
       <PageSeo
         lang={lang}
         path="/blog"
+        ogImage="/og-image-blog.jpg"
         title={{
-          uk: "Блог стоматології у Кропивницькому | Поради, акції — Dentis",
-          en: "Dental blog in Kropyvnytskyi | Tips, offers — Dentis",
+          uk: "Блог Дентіс — поради та новини стоматології",
+          en: "Dentis Blog — Dental Tips and News",
         }}
         description={{
-          uk: "Блог Dentis: поради стоматолога, новини клініки та актуальні пропозиції щодо лікування, гігієни й естетичної стоматології.",
-          en: "Dentis blog with dentist tips, clinic updates and current offers for treatment, hygiene and cosmetic dentistry.",
+          uk: "Читай корисні статті про здоров'я зубів, методи лікування, вибір матеріалів, догляд за зубами.",
+          en: "Read useful articles about dental health, treatment methods, material selection, teeth care.",
         }}
         type="article"
       />

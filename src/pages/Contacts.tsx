@@ -26,13 +26,14 @@ export default function ContactsPage() {
       <PageSeo
         lang={lang}
         path="/contacts"
+        ogImage="/og-image-contacts.jpg"
         title={{
-          uk: "Контакти стоматології у Кропивницькому | Адреса, телефон — Dentis",
-          en: "Dentist contacts in Kropyvnytskyi | Address, phone — Dentis",
+          uk: "Контакти Дентіс — стоматологія у Кропивницькому",
+          en: "Contact Dentis — Dental Clinic in Kropyvnytskyi",
         }}
         description={{
-          uk: "Контакти стоматології Dentis у Кропивницькому: адреса, телефон для запису, графік роботи та карта проїзду до клініки.",
-          en: "Dentis dental clinic contacts in Kropyvnytskyi: address, booking phone number, opening hours and map directions.",
+          uk: "Адреса: вул. Героїв-рятувальників, 9, корп. 2, Кропивницький. Телефон: +38 050 480 0825. Режим роботи: пн-пт 9:00-20:00, сб 10:00-17:00",
+          en: "Address: Heroiv-Ryatuvalnykiv St, 9, Building 2, Kropyvnytskyi. Phone: +38 050 480 0825. Hours: Mon-Fri 9:00-20:00, Sat 10:00-17:00",
         }}
       />
       <JsonLdScript id="contacts-medical-webpage" data={webPageSchema} />

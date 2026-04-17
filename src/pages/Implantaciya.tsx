@@ -65,17 +65,18 @@ export default function Implantation() {
 
   const description =
     lang === "uk"
-      ? "Імплантація зубів у Кропивницькому в клініці Dentis: цифрова діагностика, сучасні імпланти та індивідуальний план відновлення посмішки."
-      : "Dental implants in Kropyvnytskyi at Dentis with digital diagnostics, modern implant systems and a tailored restoration plan.";
+      ? "Дентальна імплантація за світовими стандартами. Безбольовий процес. Консультація безкоштовна."
+      : "World-class dental implants. Painless process. Free consultation available.";
 
   return (
     <div className="min-h-screen">
       <PageSeo
         lang={lang}
         path="/implantaciya"
+        ogImage="/og-images/implantaciya.jpg"
         title={{
-          uk: "Імплантація зубів у Кропивницькому | Ціни, відгуки — Dentis",
-          en: "Dental implants in Kropyvnytskyi | Prices, reviews — Dentis",
+          uk: "Імплантація зубів у Кропивницькому — Дентіс",
+          en: "Dental Implants in Kropyvnytskyi — Dentis",
         }}
         description={{
           uk: description,
@@ -86,7 +87,7 @@ export default function Implantation() {
         id="implantaciya-schema"
         name={lang === "uk" ? "Імплантація зубів" : "Dental implants"}
         description={description}
-        image={toAbsoluteUrl("/og-image-implantaciya.jpg")}
+        image={toAbsoluteUrl("/og-images/implantaciya.jpg")}
       />
 
       <Header />

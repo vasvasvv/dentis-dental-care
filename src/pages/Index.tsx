@@ -25,7 +25,7 @@ const Index = () => {
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "MedicalWebPage",
-    name: lang === "uk" ? "Стоматологія Dentis у Кропивницькому" : "Dentis dental clinic in Kropyvnytskyi",
+    name: lang === "uk" ? "Стоматологія Дентіс у Кропивницькому" : "Dentis dental clinic in Kropyvnytskyi",
     description:
       lang === "uk"
         ? "Приватна стоматологія у Кропивницькому з лікуванням карієсу, імплантацією, протезуванням і професійною гігієною."
@@ -38,13 +38,14 @@ const Index = () => {
       <PageSeo
         lang={lang}
         path="/"
+        ogImage="/og-image.jpg"
         title={{
-          uk: "Стоматологія у Кропивницькому | Імплантація, лікування зубів — Dentis",
-          en: "Dentistry in Kropyvnytskyi | Implants, dental treatment — Dentis",
+          uk: "Дентіс — преміальна стоматологія у Кропивницькому",
+          en: "Dentis — Premium Dental Clinic in Kropyvnytskyi",
         }}
         description={{
-          uk: "Стоматологія Dentis у Кропивницькому: лікування зубів, імплантація, протезування, професійна гігієна та консультації без довгого очікування.",
-          en: "Dentis dental clinic in Kropyvnytskyi: dental treatment, implants, prosthetics, professional hygiene and consultations without long waits.",
+          uk: "Сучасне лікування карієсу, імплантація, протезування. Висок клас обслуговування, європейські матеріали, пожиттєва гарантія. Запишіться на консультацію безкоштовно.",
+          en: "Modern cavity treatment, implants, prosthetics. European materials, lifetime warranty. Book free consultation now.",
         }}
       />
       <JsonLdScript id="index-medical-webpage" data={webPageSchema} />
@@ -77,7 +78,7 @@ const Index = () => {
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
-        aria-label="Call Dentis"
+        aria-label="Call Дентіс"
       >
         <Phone size={22} />
       </a>

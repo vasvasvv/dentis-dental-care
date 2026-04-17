@@ -81,8 +81,8 @@ export default function Protezuvannya() {
 
   const description =
     lang === "uk"
-      ? "Протезування зубів у Кропивницькому в Dentis: коронки, мости, знімні та незнімні конструкції для відновлення функції й естетики."
-      : "Dental prosthetics in Kropyvnytskyi at Dentis: crowns, bridges and removable or fixed restorations for function and aesthetics.";
+      ? "Коронки, мости, повні протези. Індивідуальне виготовлення з матеріалів вищої якості. Природний вигляд, міцність, комфорт."
+      : "Crowns, bridges, complete dentures. Custom-made from premium materials. Natural appearance, durability, comfort.";
 
   const pageTypes = types[lang];
   const pageSteps = steps[lang];
@@ -94,9 +94,10 @@ export default function Protezuvannya() {
       <PageSeo
         lang={lang}
         path="/protezuvannya"
+        ogImage="/og-images/protezuvannya.jpg"
         title={{
-          uk: "Протезування зубів у Кропивницькому | Коронки, мости — Dentis",
-          en: "Dental prosthetics in Kropyvnytskyi | Crowns, bridges — Dentis",
+          uk: "Протезування зубів у Кропивницькому — Дентіс",
+          en: "Dentures & Prosthetics in Kropyvnytskyi — Dentis",
         }}
         description={{
           uk: description,
@@ -107,7 +108,7 @@ export default function Protezuvannya() {
         id="protezuvannya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-image-protezuvannya.jpg")}
+        image={toAbsoluteUrl("/og-images/protezuvannya.jpg")}
       />
 
       <Header />

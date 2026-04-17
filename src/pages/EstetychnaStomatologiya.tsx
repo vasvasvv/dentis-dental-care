@@ -96,8 +96,8 @@ export default function EstetychnaStomatologiya() {
 
   const description =
     lang === "uk"
-      ? "Естетична стоматологія у Кропивницькому в Dentis: вініри, відбілювання, художня реставрація та дизайн усмішки з індивідуальним підходом."
-      : "Cosmetic dentistry in Kropyvnytskyi at Dentis: veneers, whitening, artistic restorations and smile design with a tailored approach.";
+      ? "Дизайн посмішки, відбілювання зубів, виправлення прикусу. Виробляємо красиву та здорову посмішку за допомогою сучасних методів."
+      : "Smile design, teeth whitening, bite correction. Creating beautiful and healthy smiles using modern techniques.";
 
   const pageServices = services[lang];
   const pageSteps = steps[lang];
@@ -110,9 +110,10 @@ export default function EstetychnaStomatologiya() {
       <PageSeo
         lang={lang}
         path="/estetychna-stomatolohiya"
+        ogImage="/og-images/estetychna-stomatologiya.jpg"
         title={{
-          uk: "Естетична стоматологія у Кропивницькому | Вініри, відбілювання — Dentis",
-          en: "Cosmetic dentistry in Kropyvnytskyi | Veneers, whitening — Dentis",
+          uk: "Естетична стоматологія у Кропивницькому — Дентіс",
+          en: "Cosmetic Dentistry in Kropyvnytskyi — Dentis",
         }}
         description={{
           uk: description,
@@ -123,7 +124,7 @@ export default function EstetychnaStomatologiya() {
         id="estetychna-stomatolohiya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-image-estetychna-stomatolohiya.jpg")}
+        image={toAbsoluteUrl("/og-images/estetychna-stomatologiya.jpg")}
       />
 
       <Header />
