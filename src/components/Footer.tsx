@@ -53,7 +53,7 @@ export default function Footer() {
             >
               <img
                 src={logo}
-                alt="Dentis Logo"
+                alt="Дентіс Logo"
                 width={300}
                 height={100}
                 loading="lazy"

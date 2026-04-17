@@ -5,7 +5,7 @@ const schema = {
   "@context": "https://schema.org",
   "@type": "Dentist",
   name: CLINIC_CONTACT.brandName,
-  description: "Стоматологія Dentis у Кропивницькому: лікування зубів, імплантація, протезування та професійна гігієна.",
+  description: "Стоматологія Дентіс у Кропивницькому: лікування зубів, імплантація, протезування та професійна гігієна.",
   url: SITE_URL,
   telephone: CLINIC_CONTACT.phone,
   email: CLINIC_CONTACT.email,

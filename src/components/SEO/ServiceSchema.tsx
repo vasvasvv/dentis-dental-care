@@ -29,7 +29,7 @@ export default function ServiceSchema({ id, name, description, image, price, pri
       : {}),
     provider: {
       "@type": "Dentist",
-      name: "Dentis",
+      name: "Дентіс",
       url: SITE_URL,
     },
   };

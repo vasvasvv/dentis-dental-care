@@ -82,8 +82,8 @@ export default function Header() {
           }}
           className="group relative"
         >
-          <img src={logo} alt="Dentis Logo White" className="block h-14 w-auto transition-opacity duration-300 group-hover:opacity-0" />
-          <img src={logogold} alt="Dentis Logo Gold" className="absolute left-0 top-0 h-14 w-auto opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <img src={logo} alt="Дентіс Logo White" className="block h-14 w-auto transition-opacity duration-300 group-hover:opacity-0" />
+          <img src={logogold} alt="Дентіс Logo Gold" className="absolute left-0 top-0 h-14 w-auto opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">
