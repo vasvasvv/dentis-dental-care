@@ -184,6 +184,12 @@ html {
   }
 
   .gold-line-center::after { margin: 12px auto 0; }
+
+  .about-section {
+    position: relative;
+    background: hsl(var(--cream));
+    z-index: 10;
+  }
 }
 
 @supports (-webkit-touch-callout: none) {
