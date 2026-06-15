@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /d-panel
+Disallow: /d-panel/
 Disallow: /api/
 
 Sitemap: https://dentis.kr.ua/sitemap.xml

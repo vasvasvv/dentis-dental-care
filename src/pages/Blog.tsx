@@ -220,6 +220,8 @@ export default function Blog() {
   const news = allItems.filter((item) => item.type !== "promo");
   const displayPromos = fillWithFallback(promos, staticPromos, 2);
   const displayNews = fillWithFallback(news, staticNews, 3);
+  const authorName = lang === "uk" ? "Лікар Dentis" : "Dentis doctor";
+  const authorProfilePath = localizePath("/doctors/dentis-team-doctor");
 
   return (
     <div className="min-h-screen">
@@ -241,7 +243,8 @@ export default function Blog() {
         id="blog-article-schema"
         title={copy.headline}
         description={copy.description}
-        author={lang === "uk" ? "Команда Dentis" : "Dentis team"}
+        author={authorName}
+        authorUrl={toAbsoluteUrl(authorProfilePath)}
         datePublished="2026-04-06"
         dateModified="2026-04-06"
         image={toAbsoluteUrl("/og-image-blog.jpg")}
@@ -299,6 +302,9 @@ export default function Blog() {
               <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("blog.hygiene.h2")}</p>
               <h2 className="mb-5 font-display text-4xl font-bold text-navy md:text-5xl">{copy.headline}</h2>
               <p className="mb-8 font-body text-base leading-relaxed text-muted-foreground">{copy.description}</p>
+              <a href={authorProfilePath} className="mb-6 inline-block font-body text-sm font-semibold text-gold">
+                {lang === "uk" ? `Автор: ${authorName}` : `Author: ${authorName}`}
+              </a>
               <div className="space-y-3">
                 {copy.bullets.map((bullet) => (
                   <div key={bullet} className="flex items-start gap-3">

@@ -1,6 +1,7 @@
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -39,6 +40,22 @@ export function trackServiceFormSubmission(serviceName: string, serviceSlug: str
     service_name: serviceName,
     service_slug: serviceSlug,
   });
+}
+
+export function trackBookingFormSubmit() {
+  const payload = {
+    form_name: "multi_step_booking",
+    form_location: "home",
+  };
+
+  pushToDataLayer({
+    event: "booking_form_submit",
+    ...payload,
+  });
+
+  if (typeof window !== "undefined") {
+    window.gtag?.("event", "booking_form_submit", payload);
+  }
 }
 
 export function trackServiceScrollDepth(serviceName: string, serviceSlug: string, depthPercent: number) {

@@ -4,7 +4,9 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import RelatedServices from "@/components/RelatedServices";
 import PageSeo from "@/components/SEO/PageSeo";
+import FaqSchema from "@/components/SEO/FaqSchema";
 import ServiceSchema from "@/components/SEO/ServiceSchema";
+import SeoAccordion from "@/components/SEO/SeoAccordion";
 import { useLang } from "@/contexts/LanguageContext";
 import heroVideo from "@/assets/hero-video.mp4";
 import { trackServiceCtaClick, trackServiceView } from "@/lib/gtmTracking";
@@ -63,14 +65,29 @@ const advantages = {
   ],
 };
 
+const faq = {
+  uk: [
+    { question: "Скільки коштує протезування зубів у Кропивницькому?", answer: "Ціна залежить від типу конструкції: коронка, міст, знімний протез або протезування на імплантах. Після діагностики лікар складає план із варіантами та вартістю." },
+    { question: "Які коронки виглядають найприродніше?", answer: "Для зони посмішки часто обирають безметалеву кераміку або цирконій. Вибір залежить від прикусу, кольору зубів і клінічної ситуації." },
+    { question: "Чи можна відновити зуби без обточування сусідніх?", answer: "У багатьох випадках для цього розглядають протезування на імплантах, яке не перевантажує сусідні зуби. Остаточний варіант визначається після огляду." },
+  ],
+  en: [
+    { question: "How much does dental prosthetics cost in Kropyvnytskyi?", answer: "The price depends on restoration type: crown, bridge, removable denture or implant-supported prosthetics. After diagnostics, the dentist prepares options and cost." },
+    { question: "Which crowns look most natural?", answer: "All-ceramic or zirconia crowns are often chosen for the smile zone. The choice depends on bite, tooth shade and clinical situation." },
+    { question: "Can teeth be restored without preparing neighbouring teeth?", answer: "In many cases, implant-supported prosthetics can avoid loading neighbouring teeth. The final option is chosen after examination." },
+  ],
+};
+
 export default function Protezuvannya() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { lang, localizePath } = useLang();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !window.matchMedia("(min-width: 768px)").matches) return;
 
+    video.src = heroVideo;
+    video.load();
     video.play().catch(() => {});
     video.playbackRate = 0.6;
   }, []);
@@ -81,12 +98,13 @@ export default function Protezuvannya() {
 
   const description =
     lang === "uk"
-      ? "Коронки, мости, повні протези. Індивідуальне виготовлення з матеріалів вищої якості. Природний вигляд, міцність, комфорт."
+      ? "Коронки, мости, знімні протези та протезування на імплантах у Кропивницькому. Індивідуальний план, природний вигляд, комфорт і зрозумілі ціни."
       : "Crowns, bridges, complete dentures. Custom-made from premium materials. Natural appearance, durability, comfort.";
 
   const pageTypes = types[lang];
   const pageSteps = steps[lang];
   const pageAdvantages = advantages[lang];
+  const faqItems = faq[lang];
   const serviceName = lang === "uk" ? "Протезування зубів" : "Dental prosthetics";
 
   return (
@@ -96,7 +114,7 @@ export default function Protezuvannya() {
         path="/protezuvannya"
         ogImage="/og-images/protezuvannya.jpg"
         title={{
-          uk: "Протезування зубів у Кропивницькому — Дентіс",
+          uk: "Протезування зубів у Кропивницькому: якісно та безболісно | Дентіс",
           en: "Dentures & Prosthetics in Kropyvnytskyi — Dentis",
         }}
         description={{
@@ -110,12 +128,13 @@ export default function Protezuvannya() {
         description={description}
         image={toAbsoluteUrl("/og-images/protezuvannya.jpg")}
       />
+      <FaqSchema id="protezuvannya-faq" faqs={faqItems} />
 
       <Header />
 
       <section className="relative overflow-hidden pb-24 pt-36">
         <div className="absolute inset-0 -z-10">
-          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover motion-reduce:hidden" />
+          <video ref={videoRef} muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover motion-reduce:hidden" />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
         <div className="absolute inset-0 opacity-10">
@@ -201,6 +220,13 @@ export default function Protezuvannya() {
       </section>
 
       <section className="bg-cream-dark py-20 text-center">
+        <div className="container mx-auto mb-20 max-w-4xl px-4 text-left">
+          <div className="mb-10 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">SEO FAQ</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Поширені питання про протезування" : "Common prosthetics questions"}</h2>
+          </div>
+          <SeoAccordion items={faqItems} />
+        </div>
         <div className="container mx-auto px-4">
           <h2 className="mb-4 font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Потрібно відновити зуб або усмішку?" : "Need to restore a tooth or your smile?"}</h2>
           <p className="mx-auto mb-8 max-w-md font-body text-primary-custom-dark/60">

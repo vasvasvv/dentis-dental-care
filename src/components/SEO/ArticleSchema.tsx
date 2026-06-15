@@ -6,12 +6,13 @@ type ArticleSchemaProps = {
   title: string;
   description: string;
   author: string;
+  authorUrl?: string;
   datePublished: string;
   dateModified?: string;
   image: string;
 };
 
-export default function ArticleSchema({ id, title, description, author, datePublished, dateModified, image }: ArticleSchemaProps) {
+export default function ArticleSchema({ id, title, description, author, authorUrl, datePublished, dateModified, image }: ArticleSchemaProps) {
   return (
     <JsonLdScript
       id={id}
@@ -24,6 +25,7 @@ export default function ArticleSchema({ id, title, description, author, datePubl
         author: {
           "@type": "Person",
           name: author,
+          ...(authorUrl ? { url: authorUrl } : {}),
         },
         publisher: {
           "@type": "Dentist",

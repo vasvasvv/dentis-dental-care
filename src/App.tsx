@@ -5,23 +5,7 @@ import BreadcrumbSchema from "@/components/SEO/BreadcrumbSchema";
 import ClinicSchema from "@/components/SEO/ClinicSchema";
 import ScrollToTop from "@/components/ScrollToTop";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import PWAInstallBanner from "./components/Pwainstallbanner";
-import { PushBanner } from "./components/PushBanner";
 import { buildCanonical, stripLangFromPath } from "@/utils/seo";
-
-function AppBanners() {
-  const location = useLocation();
-  const isAdmin = location.pathname.startsWith("/d-panel");
-
-  if (isAdmin) return null;
-
-  return (
-    <>
-      <PWAInstallBanner />
-      <PushBanner />
-    </>
-  );
-}
 
 function AppSchema() {
   const location = useLocation();
@@ -36,6 +20,10 @@ function AppSchema() {
     "/profesijne-ochischennya": { uk: "Професійне чищення зубів", en: "Professional teeth cleaning" },
     "/estetychna-stomatolohiya": { uk: "Естетична стоматологія", en: "Cosmetic dentistry" },
     "/diagnostika-zubiv": { uk: "Діагностика зубів", en: "Dental diagnostics" },
+    "/orthodontics": { uk: "Ортодонтія", en: "Orthodontics" },
+    "/child-dentistry": { uk: "Дитяча стоматологія", en: "Children's dentistry" },
+    "/prices": { uk: "Ціни", en: "Prices" },
+    "/doctors": { uk: "Лікарі", en: "Doctors" },
     "/contacts": { uk: "Контакти", en: "Contacts" },
     "/blog": { uk: "Блог", en: "Blog" },
   };
@@ -45,7 +33,7 @@ function AppSchema() {
       ? [{ name: routeLabels["/"][lang], url: buildCanonical("/", lang) }]
       : [
           { name: routeLabels["/"][lang], url: buildCanonical("/", lang) },
-          { name: routeLabels[neutralPath]?.[lang] ?? neutralPath, url: buildCanonical(neutralPath, lang) },
+          { name: routeLabels[neutralPath]?.[lang] ?? (neutralPath.startsWith("/doctors/") ? (lang === "uk" ? "Профіль лікаря" : "Doctor profile") : neutralPath), url: buildCanonical(neutralPath, lang) },
         ];
 
   return (
@@ -62,7 +50,6 @@ function Layout() {
       <AppSchema />
       <ScrollToTop />
       <Outlet />
-      <AppBanners />
       <ScrollToTopButton />
     </LanguageProvider>
   );
@@ -123,6 +110,46 @@ function createPublicRoutes(scope: string): RouteRecord[] {
       path: "diagnostika-zubiv",
       lazy: async () => {
         const { default: Component } = await import("./pages/DiagnostikaZubiv");
+        return { Component };
+      },
+    },
+    {
+      id: `${scope}-orthodontics`,
+      path: "orthodontics",
+      lazy: async () => {
+        const { default: Component } = await import("./pages/Orthodontics");
+        return { Component };
+      },
+    },
+    {
+      id: `${scope}-child-dentistry`,
+      path: "child-dentistry",
+      lazy: async () => {
+        const { default: Component } = await import("./pages/ChildDentistry");
+        return { Component };
+      },
+    },
+    {
+      id: `${scope}-prices`,
+      path: "prices",
+      lazy: async () => {
+        const { default: Component } = await import("./pages/Prices");
+        return { Component };
+      },
+    },
+    {
+      id: `${scope}-doctor-profile`,
+      path: "doctors/:slug",
+      lazy: async () => {
+        const { default: Component } = await import("./pages/DoctorProfile");
+        return { Component };
+      },
+    },
+    {
+      id: `${scope}-doctors`,
+      path: "doctors",
+      lazy: async () => {
+        const { default: Component } = await import("./pages/DoctorsPage");
         return { Component };
       },
     },

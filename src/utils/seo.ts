@@ -39,21 +39,21 @@ const OG_PAGE_METADATA: Record<
   },
   "/likuvannya-kariesu": {
     title: {
-      uk: "Лікування карієсу в Кропивницькому — Дентіс",
+      uk: "Лікування карієсу в Кропивницькому — ціни на лікування зубів",
       en: "Cavity Treatment in Kropyvnytskyi | Dentis Clinic",
     },
     description: {
-      uk: "Сучасне лікування карієсу без болю. Композитні матеріали світового рівня. Гарантія якості, дружелюбний сервіс.",
+      uk: "Лікування карієсу в стоматології Dentis у Кропивницькому: сучасна діагностика, комфортна анестезія, фотополімерні реставрації та прозорий план вартості.",
       en: "Painless cavity treatment with world-class composite materials. Quality guarantee, friendly service.",
     },
   },
   "/implantaciya": {
     title: {
-      uk: "Імплантація зубів у Кропивницькому — Дентіс",
+      uk: "Імплантація зубів Кропивницький: ціни, відгуки | Стоматологія Дентіс",
       en: "Dental Implants in Kropyvnytskyi — Dentis",
     },
     description: {
-      uk: "Дентальна імплантація за світовими стандартами. Безбольовий процес. Консультація безкоштовна.",
+      uk: "Імплантація зубів у Кропивницькому в Dentis: консультація, цифрове планування, встановлення імплантів і протезування з локальними відгуками та орієнтиром ціни.",
       en: "World-class dental implants. Painless process. Free consultation available.",
     },
   },
@@ -89,12 +89,52 @@ const OG_PAGE_METADATA: Record<
   },
   "/protezuvannya": {
     title: {
-      uk: "Протезування зубів у Кропивницькому — Дентіс",
+      uk: "Протезування зубів у Кропивницькому: якісно та безболісно | Дентіс",
       en: "Dentures & Prosthetics in Kropyvnytskyi — Dentis",
     },
     description: {
-      uk: "Коронки, мости, повні протези. Індивідуальне виготовлення з матеріалів вищої якості. Природний вигляд, міцність, комфорт.",
+      uk: "Коронки, мости, знімні протези та протезування на імплантах у Кропивницькому. Індивідуальний план, природний вигляд, комфорт і зрозумілі ціни.",
       en: "Crowns, bridges, complete dentures. Custom-made from premium materials. Natural appearance, durability, comfort.",
+    },
+  },
+  "/orthodontics": {
+    title: {
+      uk: "Ортодонтія у Кропивницькому — брекети та вирівнювання прикусу | Дентіс",
+      en: "Orthodontics in Kropyvnytskyi — Braces and Bite Correction | Dentis",
+    },
+    description: {
+      uk: "Вирівнювання прикусу, брекети та ортодонтична консультація у стоматології Dentis у Кропивницькому. PLACEHOLDER: додати точні ціни й системи.",
+      en: "Bite correction, braces and orthodontic consultation at Dentis in Kropyvnytskyi. PLACEHOLDER: add exact prices and systems.",
+    },
+  },
+  "/child-dentistry": {
+    title: {
+      uk: "Дитяча стоматологія у Кропивницькому | Дентіс",
+      en: "Children's Dentistry in Kropyvnytskyi | Dentis",
+    },
+    description: {
+      uk: "Дитячий стоматолог у Кропивницькому: профілактика, лікування карієсу молочних зубів, адаптаційний прийом і комфортний підхід у Dentis.",
+      en: "Pediatric dentistry in Kropyvnytskyi: prevention, baby tooth caries treatment, adaptation visit and gentle care at Dentis.",
+    },
+  },
+  "/prices": {
+    title: {
+      uk: "Ціни на стоматологію у Кропивницькому | Прайс Дентіс",
+      en: "Dental Prices in Kropyvnytskyi | Dentis Price List",
+    },
+    description: {
+      uk: "Прайс стоматології Dentis у Кропивницькому. PLACEHOLDER: додати актуальні ціни на консультацію, лікування, імплантацію, протезування та гігієну.",
+      en: "Dentis dental price list in Kropyvnytskyi. PLACEHOLDER: add current prices for consultation, treatment, implants, prosthetics and hygiene.",
+    },
+  },
+  "/doctors": {
+    title: {
+      uk: "Лікарі стоматології Дентіс у Кропивницькому",
+      en: "Dentis Doctors in Kropyvnytskyi",
+    },
+    description: {
+      uk: "Профілі лікарів Dentis: досвід, сертифікати, напрямки роботи та відгуки пацієнтів. PLACEHOLDER: підтвердити дані перед публікацією.",
+      en: "Dentis doctor profiles: experience, certificates, treatment areas and patient reviews. PLACEHOLDER: confirm details before publishing.",
     },
   },
   "/contacts": {
@@ -221,6 +261,10 @@ export function getOgImageForPage(path: string) {
     "/estetychna-stomatolohiya": "/og-images/estetychna-stomatologiya.jpg",
     "/profesijne-ochischennya": "/og-images/profesiyne-ochyschennya.jpg",
     "/protezuvannya": "/og-images/protezuvannya.jpg",
+    "/orthodontics": "/og-image.jpg",
+    "/child-dentistry": "/og-image.jpg",
+    "/prices": "/og-image.jpg",
+    "/doctors": "/og-image.jpg",
     "/blog": "/og-image-blog.jpg",
     "/contacts": "/og-image-contacts.jpg",
   };

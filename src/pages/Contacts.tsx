@@ -43,6 +43,20 @@ export default function ContactsPage() {
 
       <main>
         <ContactsSection />
+        <section className="bg-background py-12">
+          <div className="container mx-auto max-w-3xl px-4">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-card-custom">
+              <p className="mb-2 font-body text-xs font-semibold uppercase tracking-[0.25em] text-gold">
+                {lang === "uk" ? "Юридична інформація" : "Legal information"}
+              </p>
+              <p className="font-body text-sm leading-7 text-muted-foreground">
+                {lang === "uk"
+                  ? "Ліцензія МОЗ України на медичну практику: PLACEHOLDER — додати номер і дату ліцензії перед публікацією."
+                  : "Ministry of Health of Ukraine medical practice license: PLACEHOLDER — add license number and date before publishing."}
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
 
       <section className="bg-navy">

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Check, ChevronRight } from "lucide-react";
+import { trackBookingFormSubmit } from "@/lib/gtmTracking";
 
 const steps = ["Контакти", "Дата й час", "Підтвердження"];
 
@@ -9,12 +10,25 @@ export default function MultiStepBookingForm() {
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const isStepValid = useMemo(() => {
     if (step === 0) return name.trim().length > 1 && phone.trim().length >= 10;
     if (step === 1) return Boolean(date && time);
     return true;
   }, [step, name, phone, date, time]);
+
+  const handlePrimaryClick = () => {
+    if (step < 2) {
+      setStep((s) => Math.min(2, s + 1));
+      return;
+    }
+
+    if (submitted) return;
+
+    trackBookingFormSubmit();
+    setSubmitted(true);
+  };
 
   return (
     <section className="section-block bg-background" aria-hidden="true">
@@ -61,7 +75,7 @@ export default function MultiStepBookingForm() {
 
           {step === 2 && (
             <div className="rounded-xl border border-success/40 bg-success/10 p-4 text-sm text-navy">
-              Миттєве підтвердження: дякуємо, {name || "пацієнте"}! Попередній запис на {date || "обрану дату"} о {time || "обраний час"}.
+              {submitted ? "Подію запису зафіксовано." : "Підтвердьте попередній запис."} Дякуємо, {name || "пацієнте"}! Попередній запис на {date || "обрану дату"} о {time || "обраний час"}.
             </div>
           )}
 
@@ -76,11 +90,11 @@ export default function MultiStepBookingForm() {
             </button>
             <button
               type="button"
-              onClick={() => setStep((s) => Math.min(2, s + 1))}
+              onClick={handlePrimaryClick}
               className="px-5 py-2.5 rounded-full gradient-gold text-accent-foreground text-sm inline-flex items-center gap-1 disabled:opacity-40"
-              disabled={!isStepValid || step === 2}
+              disabled={!isStepValid || submitted}
             >
-              Далі <ChevronRight size={14} />
+              {step === 2 ? "Підтвердити" : "Далі"} <ChevronRight size={14} />
             </button>
           </div>
         </div>

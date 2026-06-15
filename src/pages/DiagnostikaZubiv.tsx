@@ -76,10 +76,12 @@ export default function DiagnosticsPage() {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {});
-      video.playbackRate = 0.6;
-    }
+    if (!video || !window.matchMedia("(min-width: 768px)").matches) return;
+
+    video.src = heroVideo;
+    video.load();
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
   }, []);
 
   useEffect(() => {
@@ -119,8 +121,6 @@ export default function DiagnosticsPage() {
         <div className="absolute inset-0 -z-10">
           <video
             ref={videoRef}
-            src={heroVideo}
-            autoPlay
             muted
             loop
             playsInline

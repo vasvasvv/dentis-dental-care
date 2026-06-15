@@ -2,7 +2,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RelatedServices from "@/components/RelatedServices";
 import PageSeo from "@/components/SEO/PageSeo";
+import FaqSchema from "@/components/SEO/FaqSchema";
 import ServiceSchema from "@/components/SEO/ServiceSchema";
+import SeoAccordion from "@/components/SEO/SeoAccordion";
 import { Phone, CheckCircle, Clock, Shield, Star } from "lucide-react";
 import heroVideo from "@/assets/hero-video.mp4";
 import { useEffect, useRef } from "react";
@@ -47,16 +49,31 @@ const benefits = [
   "Індивідуальний план лікування",
 ];
 
+const faq = {
+  uk: [
+    { question: "Скільки коштує імплантація зубів у Кропивницькому?", answer: "Вартість залежить від системи імпланта, діагностики, потреби в кістковій пластиці та майбутньої коронки. Точний план і ціну лікар формує після консультації." },
+    { question: "Чи боляче встановлювати імплант?", answer: "Процедура проходить під місцевою анестезією, тому біль під час встановлення імпланта контролюється. Після прийому лікар дає рекомендації для комфортного відновлення." },
+    { question: "Де знаходиться стоматологія для імплантації?", answer: "Dentis працює у Кропивницькому за адресою вул. Героїв-рятувальників, 9, корп. 2. Це зручно для локальних запитів на імплантацію зубів у Кропивницькому." },
+  ],
+  en: [
+    { question: "How much do dental implants cost in Kropyvnytskyi?", answer: "The cost depends on the implant system, diagnostics, bone grafting needs and final crown. The dentist prepares an exact plan and price after consultation." },
+    { question: "Is dental implant placement painful?", answer: "The procedure is performed under local anaesthesia, so pain is controlled during placement. After the visit, the dentist gives recovery recommendations." },
+    { question: "Where is the implant clinic located?", answer: "Dentis is located in Kropyvnytskyi at Heroiv-Ryatuvalnykiv Street, 9, Building 2, convenient for local dental implant searches." },
+  ],
+};
+
 export default function Implantation() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { lang, localizePath } = useLang();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
-      video.play().catch(() => {});
-      video.playbackRate = 0.6;
-    }
+    if (!video || !window.matchMedia("(min-width: 768px)").matches) return;
+
+    video.src = heroVideo;
+    video.load();
+    video.play().catch(() => {});
+    video.playbackRate = 0.6;
   }, []);
 
   useEffect(() => {
@@ -65,8 +82,9 @@ export default function Implantation() {
 
   const description =
     lang === "uk"
-      ? "Дентальна імплантація за світовими стандартами. Безбольовий процес. Консультація безкоштовна."
+      ? "Імплантація зубів у Кропивницькому в Dentis: консультація, цифрове планування, встановлення імплантів і протезування з локальними відгуками та орієнтиром ціни."
       : "World-class dental implants. Painless process. Free consultation available.";
+  const faqItems = faq[lang];
 
   return (
     <div className="min-h-screen">
@@ -75,7 +93,7 @@ export default function Implantation() {
         path="/implantaciya"
         ogImage="/og-images/implantaciya.jpg"
         title={{
-          uk: "Імплантація зубів у Кропивницькому — Дентіс",
+          uk: "Імплантація зубів Кропивницький: ціни, відгуки | Стоматологія Дентіс",
           en: "Dental Implants in Kropyvnytskyi — Dentis",
         }}
         description={{
@@ -89,6 +107,7 @@ export default function Implantation() {
         description={description}
         image={toAbsoluteUrl("/og-images/implantaciya.jpg")}
       />
+      <FaqSchema id="implantaciya-faq" faqs={faqItems} />
 
       <Header />
 
@@ -96,8 +115,6 @@ export default function Implantation() {
         <div className="absolute inset-0 -z-10">
           <video
             ref={videoRef}
-            src={heroVideo}
-            autoPlay
             muted
             loop
             playsInline
@@ -197,6 +214,13 @@ export default function Implantation() {
       </section>
 
       <section className="py-20 bg-background text-center">
+        <div className="container mx-auto mb-20 max-w-4xl px-4 text-left">
+          <div className="mb-10 text-center">
+            <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">SEO FAQ</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Поширені питання про імплантацію</h2>
+          </div>
+          <SeoAccordion items={faqItems} />
+        </div>
         <div className="container mx-auto px-4">
           <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Готові відновити посмішку?</h2>
           <p className="font-body text-primary-text-custom-dark/60 mb-8 max-w-md mx-auto">
