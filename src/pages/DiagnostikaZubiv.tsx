@@ -116,7 +116,7 @@ export default function DiagnosticsPage() {
       <Header />
 
       <section className="relative pt-36 pb-24 overflow-hidden">
-        <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 -z-10">
           <video
             ref={videoRef}
             src={heroVideo}
@@ -126,7 +126,7 @@ export default function DiagnosticsPage() {
             playsInline
             preload="none"
             poster="/hero-poster.webp"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover motion-reduce:hidden"
           />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
@@ -149,14 +149,14 @@ export default function DiagnosticsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="tel:+380504800825"
-              className="flex items-center justify-center gap-3 gradient-gold text-accent-foreground px-8 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+              className="btn-primary"
             >
               <Phone size={18} />
               Записатися на діагностику
             </a>
             <a
               href={localizePath("/contacts")}
-              className="flex items-center justify-center gap-2 border border-gold/60 text-gold hover:bg-gold/10 px-8 py-4 rounded-full font-body font-medium text-base transition-all duration-200"
+              className="btn-secondary"
             >
               Контакти
             </a>
@@ -255,7 +255,7 @@ export default function DiagnosticsPage() {
           </p>
           <a
             href="tel:+380504800825"
-            className="inline-flex items-center gap-3 gradient-gold text-accent-foreground px-10 py-4 rounded-full font-body font-semibold text-base shadow-gold-custom hover:opacity-90 transition-opacity"
+            className="btn-primary"
           >
             <Phone size={18} />
             Зателефонувати

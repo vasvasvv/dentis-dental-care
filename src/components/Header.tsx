@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@assets/logo-white.webp";
 import logogold from "@assets/logo-gold.webp";
 import { useLang } from "@/contexts/LanguageContext";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -11,7 +12,6 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang, localizePath, toggleLang, t } = useLang();
-  const menuRef = useRef<HTMLDivElement>(null);
   const homePath = localizePath("/");
 
   const navLinks = [
@@ -29,24 +29,6 @@ export default function Header() {
 
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    const handleOutside = (event: MouseEvent | TouchEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMobileOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutside);
-    document.addEventListener("touchstart", handleOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutside);
-      document.removeEventListener("touchstart", handleOutside);
-    };
-  }, [mobileOpen]);
 
   const handleNav = (href: string, isHash: boolean) => {
     setMobileOpen(false);
@@ -67,9 +49,8 @@ export default function Header() {
 
   return (
     <header
-      ref={menuRef}
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-navy/95 backdrop-blur-lg shadow-nav" : "bg-navy/85"
+      className={`sticky top-0 z-50 transition-all duration-300 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/70 after:to-transparent ${
+        scrolled ? "bg-navy/90 backdrop-blur-xl shadow-nav" : "bg-navy/80 backdrop-blur-md"
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -111,46 +92,48 @@ export default function Header() {
           </button>
         </div>
 
-        <button
-          type="button"
-          className="p-2 text-primary-foreground md:hidden"
-          onClick={() => setMobileOpen((value) => !value)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {mobileOpen && (
-        <div className="animate-fade-in border-t border-navy-light/30 bg-navy/95 px-4 pb-5 pt-3 md:hidden">
-          <div className="mb-3">
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
             <button
               type="button"
-              onClick={() => {
-                toggleLang();
-                setMobileOpen(false);
-              }}
-              className="rounded-full border border-primary-foreground/30 px-3 py-1.5 text-primary-foreground hover:text-gold"
+              className="rounded-full border border-primary-foreground/20 p-2 text-primary-foreground transition-colors hover:border-gold/60 hover:text-gold md:hidden"
+              aria-label="Toggle menu"
             >
-              <span className={lang === "uk" ? "text-gold" : "opacity-50"}>UA</span>
-              <span className="mx-1 opacity-40">/</span>
-              <span className={lang === "en" ? "text-gold" : "opacity-50"}>EN</span>
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {navLinks.map((link) => (
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[86vw] max-w-sm border-l border-white/20 bg-navy/90 p-0 text-primary-foreground shadow-nav backdrop-blur-xl">
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <div className="flex h-full flex-col px-6 pb-8 pt-16">
               <button
-                key={link.href}
-                onClick={() => handleNav(link.href, link.isHash)}
-                className="py-1 text-left text-base text-primary-foreground/90 hover:text-gold"
+                type="button"
+                onClick={() => {
+                  toggleLang();
+                  setMobileOpen(false);
+                }}
+                className="mb-8 w-fit rounded-full border border-primary-foreground/25 px-3 py-1.5 text-primary-foreground transition-colors hover:border-gold/70 hover:text-gold"
               >
-                {t(link.labelKey)}
+                <span className={lang === "uk" ? "text-gold" : "opacity-50"}>UA</span>
+                <span className="mx-1 opacity-40">/</span>
+                <span className={lang === "en" ? "text-gold" : "opacity-50"}>EN</span>
               </button>
-            ))}
-          </div>
-        </div>
-      )}
+
+              <div className="flex flex-col gap-2">
+                {navLinks.map((link, index) => (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNav(link.href, link.isHash)}
+                    className="animate-fade-up rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-left text-base text-primary-foreground/90 backdrop-blur-md transition-all duration-200 hover:border-gold/50 hover:bg-white/15 hover:text-gold"
+                    style={{ animationDelay: `${index * 0.04}s` }}
+                  >
+                    {t(link.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </header>
   );
 }

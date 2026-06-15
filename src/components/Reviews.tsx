@@ -2,16 +2,7 @@ import { Star } from "lucide-react";
 import ReviewSchema from "@/components/SEO/ReviewSchema";
 import { useLang } from "@/contexts/LanguageContext";
 
-type Review = { name: string; rating: number; text: string; service: string; photo: string };
-
-const photos = [
-  "https://i.pravatar.cc/120?img=12",
-  "https://i.pravatar.cc/120?img=33",
-  "https://i.pravatar.cc/120?img=45",
-  "https://i.pravatar.cc/120?img=51",
-  "https://i.pravatar.cc/120?img=24",
-  "https://i.pravatar.cc/120?img=18",
-];
+type Review = { name: string; rating: number; text: string; service: string };
 
 const reviewsUk: Omit<Review, "photo">[] = [
   { name: "Ольга К.", rating: 5, text: "Неймовірно задоволена! Нарешті знайшла клініку, де до тебе ставляться як до людини. Олександр Олександрович — справжній професіонал. Рекомендую всім!", service: "Протезування" },
@@ -34,7 +25,7 @@ const reviewsEn: Omit<Review, "photo">[] = [
 export default function Reviews() {
   const { lang, t } = useLang();
   const base = lang === "uk" ? reviewsUk : reviewsEn;
-  const reviews: Review[] = base.map((item, index) => ({ ...item, photo: photos[index % photos.length] }));
+  const reviews: Review[] = base.map((item) => ({ ...item }));
 
   return (
     <>
@@ -49,9 +40,11 @@ export default function Reviews() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((rev) => (
-              <div key={rev.name} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
+              <div key={rev.name} className="glass-card border rounded-2xl p-6 shadow-card-custom hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
                 <div className="flex items-center gap-3 mb-4">
-                  <img src={rev.photo} alt={`${rev.name} review for Dentis clinic`} className="w-12 h-12 rounded-full object-cover border border-gold/30" loading="lazy" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold/30 bg-gradient-to-br from-navy to-navy-light font-display text-sm font-bold text-gold shadow-card-custom">
+                    {Array.from(rev.name.trim())[0]}
+                  </div>
                   <div>
                     <div className="font-display font-semibold text-custom-dark text-sm">{rev.name}</div>
                     <div className="font-body text-xs text-muted-foreground">{rev.service}</div>

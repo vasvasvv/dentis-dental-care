@@ -24,7 +24,7 @@ export default function AwardsSection() {
         <div className="max-w-6xl mx-auto px-6 relative">
           <div className="text-center mb-14">
             <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{t("awards.label")}</p>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">{t("awards.h2")}</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">{t("awards.h2")}</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">

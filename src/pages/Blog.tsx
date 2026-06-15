@@ -179,7 +179,7 @@ function BlogCard({ item }: { item: NewsItem }) {
         </div>
       )}
 
-      <span className={`mb-4 inline-block w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/8 text-custom-dark"}`}>
+      <span className={`mb-4 inline-block w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest ${isPromo ? "bg-gold/15 text-gold" : "bg-navy/10 text-custom-dark"}`}>
         {item.badge}
       </span>
       <h3 className="mb-3 font-display text-xl font-bold text-custom-dark">{item.title}</h3>
@@ -250,8 +250,8 @@ export default function Blog() {
       <Header />
 
       <section className="relative overflow-hidden pb-24 pt-36">
-        <div className="fixed inset-0 -z-10">
-          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 -z-10">
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover motion-reduce:hidden" />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
 
@@ -281,7 +281,7 @@ export default function Blog() {
         <div className="container mx-auto px-4">
           <div className="mb-14 text-center">
             <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">{t("news.label")}</p>
-            <h2 className="font-display text-4xl font-bold text-secondary gold-line-center md:text-5xl">{t("blog.news.h2")}</h2>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center md:text-5xl">{t("blog.news.h2")}</h2>
           </div>
 
           <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -311,14 +311,14 @@ export default function Blog() {
                 <a
                   href="/oral-care-guide.pdf"
                   download="Dentis-oral-care-guide.pdf"
-                  className="inline-flex items-center gap-3 rounded-full gradient-gold px-7 py-3.5 font-body text-sm font-medium text-accent-foreground shadow-gold-custom transition-all duration-200 hover:scale-105"
+                  className="btn-primary text-sm"
                 >
                   <Download size={16} />
                   {t("blog.hygiene.download")}
                 </a>
                 <a
                   href={localizePath("/contacts")}
-                  className="inline-flex items-center gap-3 rounded-full border border-gold/50 px-7 py-3.5 font-body text-sm font-medium text-gold transition-all duration-200 hover:bg-gold/10"
+                  className="btn-secondary text-sm"
                 >
                   <BookOpen size={16} />
                   {lang === "uk" ? "Записатися на гігієну" : "Book hygiene visit"}

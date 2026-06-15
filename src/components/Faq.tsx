@@ -124,7 +124,7 @@ const Faq: FC = () => {
       <section className="faq max-w-[900px] mx-auto px-5 section-block">
         <div className="text-center mb-14">
           <p className="text-gold font-body text-m tracking-[0.3em] uppercase font-medium mb-3">{t("faq.label")}</p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-secondary gold-line-center">{t("faq.h2")}</h2>
+          <h2 className="font-display text-4xl md:text-5xl font-bold text-navy gold-line-center">{t("faq.h2")}</h2>
         </div>
 
         <div className="grid sm:grid-cols-1 lg:grid-cols-1 text-center gap-6">

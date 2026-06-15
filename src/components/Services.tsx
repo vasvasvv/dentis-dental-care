@@ -44,10 +44,10 @@ export default function Services() {
               variants={cardVariants}
               whileHover={{ scale: 1.03, y: -6 }}
               onClick={() => navigate(link)}
-              className={`rounded-2xl p-7 border shadow-card-custom transition-all duration-300 group relative overflow-hidden cursor-pointer ${
+              className={`glass-card rounded-2xl p-7 border shadow-card-custom transition-all duration-300 group relative overflow-hidden cursor-pointer ${
                 featured
-                  ? "bg-gradient-to-br from-card to-cream text-foreground border-gold/50 shadow-gold-custom"
-                  : "bg-card border-border hover:shadow-xl"
+                  ? "text-foreground border-gold/50 shadow-gold-custom"
+                  : "hover:shadow-xl"
               }`}
             >
               {featured && (

@@ -76,29 +76,27 @@ export default function Doctors() {
           {doctors.map((doctor) => (
             <div
               key={doctor.name}
-              className="bg-card border border-border rounded-2xl overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+              className="glass-card border rounded-2xl overflow-hidden shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
-              <div className="aspect-[4/3] overflow-hidden bg-muted/30">
+              <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
                 <picture>
                   <source srcSet={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 82 })} type="image/webp" />
                   <img
                     src={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 85 })}
                     alt={`${doctor.name} стоматолог Dentis у Кропивницькому`}
-                    className="w-full h-full object-contain object-center p-2"
+                    className="w-full h-full object-cover object-center"
                     loading="lazy"
                     decoding="async"
                     width={640}
                     height={480}
                   />
                 </picture>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/90 via-navy/55 to-transparent p-6 pt-24">
+                  <h3 className="font-display font-bold text-secondary text-xl leading-tight">{doctor.name}</h3>
+                  <p className="font-body text-gold text-sm font-medium mt-1">{doctor.title}</p>
+                </div>
               </div>
               <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-display font-bold text-custom-dark text-xl leading-tight">{doctor.name}</h3>
-                    <p className="font-body text-gold text-sm font-medium mt-1">{doctor.title}</p>
-                  </div>
-                </div>
                 <p className="font-body text-muted-foreground text-sm mb-1">{doctor.speciality}</p>
                 <p className="font-body text-navy/60 text-xs mb-4">
                   {doctor.experience}+ {t("doctors.exp")}

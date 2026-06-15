@@ -209,7 +209,7 @@ export default function NewsSection() {
       <div className="container mx-auto px-4">
         <div className="mb-14 text-center">
           <p className="mb-3 font-body text-sm tracking-[0.3em] uppercase text-gold">{t("news.label")}</p>
-          <h2 className="font-display text-4xl font-bold text-secondary gold-line-center md:text-5xl">
+          <h2 className="font-display text-4xl font-bold text-navy gold-line-center md:text-5xl">
             {t("news.h2")}
           </h2>
         </div>
@@ -243,7 +243,7 @@ export default function NewsSection() {
           <button
             type="button"
             onClick={() => navigate(localizePath("/blog"))}
-            className="group inline-flex items-center gap-2 rounded-full border-gold-light/80 bg-gold px-8 py-4 font-body text-secondary transition-all duration-200 hover:border hover:border-navy"
+            className="btn-primary group"
           >
             <span>{t("news.allblog")}</span>
             <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />

@@ -38,7 +38,7 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="fixed inset-0 -z-10">
+      <div className="absolute inset-0 -z-10">
         <video
           ref={videoRef}
           src={heroVideo}
@@ -47,7 +47,7 @@ export default function Hero() {
           playsInline
           preload="metadata"
           poster="/hero-poster.webp"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover motion-reduce:hidden"
         />
         <div className="absolute inset-0 gradient-hero opacity-70" />
       </div>
@@ -80,14 +80,14 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-up text-white delay-300">
             <a
               href="tel:+380504800825"
-              className="bg-gold/80 border-gold/50 text-white hover:bg-gold/95 transition-colors rounded-3xl px-5 py-3 font-medium flex items-center justify-center"
+              className="btn-primary"
             >
               <Phone size={18} />
               {t("hero.cta")}
             </a>
             <button
               onClick={() => handleScroll("#services")}
-              className="bg-gold/90 border-gold/50 text-white hover:bg-gold/30 transition-colors rounded-3xl px-5 py-3 font-medium flex items-center justify-center"
+              className="btn-secondary"
             >
               {t("hero.services")}
             </button>

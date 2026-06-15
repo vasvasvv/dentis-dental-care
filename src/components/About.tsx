@@ -31,7 +31,7 @@ export default function About() {
             </p>
             <a
               href="tel:+380504800825"
-              className="inline-flex items-center gap-2 gradient-gold text-accent-foreground px-7 py-3.5 rounded-full font-body font-semibold text-sm shadow-gold-custom hover:opacity-90 transition-opacity"
+              className="btn-primary text-sm"
             >
               {t("about.cta")}
             </a>

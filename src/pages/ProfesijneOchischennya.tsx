@@ -116,8 +116,8 @@ export default function ProfesijneOchischennya() {
       <Header />
 
       <section className="relative overflow-hidden pb-24 pt-36">
-        <div className="fixed inset-0 -z-10">
-          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 -z-10">
+          <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="none" poster="/hero-poster.webp" className="h-full w-full object-cover motion-reduce:hidden" />
           <div className="absolute inset-0 gradient-hero opacity-70" />
         </div>
         <div className="absolute inset-0 opacity-10">
@@ -132,7 +132,7 @@ export default function ProfesijneOchischennya() {
             <a
               href="tel:+380504800825"
               onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "hero")}
-              className="flex items-center justify-center gap-3 rounded-full gradient-gold px-8 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
+              className="btn-primary"
             >
               <Phone size={18} />
               {lang === "uk" ? "Записатися на гігієну" : "Book hygiene visit"}
@@ -140,7 +140,7 @@ export default function ProfesijneOchischennya() {
             <a
               href={localizePath("/contacts")}
               onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "contacts", "hero")}
-              className="flex items-center justify-center gap-2 rounded-full border border-gold/60 px-8 py-4 font-body text-base font-medium text-gold transition-all duration-200 hover:bg-gold/10"
+              className="btn-secondary"
             >
               {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
@@ -198,7 +198,7 @@ export default function ProfesijneOchischennya() {
           <a
             href="tel:+380504800825"
             onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "promo")}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full gradient-gold px-7 py-3.5 font-body text-sm font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
+            className="btn-primary shrink-0 text-sm"
           >
             <Phone size={16} />
             {lang === "uk" ? "Записатися" : "Book now"}
@@ -245,7 +245,7 @@ export default function ProfesijneOchischennya() {
           <a
             href="tel:+380504800825"
             onClick={() => trackServiceCtaClick(serviceName, "profesijne-ochischennya", "phone", "footer_cta")}
-            className="inline-flex items-center gap-3 rounded-full gradient-gold px-10 py-4 font-body text-base font-semibold text-accent-foreground shadow-gold-custom transition-opacity hover:opacity-90"
+            className="btn-primary"
           >
             <Phone size={18} />
             {lang === "uk" ? "Зателефонувати" : "Call now"}
