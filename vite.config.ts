@@ -2,6 +2,39 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
+import Sitemap from "vite-plugin-sitemap";
+
+const ssgRoutes = [
+  "/",
+  "/en",
+  "/implantaciya",
+  "/en/implantaciya",
+  "/protezuvannya",
+  "/en/protezuvannya",
+  "/likuvannya-kariesu",
+  "/en/likuvannya-kariesu",
+  "/profesijne-ochischennya",
+  "/en/profesijne-ochischennya",
+  "/estetychna-stomatolohiya",
+  "/en/estetychna-stomatolohiya",
+  "/diagnostika-zubiv",
+  "/en/diagnostika-zubiv",
+  "/orthodontics",
+  "/en/orthodontics",
+
+  "/prices",
+  "/en/prices",
+  "/doctors",
+  "/en/doctors",
+  "/doctors/roman-verhovskyi",
+  "/en/doctors/roman-verhovskyi",
+  "/doctors/dentis-team-doctor",
+  "/en/doctors/dentis-team-doctor",
+  "/contacts",
+  "/en/contacts",
+  "/blog",
+  "/en/blog",
+];
 
 export default defineConfig(({ mode, isSsrBuild }) => ({
   server: {
@@ -17,6 +50,7 @@ export default defineConfig(({ mode, isSsrBuild }) => ({
   },
   plugins: [
     react(),
+    Sitemap({ hostname: "https://dentis.kr.ua", dynamicRoutes: ssgRoutes, robots: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/d-panel", "/api/"] }] }),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null,
@@ -95,38 +129,7 @@ export default defineConfig(({ mode, isSsrBuild }) => ({
     chunkSizeWarningLimit: 600,
   },
   ssgOptions: {
-    includedRoutes: () => [
-      "/",
-      "/en",
-      "/implantaciya",
-      "/en/implantaciya",
-      "/protezuvannya",
-      "/en/protezuvannya",
-      "/likuvannya-kariesu",
-      "/en/likuvannya-kariesu",
-      "/profesijne-ochischennya",
-      "/en/profesijne-ochischennya",
-      "/estetychna-stomatolohiya",
-      "/en/estetychna-stomatolohiya",
-      "/diagnostika-zubiv",
-      "/en/diagnostika-zubiv",
-      "/orthodontics",
-      "/en/orthodontics",
-      "/child-dentistry",
-      "/en/child-dentistry",
-      "/prices",
-      "/en/prices",
-      "/doctors",
-      "/en/doctors",
-      "/doctors/roman-verhovskyi",
-      "/en/doctors/roman-verhovskyi",
-      "/doctors/dentis-team-doctor",
-      "/en/doctors/dentis-team-doctor",
-      "/contacts",
-      "/en/contacts",
-      "/blog",
-      "/en/blog",
-    ],
+    includedRoutes: () => ssgRoutes,
     // Runtime already accepts `minify`; current beta typings still lag behind.
     formatting: "minify" as never,
   },

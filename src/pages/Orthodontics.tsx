@@ -10,12 +10,12 @@ import { toAbsoluteUrl } from "@/utils/seo";
 
 const faq = {
   uk: [
-    { question: "Скільки коштують брекети у Кропивницькому?", answer: "PLACEHOLDER: додати актуальні ціни після затвердження прайсу. Остаточна вартість залежить від системи, складності прикусу та тривалості лікування." },
+    { question: "Скільки коштують брекети у Кропивницькому?", answer: "Остаточна вартість залежить від системи, складності прикусу та тривалості лікування." },
     { question: "Коли потрібна консультація ортодонта?", answer: "Якщо є скупченість зубів, проміжки, неправильний прикус або дискомфорт під час жування, варто пройти ортодонтичну діагностику в Кропивницькому." },
     { question: "Чи можна вирівняти прикус дорослим?", answer: "Так. Ортодонтичне лікування можливе у дорослому віці після діагностики стану зубів, ясен і кісткової тканини." },
   ],
   en: [
-    { question: "How much do braces cost in Kropyvnytskyi?", answer: "PLACEHOLDER: add approved price list. Final cost depends on the system, bite complexity and treatment duration." },
+    { question: "How much do braces cost in Kropyvnytskyi?", answer: "Final cost depends on the system, bite complexity and treatment duration." },
     { question: "When should I see an orthodontist?", answer: "If teeth are crowded, spaced, bite feels uneven or chewing is uncomfortable, orthodontic diagnostics in Kropyvnytskyi can clarify the plan." },
     { question: "Can adults correct their bite?", answer: "Yes. Adult orthodontic treatment is possible after diagnostics of teeth, gums and bone condition." },
   ],
@@ -23,13 +23,11 @@ const faq = {
 
 const benefits = {
   uk: [
-    "PLACEHOLDER: перелік доступних брекет-систем",
     "Діагностика прикусу та план лікування",
     "Контроль гігієни під час ортодонтичного лікування",
     "Локальна консультація у стоматології на вул. Героїв-рятувальників",
   ],
   en: [
-    "PLACEHOLDER: list of available braces systems",
     "Bite diagnostics and treatment plan",
     "Hygiene control during orthodontic treatment",
     "Local consultation at Heroiv-Ryatuvalnykiv Street",

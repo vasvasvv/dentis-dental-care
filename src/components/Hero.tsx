@@ -17,21 +17,41 @@ export default function Hero() {
     const video = videoRef.current;
     if (!video) return;
 
-    // Гарантуємо, що відео грає та встановлюємо playbackRate
     const playVideo = () => {
       video.play().catch(() => {});
       video.playbackRate = 0.99;
     };
 
-    // Якщо відео вже готово, грати відразу
-    if (video.readyState >= 3) {
-      playVideo();
+    let idleId: number | null = null;
+    let timeoutId: number | null = null;
+    let sourceAttached = false;
+
+    const attachSource = () => {
+      if (sourceAttached) return;
+      sourceAttached = true;
+      video.src = heroVideo;
+      video.load();
+
+      if (video.readyState >= 3) {
+        playVideo();
+      } else {
+        video.addEventListener("canplay", playVideo, { once: true });
+      }
+    };
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(attachSource, { timeout: 2500 });
     } else {
-      // Чекаємо на `canplay` для запуску
-      video.addEventListener("canplay", playVideo, { once: true });
+      timeoutId = window.setTimeout(attachSource, 1500);
     }
 
     return () => {
+      if (idleId !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
       video.removeEventListener("canplay", playVideo);
     };
   }, []);
@@ -41,11 +61,10 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10">
         <video
           ref={videoRef}
-          src={heroVideo}
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           poster="/hero-poster.webp"
           className="w-full h-full object-cover motion-reduce:hidden"
         />

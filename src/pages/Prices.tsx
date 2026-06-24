@@ -10,29 +10,29 @@ import { buildCanonical } from "@/utils/seo";
 
 const priceRows = {
   uk: [
-    { service: "Консультація стоматолога", price: "PLACEHOLDER: додати ціну" },
-    { service: "Лікування карієсу", price: "PLACEHOLDER: додати ціну" },
-    { service: "Імплантація зубів", price: "PLACEHOLDER: додати ціну" },
-    { service: "Протезування зубів", price: "PLACEHOLDER: додати ціну" },
-    { service: "Професійна гігієна", price: "PLACEHOLDER: додати ціну" },
+    { service: "Консультація стоматолога", price: "За результатами огляду" },
+    { service: "Лікування карієсу", price: "За результатами огляду" },
+    { service: "Імплантація зубів", price: "За результатами огляду" },
+    { service: "Протезування зубів", price: "За результатами огляду" },
+    { service: "Професійна гігієна", price: "За результатами огляду" },
   ],
   en: [
-    { service: "Dental consultation", price: "PLACEHOLDER: add price" },
-    { service: "Caries treatment", price: "PLACEHOLDER: add price" },
-    { service: "Dental implants", price: "PLACEHOLDER: add price" },
-    { service: "Dental prosthetics", price: "PLACEHOLDER: add price" },
-    { service: "Professional hygiene", price: "PLACEHOLDER: add price" },
+    { service: "Dental consultation", price: "After examination" },
+    { service: "Caries treatment", price: "After examination" },
+    { service: "Dental implants", price: "After examination" },
+    { service: "Dental prosthetics", price: "After examination" },
+    { service: "Professional hygiene", price: "After examination" },
   ],
 };
 
 const faq = {
   uk: [
-    { question: "Чому на сайті вказані placeholders?", answer: "PLACEHOLDER: ціни потрібно замінити на затверджений прайс клініки перед публікацією." },
+    { question: "Чому на сайті вказані placeholders?", answer: "Ціни потрібно уточнити у адміністратора клініки." },
     { question: "Від чого залежить вартість лікування зубів?", answer: "Вартість залежить від діагностики, складності випадку, матеріалів і обсягу роботи. Точний план лікар формує після огляду." },
     { question: "Чи можна отримати план лікування з цінами?", answer: "Так. Після консультації пацієнт отримує зрозумілий план лікування з етапами та орієнтиром вартості." },
   ],
   en: [
-    { question: "Why does this page show placeholders?", answer: "PLACEHOLDER: prices must be replaced with the approved clinic price list before publishing." },
+    { question: "Why does this page show placeholders?", answer: "Prices should be clarified with the clinic administrator." },
     { question: "What affects dental treatment cost?", answer: "Cost depends on diagnostics, case complexity, materials and scope. The dentist prepares an exact plan after examination." },
     { question: "Can I get a treatment plan with prices?", answer: "Yes. After consultation, the patient receives a clear treatment plan with stages and cost guidance." },
   ],
@@ -44,8 +44,8 @@ export default function Prices() {
   const faqItems = faq[lang];
   const description =
     lang === "uk"
-      ? "Прайс стоматології Dentis у Кропивницькому. PLACEHOLDER: додати актуальні ціни на консультацію, лікування, імплантацію, протезування та гігієну."
-      : "Dentis dental price list in Kropyvnytskyi. PLACEHOLDER: add current prices for consultation, treatment, implants, prosthetics and hygiene.";
+      ? "Прайс стоматології Dentis у Кропивницькому. Актуальні ціни на консультацію, лікування, імплантацію, протезування та гігієну."
+      : "Dentis dental price list in Kropyvnytskyi. Current prices for consultation, treatment, implants, prosthetics and hygiene.";
 
   return (
     <div className="min-h-screen">

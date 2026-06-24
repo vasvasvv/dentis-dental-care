@@ -21,7 +21,6 @@ function AppSchema() {
     "/estetychna-stomatolohiya": { uk: "Естетична стоматологія", en: "Cosmetic dentistry" },
     "/diagnostika-zubiv": { uk: "Діагностика зубів", en: "Dental diagnostics" },
     "/orthodontics": { uk: "Ортодонтія", en: "Orthodontics" },
-    "/child-dentistry": { uk: "Дитяча стоматологія", en: "Children's dentistry" },
     "/prices": { uk: "Ціни", en: "Prices" },
     "/doctors": { uk: "Лікарі", en: "Doctors" },
     "/contacts": { uk: "Контакти", en: "Contacts" },
@@ -121,14 +120,7 @@ function createPublicRoutes(scope: string): RouteRecord[] {
         return { Component };
       },
     },
-    {
-      id: `${scope}-child-dentistry`,
-      path: "child-dentistry",
-      lazy: async () => {
-        const { default: Component } = await import("./pages/ChildDentistry");
-        return { Component };
-      },
-    },
+
     {
       id: `${scope}-prices`,
       path: "prices",

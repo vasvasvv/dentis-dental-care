@@ -51,8 +51,8 @@ export default function ContactsPage() {
               </p>
               <p className="font-body text-sm leading-7 text-muted-foreground">
                 {lang === "uk"
-                  ? "Ліцензія МОЗ України на медичну практику: PLACEHOLDER — додати номер і дату ліцензії перед публікацією."
-                  : "Ministry of Health of Ukraine medical practice license: PLACEHOLDER — add license number and date before publishing."}
+                  ? "Ліцензія МОЗ України на медичну практику (дані уточнюються)."
+                  : "Ministry of Health of Ukraine medical practice license (data is updating)."}
               </p>
             </div>
           </div>

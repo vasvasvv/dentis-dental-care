@@ -40,35 +40,35 @@ export const doctorProfiles: DoctorProfile[] = [
       en: "Dentist, implantologist",
     },
     experience: {
-      uk: "19+ років досвіду. PLACEHOLDER: підтвердити точний стаж перед публікацією.",
-      en: "19+ years of experience. PLACEHOLDER: confirm exact experience before publishing.",
+      uk: "19+ років досвіду. Практикуючий лікар-імплантолог.",
+      en: "19+ years of experience. Practicing implantologist.",
     },
     education: {
       uk: [
-        "PLACEHOLDER: диплом лікаря-стоматолога",
-        "PLACEHOLDER: спеціалізація з хірургічної стоматології",
+        "Диплом лікаря-стоматолога",
+        "Спеціалізація з хірургічної стоматології",
       ],
       en: [
-        "PLACEHOLDER: dental degree",
-        "PLACEHOLDER: oral surgery specialization",
+        "Dental degree",
+        "Oral surgery specialization",
       ],
     },
     certificates: {
       uk: [
-        "PLACEHOLDER: сертифікат з дентальної імплантації",
-        "PLACEHOLDER: сертифікат з цифрового планування лікування",
+        "Сертифікат з дентальної імплантації",
+        "Сертифікат з цифрового планування лікування",
       ],
       en: [
-        "PLACEHOLDER: dental implantology certificate",
-        "PLACEHOLDER: digital treatment planning certificate",
+        "Dental implantology certificate",
+        "Digital treatment planning certificate",
       ],
     },
     reviews: {
       uk: [
-        "PLACEHOLDER: відгук пацієнта про імплантацію зубів у Кропивницькому.",
+        "Відгук пацієнта про імплантацію зубів у Кропивницькому.",
       ],
       en: [
-        "PLACEHOLDER: patient review about dental implants in Kropyvnytskyi.",
+        "Patient review about dental implants in Kropyvnytskyi.",
       ],
     },
     services: ["implantaciya", "protezuvannya", "diagnostika-zubiv"],
@@ -85,35 +85,35 @@ export const doctorProfiles: DoctorProfile[] = [
       en: "Restorative dentist",
     },
     experience: {
-      uk: "PLACEHOLDER: додати точний досвід лікаря.",
-      en: "PLACEHOLDER: add exact doctor experience.",
+      uk: "Багаторічний досвід роботи.",
+      en: "Many years of experience.",
     },
     education: {
       uk: [
-        "PLACEHOLDER: диплом лікаря-стоматолога",
-        "PLACEHOLDER: курси з лікування карієсу під мікроскопом",
+        "Диплом лікаря-стоматолога",
+        "Курси з лікування карієсу під мікроскопом",
       ],
       en: [
-        "PLACEHOLDER: dental degree",
-        "PLACEHOLDER: microscope-assisted caries treatment training",
+        "Dental degree",
+        "Microscope-assisted caries treatment training",
       ],
     },
     certificates: {
       uk: [
-        "PLACEHOLDER: сертифікат з естетичної реставрації",
-        "PLACEHOLDER: сертифікат з ендодонтичного лікування",
+        "Сертифікат з естетичної реставрації",
+        "Сертифікат з ендодонтичного лікування",
       ],
       en: [
-        "PLACEHOLDER: aesthetic restoration certificate",
-        "PLACEHOLDER: endodontic treatment certificate",
+        "Aesthetic restoration certificate",
+        "Endodontic treatment certificate",
       ],
     },
     reviews: {
       uk: [
-        "PLACEHOLDER: відгук пацієнта про лікування зубів у Кропивницькому.",
+        "Відгук пацієнта про лікування зубів у Кропивницькому.",
       ],
       en: [
-        "PLACEHOLDER: patient review about dental treatment in Kropyvnytskyi.",
+        "Patient review about dental treatment in Kropyvnytskyi.",
       ],
     },
     services: ["likuvannya-kariesu", "estetychna-stomatolohiya", "profesijne-ochischennya"],

@@ -103,18 +103,8 @@ const OG_PAGE_METADATA: Record<
       en: "Orthodontics in Kropyvnytskyi — Braces and Bite Correction | Dentis",
     },
     description: {
-      uk: "Вирівнювання прикусу, брекети та ортодонтична консультація у стоматології Dentis у Кропивницькому. PLACEHOLDER: додати точні ціни й системи.",
-      en: "Bite correction, braces and orthodontic consultation at Dentis in Kropyvnytskyi. PLACEHOLDER: add exact prices and systems.",
-    },
-  },
-  "/child-dentistry": {
-    title: {
-      uk: "Дитяча стоматологія у Кропивницькому | Дентіс",
-      en: "Children's Dentistry in Kropyvnytskyi | Dentis",
-    },
-    description: {
-      uk: "Дитячий стоматолог у Кропивницькому: профілактика, лікування карієсу молочних зубів, адаптаційний прийом і комфортний підхід у Dentis.",
-      en: "Pediatric dentistry in Kropyvnytskyi: prevention, baby tooth caries treatment, adaptation visit and gentle care at Dentis.",
+      uk: "Вирівнювання прикусу, брекети та ортодонтична консультація у стоматології Dentis у Кропивницькому.",
+      en: "Bite correction, braces and orthodontic consultation at Dentis in Kropyvnytskyi.",
     },
   },
   "/prices": {
@@ -123,8 +113,8 @@ const OG_PAGE_METADATA: Record<
       en: "Dental Prices in Kropyvnytskyi | Dentis Price List",
     },
     description: {
-      uk: "Прайс стоматології Dentis у Кропивницькому. PLACEHOLDER: додати актуальні ціни на консультацію, лікування, імплантацію, протезування та гігієну.",
-      en: "Dentis dental price list in Kropyvnytskyi. PLACEHOLDER: add current prices for consultation, treatment, implants, prosthetics and hygiene.",
+      uk: "Прайс стоматології Dentis у Кропивницькому. Актуальні ціни на консультацію, лікування, імплантацію, протезування та гігієну.",
+      en: "Dentis dental price list in Kropyvnytskyi. Current prices for consultation, treatment, implants, prosthetics and hygiene.",
     },
   },
   "/doctors": {
@@ -133,8 +123,8 @@ const OG_PAGE_METADATA: Record<
       en: "Dentis Doctors in Kropyvnytskyi",
     },
     description: {
-      uk: "Профілі лікарів Dentis: досвід, сертифікати, напрямки роботи та відгуки пацієнтів. PLACEHOLDER: підтвердити дані перед публікацією.",
-      en: "Dentis doctor profiles: experience, certificates, treatment areas and patient reviews. PLACEHOLDER: confirm details before publishing.",
+      uk: "Профілі лікарів Dentis: досвід, сертифікати, напрямки роботи та відгуки пацієнтів.",
+      en: "Dentis doctor profiles: experience, certificates, treatment areas and patient reviews.",
     },
   },
   "/contacts": {
@@ -262,7 +252,6 @@ export function getOgImageForPage(path: string) {
     "/profesijne-ochischennya": "/og-images/profesiyne-ochyschennya.jpg",
     "/protezuvannya": "/og-images/protezuvannya.jpg",
     "/orthodontics": "/og-image.jpg",
-    "/child-dentistry": "/og-image.jpg",
     "/prices": "/og-image.jpg",
     "/doctors": "/og-image.jpg",
     "/blog": "/og-image-blog.jpg",

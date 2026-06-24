@@ -18,8 +18,8 @@ export default function DoctorsPage() {
           en: "Dentis Doctors in Kropyvnytskyi",
         }}
         description={{
-          uk: "Профілі лікарів Dentis: досвід, сертифікати, напрямки роботи та відгуки пацієнтів. PLACEHOLDER: підтвердити дані перед публікацією.",
-          en: "Dentis doctor profiles: experience, certificates, treatment areas and patient reviews. PLACEHOLDER: confirm details before publishing.",
+          uk: "Профілі лікарів Dentis: досвід, сертифікати, напрямки роботи та відгуки пацієнтів.",
+          en: "Dentis doctor profiles: experience, certificates, treatment areas and patient reviews.",
         }}
       />
 
@@ -30,8 +30,8 @@ export default function DoctorsPage() {
           <h1 className="mb-6 max-w-3xl font-display text-5xl font-bold leading-tight text-secondary md:text-6xl">{lang === "uk" ? "Лікарі Dentis" : "Dentis doctors"}</h1>
           <p className="max-w-2xl font-body text-lg leading-relaxed text-primary-foreground/70">
             {lang === "uk"
-              ? "Досвід, сертифікати, напрямки роботи та відгуки пацієнтів. PLACEHOLDER: замінити демонстраційні дані на підтверджені профілі."
-              : "Experience, certificates, treatment areas and patient reviews. PLACEHOLDER: replace demo data with confirmed profiles."}
+              ? "Досвід, сертифікати, напрямки роботи та відгуки пацієнтів."
+              : "Experience, certificates, treatment areas and patient reviews."}
           </p>
         </div>
       </section>

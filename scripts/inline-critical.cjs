@@ -27,17 +27,23 @@ async function run() {
 
   // Виправити: Critters залишає rel="stylesheet" з onload, але може дублювати.
   // Замінюємо на правильний non-blocking патерн: preload + noscript fallback
-  const cssFile = processed.match(/href="(\/assets\/index-[^"]+\.css)"/)?.[1];
+  const cssFile = processed.match(/href="(\/assets\/[^"]+\.css)"/)?.[1];
   if (cssFile) {
-    // Видаляємо всі stylesheet лінки та noscript блоки для CSS
-    processed = processed.replace(/<link[^>]*stylesheet[^>]*>/g, "");
-    processed = processed.replace(/<noscript>[\s\S]*?<\/noscript>/g, "");
+    const escapedCssFile = cssFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const cssLinkPattern = new RegExp(`<link[^>]*href="${escapedCssFile}"[^>]*>`, "g");
+    const cssNoscriptPattern = new RegExp(`<noscript><link[^>]*href="${escapedCssFile}"[^>]*><\\/noscript>`, "g");
+    processed = processed.replace(cssNoscriptPattern, "");
+    processed = processed.replace(cssLinkPattern, "");
     // Вставляємо правильний async CSS + noscript fallback перед </head>
-    const asyncCss = `<link rel="preload" as="style" href="${cssFile}" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="${cssFile}"></noscript>`;
+    const asyncCss = `<link rel="preload" crossorigin href="${cssFile}" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" crossorigin href="${cssFile}"></noscript>`;
     processed = processed.replace("</head>", `${asyncCss}\n</head>`);
   }
 
-  fs.writeFileSync(indexPath, processed);
+  processed = processed.replace(/<link\b(?=[^>]*rel="preload")(?=[^>]*as="image")[^>]*>/g, (tag) => {
+    return tag.includes("/hero-poster.webp") ? tag : "";
+  });
+
+  fs.writeFileSync(indexPath, processed, "utf-8");
 
   const before = html.length;
   const after = processed.length;
