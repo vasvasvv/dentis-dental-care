@@ -1,4 +1,5 @@
 import JsonLdScript from "@/components/SEO/JsonLdScript";
+import { useLang } from "@/contexts/LanguageContext";
 import { SITE_URL } from "@/utils/seo";
 
 type ServiceSchemaProps = {
@@ -11,6 +12,7 @@ type ServiceSchemaProps = {
 };
 
 export default function ServiceSchema({ id, name, description, image, price, priceCurrency = "UAH" }: ServiceSchemaProps) {
+  const { lang } = useLang();
   const data = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
@@ -29,7 +31,7 @@ export default function ServiceSchema({ id, name, description, image, price, pri
       : {}),
     provider: {
       "@type": "Dentist",
-      name: "Дентіс",
+      name: lang === "uk" ? "Дентіс" : "Dentis",
       url: SITE_URL,
     },
   };

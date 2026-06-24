@@ -14,7 +14,7 @@ type DoctorCard = {
   desc: string;
 };
 
-const fallbackDoctors: DoctorCard[] = [
+const fallbackDoctorsUk: DoctorCard[] = [
   {
     img: doctorVerhovsky,
     name: "Верховський Олександр Олександрович",
@@ -30,6 +30,25 @@ const fallbackDoctors: DoctorCard[] = [
     speciality: "Терапевт, естетична стоматологія",
     experience: "8",
     desc: "Досвідчений терапевт та фахівець з естетичного відновлення зубів. Майстер художньої реставрації.",
+  },
+];
+
+const fallbackDoctorsEn: DoctorCard[] = [
+  {
+    img: doctorVerhovsky,
+    name: "Oleksandr Verkhovskyi",
+    title: "Chief doctor",
+    speciality: "Dentist, implantologist",
+    experience: "19",
+    desc: "Senior-category specialist. Regularly trains at leading clinics and creates individual rehabilitation plans.",
+  },
+  {
+    img: doctorFemale,
+    name: "Anton Halchenko",
+    title: "Dentist",
+    speciality: "Therapist, aesthetic dentistry",
+    experience: "8",
+    desc: "Experienced therapist and specialist in aesthetic tooth restoration. Skilled in artistic restorations.",
   },
 ];
 
@@ -52,16 +71,19 @@ function toDoctorCard(doctor: PublicDoctor, index: number): DoctorCard {
 }
 
 export default function Doctors() {
-  const [doctors, setDoctors] = useState<DoctorCard[]>(fallbackDoctors);
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const [publicDoctors, setPublicDoctors] = useState<DoctorCard[]>([]);
+  const doctors = lang === "uk" ? (publicDoctors.length > 0 ? publicDoctors : fallbackDoctorsUk) : fallbackDoctorsEn;
 
   useEffect(() => {
+    if (lang === "en") return;
+
     getPublicDoctors()
       .then((items) => {
-        if (items.length > 0) setDoctors(items.map(toDoctorCard));
+        if (items.length > 0) setPublicDoctors(items.map(toDoctorCard));
       })
       .catch(() => {});
-  }, []);
+  }, [lang]);
 
   return (
     <section id="doctors" className="section-block site-section">
@@ -83,7 +105,7 @@ export default function Doctors() {
                   <source srcSet={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 82 })} type="image/webp" />
                   <img
                     src={generateImageUrl(doctor.img, { width: 640, height: 480, quality: 85 })}
-                    alt={`${doctor.name} стоматолог Dentis у Кропивницькому`}
+                    alt={lang === "uk" ? `${doctor.name} стоматолог Dentis у Кропивницькому` : `${doctor.name}, Dentis dentist in Kropyvnytskyi`}
                     className="w-full h-full object-cover object-center"
                     loading="lazy"
                     decoding="async"

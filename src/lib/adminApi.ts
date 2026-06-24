@@ -11,6 +11,10 @@ export type NewsItem = {
   title: string
   desc: string
   date: string
+  badge_en?: string | null
+  title_en?: string | null
+  desc_en?: string | null
+  date_en?: string | null
   hot: boolean | number
 }
 

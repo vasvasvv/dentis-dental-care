@@ -10,65 +10,58 @@ import { useLang } from "@/contexts/LanguageContext";
 import { trackServiceView } from "@/lib/gtmTracking";
 import { toAbsoluteUrl } from "@/utils/seo";
 
-const methods = [
-  {
-    title: "Цифровий прицільний рентген",
-    desc: "Швидкий локальний знімок для оцінки конкретного зуба, коренів або ділянки, яка викликає скарги.",
-    tag: "Базовий",
-  },
-  {
-    title: "Первинна консультація стоматолога",
-    desc: "Огляд ротової порожнини, аналіз симптомів і попередній план лікування після візиту до лікаря.",
-  },
-  {
-    title: "Пародонтологічна діагностика",
-    desc: "Оцінка стану ясен, пародонтальних кишень, кровоточивості та рухомості зубів при підозрі на захворювання тканин.",
-  },
-  {
-    title: "Діагностика карієсу",
-    desc: "Виявлення прихованих уражень емалі та дентину, оцінка глибини каріозного процесу та ризику ускладнень.",
-  },
-  {
-    title: "Діагностика прикусу",
-    desc: "Оцінка взаємного положення зубів і щелеп для планування ортодонтичного, ортопедичного або комплексного лікування.",
-  },
-  {
-    title: "Тест життєздатності зуба",
-    desc: "Перевірка реакції зуба на подразники для визначення стану пульпи та потреби в ендодонтичному лікуванні.",
-  },
-];
+const methods = {
+  uk: [
+    { title: "Цифровий прицільний рентген", desc: "Швидкий локальний знімок для оцінки конкретного зуба, коренів або ділянки, яка викликає скарги.", tag: "Базовий" },
+    { title: "Первинна консультація стоматолога", desc: "Огляд ротової порожнини, аналіз симптомів і попередній план лікування після візиту до лікаря." },
+    { title: "Пародонтологічна діагностика", desc: "Оцінка стану ясен, пародонтальних кишень, кровоточивості та рухомості зубів при підозрі на захворювання тканин." },
+    { title: "Діагностика карієсу", desc: "Виявлення прихованих уражень емалі та дентину, оцінка глибини каріозного процесу та ризику ускладнень." },
+    { title: "Діагностика прикусу", desc: "Оцінка взаємного положення зубів і щелеп для планування ортодонтичного, ортопедичного або комплексного лікування." },
+    { title: "Тест життєздатності зуба", desc: "Перевірка реакції зуба на подразники для визначення стану пульпи та потреби в ендодонтичному лікуванні." },
+  ],
+  en: [
+    { title: "Digital periapical X-ray", desc: "A quick local image to assess a specific tooth, root or area causing symptoms.", tag: "Basic" },
+    { title: "Initial dental consultation", desc: "Oral examination, symptom review and a preliminary treatment plan after the visit." },
+    { title: "Periodontal diagnostics", desc: "Assessment of gums, periodontal pockets, bleeding and tooth mobility when gum disease is suspected." },
+    { title: "Caries diagnostics", desc: "Detection of hidden enamel and dentin lesions, lesion depth and complication risk." },
+    { title: "Bite diagnostics", desc: "Assessment of tooth and jaw position for orthodontic, prosthetic or complex treatment planning." },
+    { title: "Tooth vitality test", desc: "Checking tooth response to stimuli to assess pulp health and endodontic treatment need." },
+  ],
+};
 
-const steps = [
-  {
-    num: "01",
-    title: "Скарги та огляд",
-    desc: "Лікар збирає анамнез, уточнює симптоми, оглядає ротову порожнину та визначає необхідний обсяг діагностики.",
-  },
-  {
-    num: "02",
-    title: "Знімок або сканування",
-    desc: "Залежно від клінічного завдання виконується рентген або інше дослідження. Зазвичай це займає 1-3 хвилини.",
-  },
-  {
-    num: "03",
-    title: "Аналіз та опис",
-    desc: "Лікар аналізує знімки, пояснює виявлені зміни та формує обґрунтований план подальших дій.",
-  },
-  {
-    num: "04",
-    title: "Пояснення пацієнту",
-    desc: "Ви отримуєте зрозуміле пояснення результатів, варіантів лікування, послідовності етапів та орієнтовної вартості.",
-  },
-];
+const steps = {
+  uk: [
+    { num: "01", title: "Скарги та огляд", desc: "Лікар збирає анамнез, уточнює симптоми, оглядає ротову порожнину та визначає необхідний обсяг діагностики." },
+    { num: "02", title: "Знімок або сканування", desc: "Залежно від клінічного завдання виконується рентген або інше дослідження. Зазвичай це займає 1-3 хвилини." },
+    { num: "03", title: "Аналіз та опис", desc: "Лікар аналізує знімки, пояснює виявлені зміни та формує обґрунтований план подальших дій." },
+    { num: "04", title: "Пояснення пацієнту", desc: "Ви отримуєте зрозуміле пояснення результатів, варіантів лікування, послідовності етапів та орієнтовної вартості." },
+  ],
+  en: [
+    { num: "01", title: "Symptoms and examination", desc: "The dentist reviews your history, clarifies symptoms, examines the mouth and defines the needed diagnostics." },
+    { num: "02", title: "X-ray or scan", desc: "Depending on the clinical task, an X-ray or another diagnostic study is performed. It usually takes 1-3 minutes." },
+    { num: "03", title: "Analysis and explanation", desc: "The dentist analyzes images, explains findings and creates a justified plan for next steps." },
+    { num: "04", title: "Patient guidance", desc: "You receive a clear explanation of results, treatment options, sequence and estimated cost." },
+  ],
+};
 
-const advantages = [
-  "Цифровий рентген з мінімальним променевим навантаженням",
-  "Швидка діагностика тріщин, карієсу та прихованих уражень",
-  "Результати знімків одразу на екрані",
-  "Цифровий архів досліджень для контролю динаміки",
-  "Безпечно за клінічними показаннями та сучасними протоколами",
-  "Повна документація для планування лікування",
-];
+const advantages = {
+  uk: [
+    "Цифровий рентген з мінімальним променевим навантаженням",
+    "Швидка діагностика тріщин, карієсу та прихованих уражень",
+    "Результати знімків одразу на екрані",
+    "Цифровий архів досліджень для контролю динаміки",
+    "Безпечно за клінічними показаннями та сучасними протоколами",
+    "Повна документація для планування лікування",
+  ],
+  en: [
+    "Digital X-ray with minimal radiation exposure",
+    "Fast diagnostics of cracks, caries and hidden lesions",
+    "Image results available on screen immediately",
+    "Digital archive for tracking changes over time",
+    "Safe according to clinical indications and modern protocols",
+    "Complete documentation for treatment planning",
+  ],
+};
 
 export default function DiagnosticsPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -92,6 +85,9 @@ export default function DiagnosticsPage() {
     lang === "uk"
       ? "Комп'ютерна діагностика зубів. Цифрові знімки високої якості. Точна діагностика карієсу, запалення, патологій."
       : "Computer dental diagnostics. high-quality digital imaging. Precise diagnosis of cavities and inflammation.";
+  const pageMethods = methods[lang];
+  const pageSteps = steps[lang];
+  const pageAdvantages = advantages[lang];
 
   return (
     <div className="min-h-screen">
@@ -136,15 +132,16 @@ export default function DiagnosticsPage() {
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">{lang === "uk" ? "Послуги" : "Services"}</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Діагностика
+            {lang === "uk" ? "Діагностика" : "Diagnostics"}
             <br />
-            та рентген
+            {lang === "uk" ? "та рентген" : "and X-ray"}
           </h1>
           <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Точна діагностика є фундаментом правильного лікування. Цифровий рентген та клінічний огляд
-            допомагають швидко побачити реальну картину та обрати оптимальну тактику для вашого випадку.
+            {lang === "uk"
+              ? "Точна діагностика є фундаментом правильного лікування. Цифровий рентген та клінічний огляд допомагають швидко побачити реальну картину та обрати оптимальну тактику для вашого випадку."
+              : "Accurate diagnostics are the foundation of proper treatment. Digital X-ray and clinical examination help quickly understand the real picture and choose the right plan for your case."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
@@ -152,13 +149,13 @@ export default function DiagnosticsPage() {
               className="btn-primary"
             >
               <Phone size={18} />
-              Записатися на діагностику
+              {lang === "uk" ? "Записатися на діагностику" : "Book diagnostics"}
             </a>
             <a
               href={localizePath("/contacts")}
               className="btn-secondary"
             >
-              Контакти
+              {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
           </div>
         </div>
@@ -168,9 +165,9 @@ export default function DiagnosticsPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center">
             {[
-              { icon: Zap, value: "x10", label: "менше опромінення" },
-              { icon: Shield, value: "100%", label: "цифровий архів знімків" },
-              { icon: CheckCircle, value: "1-3 хв", label: "час обстеження" },
+              { icon: Zap, value: "x10", label: lang === "uk" ? "менше опромінення" : "lower radiation" },
+              { icon: Shield, value: "100%", label: lang === "uk" ? "цифровий архів знімків" : "digital image archive" },
+              { icon: CheckCircle, value: lang === "uk" ? "1-3 хв" : "1-3 min", label: lang === "uk" ? "час обстеження" : "examination time" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label}>
                 <Icon size={22} className="text-gold mx-auto mb-3" />
@@ -185,11 +182,11 @@ export default function DiagnosticsPage() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Можливості</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Методи діагностики</h2>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{lang === "uk" ? "Можливості" : "Options"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Методи діагностики" : "Diagnostic methods"}</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {methods.map((m) => (
+            {pageMethods.map((m) => (
               <div
                 key={m.title}
                 className="bg-card border border-border rounded-2xl p-7 shadow-card-custom hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative"
@@ -213,11 +210,11 @@ export default function DiagnosticsPage() {
       <section className="py-20 bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Процес</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Як проходить діагностика</h2>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{lang === "uk" ? "Процес" : "Process"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Як проходить діагностика" : "How diagnostics works"}</h2>
           </div>
           <div className="max-w-3xl mx-auto space-y-6">
-            {steps.map((step) => (
+            {pageSteps.map((step) => (
               <div key={step.num} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom flex gap-6 items-start">
                 <span className="font-display text-4xl font-bold text-gold/30 shrink-0 leading-none">{step.num}</span>
                 <div>
@@ -233,10 +230,10 @@ export default function DiagnosticsPage() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-10">
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Наші переваги</h2>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Наші переваги" : "Why patients choose Dentis"}</h2>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            {advantages.map((item) => (
+            {pageAdvantages.map((item) => (
               <div key={item} className="flex items-start gap-3 bg-card border border-border rounded-xl p-4">
                 <CheckCircle size={18} className="text-gold shrink-0 mt-0.5" />
                 <span className="font-body text-sm text-foreground/80">{item}</span>
@@ -248,17 +245,18 @@ export default function DiagnosticsPage() {
 
       <section className="py-20 bg-background text-center">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Не знаєте, з чого почати?</h2>
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">{lang === "uk" ? "Не знаєте, з чого почати?" : "Not sure where to start?"}</h2>
           <p className="font-body text-primary-custom-dark/60 mb-8 max-w-md mx-auto">
-            Запишіться на первинну консультацію з діагностикою, щоб отримати зрозумілий план лікування та
-            пріоритети саме для вашого клінічного випадку.
+            {lang === "uk"
+              ? "Запишіться на первинну консультацію з діагностикою, щоб отримати зрозумілий план лікування та пріоритети саме для вашого клінічного випадку."
+              : "Book an initial consultation with diagnostics to receive a clear treatment plan and priorities for your clinical case."}
           </p>
           <a
             href="tel:+380504800825"
             className="btn-primary"
           >
             <Phone size={18} />
-            Зателефонувати
+            {lang === "uk" ? "Зателефонувати" : "Call now"}
           </a>
         </div>
       </section>
@@ -270,7 +268,7 @@ export default function DiagnosticsPage() {
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"
-        aria-label="Зателефонувати"
+        aria-label={lang === "uk" ? "Зателефонувати" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>

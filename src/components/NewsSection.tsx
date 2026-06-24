@@ -177,7 +177,7 @@ export default function NewsSection() {
   useEffect(() => {
     let cancelled = false;
 
-    getPublicNews()
+    getPublicNews(lang)
       .then((data) => {
         if (cancelled) return;
         setAllItems(normalizeNews(data, lang));

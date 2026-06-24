@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { X, Download, Smartphone } from 'lucide-react'
+import { useLang } from '@/contexts/LanguageContext'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 const STORAGE_KEY = 'dentis-pwa-banner-dismissed'
 
 export default function PWAInstallBanner() {
+  const { lang } = useLang()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
   const [isIOS] = useState(() => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent))
@@ -116,7 +118,7 @@ export default function PWAInstallBanner() {
                 >
                   <img
                     src="/favicon.png"
-                    alt="Дентіс"
+                    alt={lang === 'uk' ? 'Дентіс' : 'Dentis'}
                     className="w-7 h-7 object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none'
@@ -129,13 +131,13 @@ export default function PWAInstallBanner() {
                     style={{ color: 'hsl(38 70% 68%)', fontSize: '11px', letterSpacing: '0.08em' }}
                     className="uppercase font-medium mb-0.5"
                   >
-                    Дентіс
+                    {lang === 'uk' ? 'Дентіс' : 'Dentis'}
                   </p>
                   <p
                     style={{ color: 'hsl(40 30% 92%)', fontSize: '15px' }}
                     className="font-medium leading-tight"
                   >
-                    Додаток на головний екран
+                    {lang === 'uk' ? 'Додаток на головний екран' : 'App on your home screen'}
                   </p>
                 </div>
               </div>
@@ -144,7 +146,7 @@ export default function PWAInstallBanner() {
                 onClick={handleDismiss}
                 style={{ color: 'hsl(180 20% 60%)' }}
                 className="hover:opacity-80 transition-opacity p-1 -mt-0.5 -mr-0.5"
-                aria-label="Закрити"
+                aria-label={lang === 'uk' ? 'Закрити' : 'Close'}
               >
                 <X size={16} />
               </button>
@@ -164,29 +166,29 @@ export default function PWAInstallBanner() {
                 <div className="flex items-center gap-2 mb-2">
                   <Smartphone size={14} style={{ color: 'hsl(38 62% 52%)', flexShrink: 0 }} />
                   <span style={{ color: 'hsl(40 30% 88%)' }} className="font-medium text-xs">
-                    Інструкція для iPhone
+                    {lang === 'uk' ? 'Інструкція для iPhone' : 'iPhone instructions'}
                   </span>
                 </div>
                 <ol className="space-y-1 pl-1">
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">1.</span>
-                    <span className="text-xs">Натисніть{' '}
+                    <span className="text-xs">{lang === 'uk' ? 'Натисніть' : 'Tap'}{' '}
                       <span style={{ color: 'hsl(40 30% 88%)' }} className="inline-flex items-center gap-1">
-                        «Поширити»
+                        {lang === 'uk' ? '«Поширити»' : 'Share'}
                         <svg width="11" height="13" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', verticalAlign: 'middle', marginTop: '-1px' }}>
                           <path d="M6 10V1M6 1L3 4M6 1L9 4" stroke="hsl(40 30% 88%)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                           <path d="M1 8v5a1 1 0 001 1h8a1 1 0 001-1V8" stroke="hsl(40 30% 88%)" strokeWidth="1.4" strokeLinecap="round"/>
                         </svg>
                       </span>
-                    {' '}у Safari</span>
+                    {' '}{lang === 'uk' ? 'у Safari' : 'in Safari'}</span>
                   </li>
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">2.</span>
-                    <span className="text-xs">Оберіть <span style={{ color: 'hsl(40 30% 88%)' }}>«На Початковий екран»</span></span>
+                    <span className="text-xs">{lang === 'uk' ? 'Оберіть' : 'Choose'} <span style={{ color: 'hsl(40 30% 88%)' }}>{lang === 'uk' ? '«На Початковий екран»' : 'Add to Home Screen'}</span></span>
                   </li>
                   <li className="flex gap-2">
                     <span style={{ color: 'hsl(38 62% 52%)' }} className="font-medium text-xs flex-shrink-0">3.</span>
-                    <span className="text-xs">Натисніть <span style={{ color: 'hsl(40 30% 88%)' }}>«Додати»</span></span>
+                    <span className="text-xs">{lang === 'uk' ? 'Натисніть' : 'Tap'} <span style={{ color: 'hsl(40 30% 88%)' }}>{lang === 'uk' ? '«Додати»' : 'Add'}</span></span>
                   </li>
                 </ol>
               </div>
@@ -195,7 +197,7 @@ export default function PWAInstallBanner() {
                 style={{ color: 'hsl(180 15% 65%)', fontSize: '13px' }}
                 className="mb-3 leading-relaxed"
               >
-                Швидкий доступ до клініки — без браузера.
+                {lang === 'uk' ? 'Швидкий доступ до клініки — без браузера.' : 'Quick clinic access without opening the browser.'}
               </p>
             )}
 
@@ -213,7 +215,7 @@ export default function PWAInstallBanner() {
                   className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 font-medium transition-all hover:brightness-110 active:scale-95"
                 >
                   <Download size={14} />
-                  Встановити
+                  {lang === 'uk' ? 'Встановити' : 'Install'}
                 </button>
               )}
               <button
@@ -225,7 +227,7 @@ export default function PWAInstallBanner() {
                 }}
                 className={`${isIOS ? 'flex-1' : ''} px-4 rounded-xl py-2.5 transition-all hover:brightness-125 active:scale-95`}
               >
-                {isIOS ? 'Зрозуміло' : 'Пізніше'}
+                {isIOS ? (lang === 'uk' ? 'Зрозуміло' : 'Got it') : (lang === 'uk' ? 'Пізніше' : 'Later')}
               </button>
             </div>
           </div>

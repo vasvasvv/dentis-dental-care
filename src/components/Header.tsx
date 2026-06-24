@@ -50,7 +50,7 @@ export default function Header() {
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300  after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/70 after:to-transparent ${
-        scrolled ? "bg-navy/70 backdrop-blur-xl shadow-nav" : "bg-navy/70 backdrop-blur-md"
+        scrolled ? "bg-navy/95 backdrop-blur-xl shadow-nav" : "bg-primary/85 shadow-nav backdrop-blur-md"
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -63,8 +63,8 @@ export default function Header() {
           }}
           className="group relative"
         >
-          <img src={logo} alt="Дентіс Logo White" className="block h-14 w-auto transition-opacity duration-300 group-hover:opacity-0" />
-          <img src={logogold} alt="Дентіс Logo Gold" className="absolute left-0 top-0 h-14 w-auto opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <img src={logo} alt={lang === "uk" ? "Дентіс Logo White" : "Dentis Logo White"} className="block h-14 w-auto transition-opacity duration-300 group-hover:opacity-0" />
+          <img src={logogold} alt={lang === "uk" ? "Дентіс Logo Gold" : "Dentis Logo Gold"} className="absolute left-0 top-0 h-14 w-auto opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">

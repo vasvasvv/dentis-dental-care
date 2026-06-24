@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Bell, BellOff, Download, Smartphone, X, ChevronRight } from 'lucide-react'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { useLang } from '@/contexts/LanguageContext'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -16,6 +17,7 @@ function isPWA() {
 
 // ── Спливаючий банер ───────────────────────────────────────────────────────────
 export function PushBanner() {
+  const { lang } = useLang()
   const { state, subscribe } = usePushNotifications()
 
   // PWA install state
@@ -123,8 +125,8 @@ export function PushBanner() {
                 <img src="/favicon.png" alt="" className="w-8 h-8 md:w-7 md:h-7 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-[hsl(38_70%_60%)] mb-0.5">Дентіс</p>
-                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">Додайте на головний екран</p>
+                <p className="text-[10px] uppercase tracking-widest text-[hsl(38_70%_60%)] mb-0.5">{lang === 'uk' ? 'Дентіс' : 'Dentis'}</p>
+                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">{lang === 'uk' ? 'Додайте на головний екран' : 'Add to your home screen'}</p>
               </div>
             </div>
 
@@ -132,17 +134,17 @@ export function PushBanner() {
               <div className="rounded-xl p-3 mb-3 text-xs leading-relaxed" style={{ background: 'hsl(180 55% 9%)', border: '1px solid hsl(180 40% 22% / 0.5)' }}>
                 <div className="flex items-center gap-2 mb-2 text-[hsl(38_62%_52%)]">
                   <Smartphone size={13} />
-                  <span className="font-medium">Для iPhone/iPad:</span>
+                  <span className="font-medium">{lang === 'uk' ? 'Для iPhone/iPad:' : 'For iPhone/iPad:'}</span>
                 </div>
                 <div className="space-y-1 text-[hsl(40_20%_70%)]">
-                  <p><span className="text-[hsl(38_62%_52%)]">1.</span> Натисніть «Поділитися» в Safari</p>
-                  <p><span className="text-[hsl(38_62%_52%)]">2.</span> Оберіть «На Початковий екран»</p>
-                  <p><span className="text-[hsl(38_62%_52%)]">3.</span> Натисніть «Додати»</p>
+                  <p><span className="text-[hsl(38_62%_52%)]">1.</span> {lang === 'uk' ? 'Натисніть «Поділитися» в Safari' : 'Tap Share in Safari'}</p>
+                  <p><span className="text-[hsl(38_62%_52%)]">2.</span> {lang === 'uk' ? 'Оберіть «На Початковий екран»' : 'Choose Add to Home Screen'}</p>
+                  <p><span className="text-[hsl(38_62%_52%)]">3.</span> {lang === 'uk' ? 'Натисніть «Додати»' : 'Tap Add'}</p>
                 </div>
               </div>
             ) : (
               <p className="text-[hsl(180_15%_60%)] text-xs mb-3 leading-relaxed">
-                Встановіть додаток — і сповіщення від клініки приходитимуть без рядка «from ...» у браузері.
+                {lang === 'uk' ? 'Встановіть додаток — і сповіщення від клініки приходитимуть без рядка «from ...» у браузері.' : 'Install the app so clinic notifications arrive without the browser "from ..." line.'}
               </p>
             )}
 
@@ -151,13 +153,13 @@ export function PushBanner() {
                 <button onClick={handleInstall}
                   className="flex-1 flex items-center justify-center gap-1.5 rounded-xl py-3 md:py-2.5 text-sm md:text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
                   style={{ background: 'linear-gradient(135deg, hsl(38 74% 52%), hsl(38 80% 62%))', color: 'hsl(220 40% 10%)', boxShadow: '0 4px 14px hsl(38 62% 52% / 0.3)' }}>
-                  <Download size={14} />Встановити
+                  <Download size={14} />{lang === 'uk' ? 'Встановити' : 'Install'}
                 </button>
               )}
               <button onClick={isIOS ? handlePushAccept : handlePwaSkip}
                 className="flex items-center justify-center gap-1 rounded-xl py-3 md:py-2.5 text-sm md:text-xs transition-all hover:brightness-125 active:scale-95"
                 style={{ flex: (!isIOS && deferredPrompt) ? '0 0 auto' : 1, paddingLeft: 16, paddingRight: 16, color: 'hsl(180 20% 55%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
-                {isIOS ? 'Зрозуміло' : <><span>Пізніше</span><ChevronRight size={12} /></>}
+                {isIOS ? (lang === 'uk' ? 'Зрозуміло' : 'Got it') : <><span>{lang === 'uk' ? 'Пізніше' : 'Later'}</span><ChevronRight size={12} /></>}
               </button>
             </div>
           </>
@@ -169,8 +171,8 @@ export function PushBanner() {
                 <Bell size={22} className="text-[hsl(38_62%_52%)]" />
               </div>
               <div>
-                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">Отримуйте сповіщення</p>
-                <p className="text-[hsl(180_20%_55%)] text-sm md:text-xs mt-0.5">Акції, новини та нагадування про прийом</p>
+                <p className="text-[hsl(40_30%_92%)] text-base md:text-sm font-medium leading-snug">{lang === 'uk' ? 'Отримуйте сповіщення' : 'Get notifications'}</p>
+                <p className="text-[hsl(180_20%_55%)] text-sm md:text-xs mt-0.5">{lang === 'uk' ? 'Акції, новини та нагадування про прийом' : 'Deals, news, and appointment reminders'}</p>
               </div>
             </div>
             <div className="mb-3">
@@ -179,26 +181,26 @@ export function PushBanner() {
                 autoComplete="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                placeholder="Ваш номер (необов'язково)"
+                placeholder={lang === 'uk' ? "Ваш номер (необов'язково)" : 'Your number (optional)'}
                 className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ background: 'hsl(180 30% 92%)', border: '1px solid hsl(180 40% 60%)', color: '#111', fontFamily: '"NueneMontreal", system-ui, sans-serif' }}
               />
               <p className="text-[hsl(180_20%_45%)] text-[10px] mt-1 px-1" style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
                 {phone.trim() && !/^(\+?380\d{9}|0\d{9})$/.test(phone.replace(/\s/g, ''))
-                  ? <span style={{ color: 'hsl(0 60% 55%)' }}>Формат: +380XXXXXXXXX або 0XXXXXXXXX</span>
-                  : 'Для індивідуальних нагадувань про запис'}
+                  ? <span style={{ color: 'hsl(0 60% 55%)' }}>{lang === 'uk' ? 'Формат: +380XXXXXXXXX або 0XXXXXXXXX' : 'Format: +380XXXXXXXXX or 0XXXXXXXXX'}</span>
+                  : (lang === 'uk' ? 'Для індивідуальних нагадувань про запис' : 'For personalized appointment reminders')}
               </p>
             </div>
             <div className="flex gap-2">
               <button onClick={handleDismiss}
                 className="px-4 py-3 md:py-2.5 rounded-xl text-sm md:text-xs transition-all hover:brightness-125"
                 style={{ color: 'hsl(180 20% 50%)', border: '1px solid hsl(180 35% 25% / 0.6)' }}>
-                Не зараз
+                {lang === 'uk' ? 'Не зараз' : 'Not now'}
               </button>
               <button onClick={handlePushAccept}
                 className="flex-1 py-3 md:py-2.5 rounded-xl text-sm md:text-xs font-semibold transition-all hover:brightness-110 active:scale-95"
                 style={{ background: 'linear-gradient(135deg, hsl(38 74% 52%), hsl(38 80% 62%))', color: 'hsl(220 40% 10%)', boxShadow: '0 4px 14px hsl(38 62% 52% / 0.3)' }}>
-                Отримувати
+                {lang === 'uk' ? 'Отримувати' : 'Allow'}
               </button>
             </div>
           </>

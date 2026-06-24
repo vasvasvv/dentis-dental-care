@@ -28,8 +28,8 @@ export async function getPublicDoctors(): Promise<PublicDoctor[]> {
   return response.json();
 }
 
-export async function getPublicNews(): Promise<PublicNewsItem[]> {
-  const response = await fetch(`${BASE}/api/public/news`);
+export async function getPublicNews(lang: 'uk' | 'en' = 'uk'): Promise<PublicNewsItem[]> {
+  const response = await fetch(`${BASE}/api/public/news?lang=${lang}`);
   if (!response.ok) throw new Error('Failed to fetch news');
   return response.json();
 }

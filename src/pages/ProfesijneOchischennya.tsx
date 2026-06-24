@@ -154,9 +154,9 @@ export default function ProfesijneOchischennya() {
         <div className="container mx-auto px-4">
           <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
             {[
-              { icon: Clock, value: "60-90 хв", label: lang === "uk" ? "тривалість процедури" : "procedure duration" },
-              { icon: Star, value: "1-2 тони", label: lang === "uk" ? "візуальне освітлення емалі" : "visual enamel brightening" },
-              { icon: CheckCircle, value: "6 міс", label: lang === "uk" ? "рекомендований інтервал" : "recommended interval" },
+              { icon: Clock, value: lang === "uk" ? "60-90 хв" : "60-90 min", label: lang === "uk" ? "тривалість процедури" : "procedure duration" },
+              { icon: Star, value: lang === "uk" ? "1-2 тони" : "1-2 shades", label: lang === "uk" ? "візуальне освітлення емалі" : "visual enamel brightening" },
+              { icon: CheckCircle, value: lang === "uk" ? "6 міс" : "6 months", label: lang === "uk" ? "рекомендований інтервал" : "recommended interval" },
               { icon: Phone, value: "100%", label: lang === "uk" ? "контроль комфорту" : "comfort control" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label}>

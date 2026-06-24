@@ -12,42 +12,41 @@ import { useLang } from "@/contexts/LanguageContext";
 import { trackServiceView } from "@/lib/gtmTracking";
 import { toAbsoluteUrl } from "@/utils/seo";
 
-const steps = [
-  {
-    num: "01",
-    title: "Консультація та діагностика",
-    desc: "Оцінка стану кістки, діагностика та планування імплантації з урахуванням вашої клінічної ситуації.",
-  },
-  {
-    num: "02",
-    title: "Підготовка",
-    desc: "Санація порожнини рота, а за потреби нарощування кістки або синус-ліфтинг перед встановленням імпланта.",
-  },
-  {
-    num: "03",
-    title: "Встановлення імпланта",
-    desc: "Хірургічний етап під місцевою анестезією. Зазвичай процедура триває близько 30-60 хвилин.",
-  },
-  {
-    num: "04",
-    title: "Остеоінтеграція",
-    desc: "Імплант зростається з кісткою протягом 2-6 місяців, після чого можна переходити до ортопедичного етапу.",
-  },
-  {
-    num: "05",
-    title: "Коронка",
-    desc: "Виготовлення та фіксація коронки для повного відновлення функції та естетики зуба.",
-  },
-];
+const steps = {
+  uk: [
+    { num: "01", title: "Консультація та діагностика", desc: "Оцінка стану кістки, діагностика та планування імплантації з урахуванням вашої клінічної ситуації." },
+    { num: "02", title: "Підготовка", desc: "Санація порожнини рота, а за потреби нарощування кістки або синус-ліфтинг перед встановленням імпланта." },
+    { num: "03", title: "Встановлення імпланта", desc: "Хірургічний етап під місцевою анестезією. Зазвичай процедура триває близько 30-60 хвилин." },
+    { num: "04", title: "Остеоінтеграція", desc: "Імплант зростається з кісткою протягом 2-6 місяців, після чого можна переходити до ортопедичного етапу." },
+    { num: "05", title: "Коронка", desc: "Виготовлення та фіксація коронки для повного відновлення функції та естетики зуба." },
+  ],
+  en: [
+    { num: "01", title: "Consultation and diagnostics", desc: "Assessment of bone condition, diagnostics and implant planning based on your clinical situation." },
+    { num: "02", title: "Preparation", desc: "Oral sanitation and, when needed, bone grafting or sinus lift before implant placement." },
+    { num: "03", title: "Implant placement", desc: "The surgical stage is performed under local anaesthesia and usually takes about 30-60 minutes." },
+    { num: "04", title: "Osseointegration", desc: "The implant integrates with bone over 2-6 months before the prosthetic stage begins." },
+    { num: "05", title: "Crown", desc: "A crown is made and fixed to fully restore tooth function and aesthetics." },
+  ],
+};
 
-const benefits = [
-  "Імпланти від провідних світових виробників",
-  "19+ років досвіду лікаря-імплантолога",
-  "Гарантія на імплант та виконану роботу",
-  "Сучасна цифрова діагностика",
-  "Безболісна місцева анестезія",
-  "Індивідуальний план лікування",
-];
+const benefits = {
+  uk: [
+    "Імпланти від провідних світових виробників",
+    "19+ років досвіду лікаря-імплантолога",
+    "Гарантія на імплант та виконану роботу",
+    "Сучасна цифрова діагностика",
+    "Безболісна місцева анестезія",
+    "Індивідуальний план лікування",
+  ],
+  en: [
+    "Implants from leading global manufacturers",
+    "19+ years of implantology experience",
+    "Warranty on the implant and completed work",
+    "Modern digital diagnostics",
+    "Painless local anaesthesia",
+    "Individual treatment plan",
+  ],
+};
 
 const faq = {
   uk: [
@@ -85,6 +84,8 @@ export default function Implantation() {
       ? "Імплантація зубів у Кропивницькому в Dentis: консультація, цифрове планування, встановлення імплантів і протезування з локальними відгуками та орієнтиром ціни."
       : "World-class dental implants. Painless process. Free consultation available.";
   const faqItems = faq[lang];
+  const pageSteps = steps[lang];
+  const pageBenefits = benefits[lang];
 
   return (
     <div className="min-h-screen">
@@ -129,14 +130,14 @@ export default function Implantation() {
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold blur-3xl" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Послуги</p>
+          <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">{lang === "uk" ? "Послуги" : "Services"}</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-secondary leading-tight mb-6 max-w-2xl">
-            Імплантація зубів
+            {lang === "uk" ? "Імплантація зубів" : "Dental implants"}
           </h1>
           <p className="font-body text-primary-foreground/70 text-lg leading-relaxed max-w-xl mb-10">
-            Повноцінне відновлення зуба, що виглядає та відчувається як природний. Імплантація є
-            найнадійнішим довгостроковим способом замінити втрачений зуб і повернути комфорт під час
-            жування та усмішки.
+            {lang === "uk"
+              ? "Повноцінне відновлення зуба, що виглядає та відчувається як природний. Імплантація є найнадійнішим довгостроковим способом замінити втрачений зуб і повернути комфорт під час жування та усмішки."
+              : "Full tooth restoration that looks and feels natural. Implant treatment is the most reliable long-term way to replace a missing tooth and restore comfort when chewing and smiling."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
@@ -144,13 +145,13 @@ export default function Implantation() {
               className="btn-primary"
             >
               <Phone size={18} />
-              Записатися на консультацію
+              {lang === "uk" ? "Записатися на консультацію" : "Book consultation"}
             </a>
             <a
               href={localizePath("/contacts")}
               className="btn-secondary"
             >
-              Контакти
+              {lang === "uk" ? "Контакти" : "Contacts"}
             </a>
           </div>
         </div>
@@ -160,14 +161,14 @@ export default function Implantation() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center max-w-5xl mx-auto">
             <div>
-              <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">Переваги</p>
+              <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-4">{lang === "uk" ? "Переваги" : "Benefits"}</p>
               <h2 className="font-display text-4xl font-bold text-navy mb-8 gold-line">
-                Чому обирають
+                {lang === "uk" ? "Чому обирають" : "Why choose"}
                 <br />
-                імплантацію у нас?
+                {lang === "uk" ? "імплантацію у нас?" : "implants at Dentis?"}
               </h2>
               <ul className="space-y-3">
-                {benefits.map((b) => (
+                {pageBenefits.map((b) => (
                   <li key={b} className="flex items-start gap-3 font-body text-foreground/80">
                     <CheckCircle size={18} className="text-gold shrink-0 mt-0.5" />
                     {b}
@@ -177,10 +178,10 @@ export default function Implantation() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Star, label: "Приживлюваність", value: "98%" },
-                { icon: Clock, label: "Термін служби", value: "25+ років" },
-                { icon: Shield, label: "Гарантія", value: "5 років" },
-                { icon: CheckCircle, label: "Проведених операцій", value: "500+" },
+                { icon: Star, label: lang === "uk" ? "Приживлюваність" : "Success rate", value: "98%" },
+                { icon: Clock, label: lang === "uk" ? "Термін служби" : "Service life", value: lang === "uk" ? "25+ років" : "25+ years" },
+                { icon: Shield, label: lang === "uk" ? "Гарантія" : "Warranty", value: lang === "uk" ? "5 років" : "5 years" },
+                { icon: CheckCircle, label: lang === "uk" ? "Проведених операцій" : "Completed surgeries", value: "500+" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom text-center">
                   <Icon size={24} className="text-gold mx-auto mb-3" />
@@ -196,11 +197,11 @@ export default function Implantation() {
       <section className="py-20 bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">Процес</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Етапи імплантації</h2>
+            <p className="text-gold font-body text-sm tracking-[0.3em] uppercase font-medium mb-3">{lang === "uk" ? "Процес" : "Process"}</p>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Етапи імплантації" : "Implant treatment stages"}</h2>
           </div>
           <div className="max-w-3xl mx-auto space-y-6">
-            {steps.map((step) => (
+            {pageSteps.map((step) => (
               <div key={step.num} className="bg-card border border-border rounded-2xl p-6 shadow-card-custom flex gap-6 items-start">
                 <span className="font-display text-4xl font-bold text-gold/30 shrink-0 leading-none">{step.num}</span>
                 <div>
@@ -217,22 +218,23 @@ export default function Implantation() {
         <div className="container mx-auto mb-20 max-w-4xl px-4 text-left">
           <div className="mb-10 text-center">
             <p className="mb-3 font-body text-sm font-medium uppercase tracking-[0.3em] text-gold">SEO FAQ</p>
-            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">Поширені питання про імплантацію</h2>
+            <h2 className="font-display text-4xl font-bold text-navy gold-line-center">{lang === "uk" ? "Поширені питання про імплантацію" : "Common implant questions"}</h2>
           </div>
           <SeoAccordion items={faqItems} />
         </div>
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">Готові відновити посмішку?</h2>
+          <h2 className="font-display text-4xl font-bold text-navy mb-4 gold-line-center">{lang === "uk" ? "Готові відновити посмішку?" : "Ready to restore your smile?"}</h2>
           <p className="font-body text-primary-text-custom-dark/60 mb-8 max-w-md mx-auto">
-            Запишіться на консультацію та дізнайтеся, який план імплантації буде оптимальним саме для
-            вашого випадку.
+            {lang === "uk"
+              ? "Запишіться на консультацію та дізнайтеся, який план імплантації буде оптимальним саме для вашого випадку."
+              : "Book a consultation and find out which implant treatment plan is best for your case."}
           </p>
           <a
             href="tel:+380504800825"
             className="btn-primary"
           >
             <Phone size={18} />
-            Зателефонувати
+            {lang === "uk" ? "Зателефонувати" : "Call now"}
           </a>
         </div>
       </section>
@@ -244,7 +246,7 @@ export default function Implantation() {
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 gradient-gold text-accent-foreground w-14 h-14 rounded-full flex items-center justify-center shadow-gold-custom hover:scale-110 transition-transform duration-200 md:hidden"
-        aria-label="Зателефонувати"
+        aria-label={lang === "uk" ? "Зателефонувати" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>

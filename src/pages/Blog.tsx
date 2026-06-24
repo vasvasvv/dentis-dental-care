@@ -19,14 +19,39 @@ type NewsItem = {
   hot: number;
 };
 
-function mapPublicNewsItem(item: PublicNewsItem): NewsItem {
+function formatApiDate(value: string | null, locale: string) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function mapPublicNewsItem(item: PublicNewsItem, lang: "uk" | "en"): NewsItem {
+  const fallbackBadge =
+    item.kind === "promo"
+      ? lang === "uk"
+        ? "Акція"
+        : "Deal"
+      : lang === "uk"
+        ? "Новини"
+        : "News";
+  const locale = lang === "uk" ? "uk-UA" : "en-US";
+
   return {
     id: item.id,
     type: item.kind,
-    badge: item.label?.trim() || (item.kind === "promo" ? "Deal" : "News"),
-    title: item.title,
-    desc: item.description,
-    date: item.expires_on || item.published_at?.slice(0, 10) || "",
+    badge: item.label?.trim() || fallbackBadge,
+    title: item.title.trim(),
+    desc: item.description.trim(),
+    date: formatApiDate(item.expires_on ?? item.published_at, locale),
     hot: Number(item.is_hot),
   };
 }
@@ -206,12 +231,12 @@ export default function Blog() {
   }, []);
 
   useEffect(() => {
-    getPublicNews()
+    getPublicNews(lang)
       .then((data) => {
-        setAllItems(data.map(mapPublicNewsItem));
+        setAllItems(data.map((item) => mapPublicNewsItem(item, lang)));
       })
       .catch(() => setAllItems([]));
-  }, []);
+  }, [lang]);
 
   const copy = HYGIENE_GUIDE[lang];
   const staticPromos = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;

@@ -6,7 +6,7 @@ import { useLang } from "@/contexts/LanguageContext";
 export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { localizePath, t } = useLang();
+  const { localizePath, t, lang } = useLang();
   const homePath = localizePath("/");
 
   const handleNav = (href: string, isHash: boolean) => {
@@ -53,7 +53,7 @@ export default function Footer() {
             >
               <img
                 src={logo}
-                alt="Дентіс Logo"
+                alt={lang === "uk" ? "Дентіс Logo" : "Dentis Logo"}
                 width={300}
                 height={100}
                 loading="lazy"
@@ -99,9 +99,9 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-gold/70 pt-7 md:flex-row">
           <p className="font-body text-xs text-primary-foreground/60">
-            © {new Date().getFullYear()} Дентіс. {t("footer.rights")}
+            © {new Date().getFullYear()} {lang === "uk" ? "Дентіс" : "Dentis"}. {t("footer.rights")}
           </p>
-          <p className="font-body text-xs text-primary-foreground/60">Верховський Олександр Олександрович</p>
+          <p className="font-body text-xs text-primary-foreground/60">{lang === "uk" ? "Верховський Олександр Олександрович" : "Oleksandr Verkhovskyi"}</p>
         </div>
       </div>
     </footer>

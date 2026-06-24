@@ -485,18 +485,25 @@ async function publishScheduledArticles(db, env) {
         const today = new Date().toLocaleDateString('uk-UA', {
           day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Kiev'
         })
+        const todayEn = new Date().toLocaleDateString('en-US', {
+          day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Kiev'
+        })
 
         console.log(`[publishScheduledArticles]    Inserting into news table with date="${today}"`)
 
         const { meta } = await db.prepare(
-          'INSERT INTO news (type, badge, title, desc, date, hot) VALUES (?, ?, ?, ?, ?, ?)'
+          'INSERT INTO news (type, badge, title, desc, date, hot, badge_en, title_en, desc_en, date_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         ).bind(
           article.type === 'promo' ? 'promo' : 'news',
           article.badge || 'Стаття',
           article.title,
           article.desc,
           today,
-          article.hot ?? 0
+          article.hot ?? 0,
+          article.badge_en || null,
+          article.title_en || null,
+          article.desc_en || null,
+          todayEn
         ).run()
         inserted = true
 
@@ -570,7 +577,8 @@ export default {
 }
 
 async function handleRequest(request, env, origin) {
-    const { pathname: p } = new URL(request.url)
+    const url = new URL(request.url)
+    const { pathname: p } = url
     const m = request.method
 
     if (m === 'OPTIONS') {
@@ -646,20 +654,45 @@ async function handleRequest(request, env, origin) {
 
     // ── PUBLIC: News and Doctors (read-only, no auth) ─────────────────────────
     if (p === '/api/public/news' && m === 'GET') {
-      const { results } = await env.DB.prepare(`
-        SELECT
-          id,
-          CASE WHEN type = 'promo' THEN 'promo' ELSE 'news' END AS kind,
-          COALESCE(badge, '') AS label,
-          title,
-          COALESCE(desc, '') AS description,
-          date AS expires_on,
-          COALESCE(hot, 0) AS is_hot,
-          created_at AS published_at
-        FROM news
-        ORDER BY hot DESC, created_at DESC
-      `).all()
-      return withPublicCache(json(results, 200, origin), 300)
+      const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'uk'
+      try {
+        const { results } = await env.DB.prepare(`
+          SELECT
+            id,
+            CASE WHEN type = 'promo' THEN 'promo' ELSE 'news' END AS kind,
+            CASE
+              WHEN ? = 'en' THEN COALESCE(NULLIF(badge_en, ''), CASE WHEN type = 'promo' THEN 'Deal' ELSE 'News' END)
+              ELSE COALESCE(badge, '')
+            END AS label,
+            CASE WHEN ? = 'en' THEN title_en ELSE title END AS title,
+            CASE WHEN ? = 'en' THEN COALESCE(desc_en, '') ELSE COALESCE(desc, '') END AS description,
+            CASE WHEN ? = 'en' THEN NULLIF(date_en, '') ELSE date END AS expires_on,
+            COALESCE(hot, 0) AS is_hot,
+            created_at AS published_at
+          FROM news
+          WHERE ? <> 'en'
+             OR (title_en IS NOT NULL AND TRIM(title_en) <> '' AND desc_en IS NOT NULL AND TRIM(desc_en) <> '')
+          ORDER BY hot DESC, created_at DESC
+        `).bind(lang, lang, lang, lang, lang).all()
+        return withPublicCache(json(results, 200, origin), 300)
+      } catch (e) {
+        if (lang === 'en') return withPublicCache(json([], 200, origin), 300)
+
+        const { results } = await env.DB.prepare(`
+          SELECT
+            id,
+            CASE WHEN type = 'promo' THEN 'promo' ELSE 'news' END AS kind,
+            COALESCE(badge, '') AS label,
+            title,
+            COALESCE(desc, '') AS description,
+            date AS expires_on,
+            COALESCE(hot, 0) AS is_hot,
+            created_at AS published_at
+          FROM news
+          ORDER BY hot DESC, created_at DESC
+        `).all()
+        return withPublicCache(json(results, 200, origin), 300)
+      }
     }
     if (p === '/api/public/doctors' && m === 'GET') {
       const { results } = await env.DB.prepare(`
@@ -795,8 +828,8 @@ async function handleRequest(request, env, origin) {
     if (p === '/api/news' && m === 'POST') {
       const b = await request.json()
       const { meta } = await env.DB.prepare(
-        'INSERT INTO news (type,badge,title,desc,date,hot) VALUES (?,?,?,?,?,?)'
-      ).bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0).run()
+        'INSERT INTO news (type,badge,title,desc,date,hot,badge_en,title_en,desc_en,date_en) VALUES (?,?,?,?,?,?,?,?,?,?)'
+      ).bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0, b.badge_en || null, b.title_en || null, b.desc_en || null, b.date_en || null).run()
       if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) {
         broadcast(env.DB, { title: b.badge || 'Дентіс', body: b.title, url: '/#news', icon: '/icon-192.png' }, env).catch(() => {})
       }
@@ -804,8 +837,8 @@ async function handleRequest(request, env, origin) {
     }
     if (p.match(/^\/api\/news\/\d+$/) && m === 'PUT') {
       const b = await request.json()
-      await env.DB.prepare("UPDATE news SET type=?,badge=?,title=?,desc=?,date=?,hot=?,updated_at=datetime('now') WHERE id=?")
-        .bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0, idFrom(p)).run()
+      await env.DB.prepare("UPDATE news SET type=?,badge=?,title=?,desc=?,date=?,hot=?,badge_en=?,title_en=?,desc_en=?,date_en=?,updated_at=datetime('now') WHERE id=?")
+        .bind(b.type, b.badge, b.title, b.desc, b.date, b.hot ? 1 : 0, b.badge_en || null, b.title_en || null, b.desc_en || null, b.date_en || null, idFrom(p)).run()
       return json({ ok: true }, 200, origin)
     }
     if (p.match(/^\/api\/news\/\d+$/) && m === 'DELETE') {
@@ -886,14 +919,17 @@ async function handleRequest(request, env, origin) {
         console.log(`[POST /api/scheduled-articles] ✓ Normalized publish_at: "${publishTime}"`)
 
         const { meta } = await env.DB.prepare(
-          'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at) VALUES (?, ?, ?, ?, ?, ?)'
+          'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at, badge_en, title_en, desc_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         ).bind(
           b.type === 'promo' ? 'promo' : 'news',
           b.badge  || 'Стаття',
           b.title,
           b.desc,
           b.hot ? 1 : 0,
-          publishTime
+          publishTime,
+          b.badge_en || null,
+          b.title_en || null,
+          b.desc_en || null
         ).run()
 
         console.log(`[POST /api/scheduled-articles] ✓ Inserted ID=${meta.last_row_id}`)

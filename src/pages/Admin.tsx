@@ -129,14 +129,15 @@ function NewsTab({ token }: { token: string }) {
   };
   useEffect(() => { load(); }, []);
 
-  const emptyForm = { type: 'news' as const, badge: 'Новини', title: '', desc: '', date: '', hot: false };
+  const emptyForm = { type: 'news' as const, badge: 'Новини', title: '', desc: '', date: '', badge_en: 'News', title_en: '', desc_en: '', date_en: '', hot: false };
   const badgeOpts = { news: ['Новини', 'Інформація', 'Оновлення'], promo: ['Акція', 'Спецпропозиція', 'Знижка'] };
+  const badgeOptsEn = { news: ['News', 'Info', 'Update'], promo: ['Deal', 'Special offer', 'Discount'] };
 
   const handleSave = async () => {
     if (!editing) return;
     setSaving(true); setError(null);
     try {
-      const p = { type: editing.type, badge: editing.badge, title: editing.title, desc: editing.desc, date: editing.date, hot: editing.hot };
+      const p = { type: editing.type, badge: editing.badge, title: editing.title, desc: editing.desc, date: editing.date, badge_en: editing.badge_en ?? '', title_en: editing.title_en ?? '', desc_en: editing.desc_en ?? '', date_en: editing.date_en ?? '', hot: editing.hot };
       if (isNew) {
         await createNews(p, token);
       } else {
@@ -220,7 +221,7 @@ function NewsTab({ token }: { token: string }) {
               <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Тип</label>
               <div className="flex gap-2">
                 {(['news', 'promo'] as const).map((t) => (
-                  <button key={t} onClick={() => setEditing((p) => p ? { ...p, type: t, badge: badgeOpts[t][0] } : p)}
+                  <button key={t} onClick={() => setEditing((p) => p ? { ...p, type: t, badge: badgeOpts[t][0], badge_en: badgeOptsEn[t][0] } : p)}
                     className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${editing.type === t ? "gradient-gold text-[hsl(220_40%_10%)]" : "text-[hsl(40_20%_65%)] border border-[hsl(180_40%_22%/0.5)]"}`}
                     style={{ fontFamily: '"NueneMontreal", system-ui, sans-serif' }}>
                     {t === "news" ? "Новина" : "Акція"}
@@ -242,6 +243,25 @@ function NewsTab({ token }: { token: string }) {
                 className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={inputStyle} placeholder="Детальний опис..." />
             </div>
             <FieldInput label="Дата / Термін" value={editing.date} onChange={(v) => setEditing((p) => p ? { ...p, date: v } : p)} placeholder="До 31 березня 2026" />
+            <div className="rounded-2xl border border-[hsl(180_40%_22%/0.5)] p-3">
+              <p className="mb-3 text-xs uppercase tracking-wider text-[hsl(180_20%_55%)]">English version</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Label EN</label>
+                  <select value={editing.badge_en ?? ''} onChange={(e) => setEditing((p) => p ? { ...p, badge_en: e.target.value } : p)}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none" style={inputStyle}>
+                    {badgeOptsEn[editing.type].map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <FieldInput label="Title EN" value={editing.title_en ?? ''} onChange={(v) => setEditing((p) => p ? { ...p, title_en: v } : p)} placeholder="Promotion or news title" />
+                <div>
+                  <label className="block text-[hsl(180_20%_55%)] text-xs mb-1.5 uppercase tracking-wider">Description EN</label>
+                  <textarea value={editing.desc_en ?? ''} onChange={(e) => setEditing((p) => p ? { ...p, desc_en: e.target.value } : p)} rows={3}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" style={inputStyle} placeholder="Detailed English description..." />
+                </div>
+                <FieldInput label="Date / Term EN" value={editing.date_en ?? ''} onChange={(v) => setEditing((p) => p ? { ...p, date_en: v } : p)} placeholder="Until 31 March 2026" />
+              </div>
+            </div>
             <label className="flex items-center gap-3 cursor-pointer">
               <div onClick={() => setEditing((p) => p ? { ...p, hot: !normalizeHot(p.hot) } : p)}
                 className={`w-11 h-6 rounded-full transition-all duration-200 flex items-center px-0.5 ${normalizeHot(editing.hot) ? "gradient-gold" : "bg-[hsl(180_50%_18%)]"}`}>

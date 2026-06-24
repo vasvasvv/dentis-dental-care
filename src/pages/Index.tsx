@@ -78,7 +78,7 @@ const Index = () => {
       <a
         href="tel:+380504800825"
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-accent-foreground shadow-gold-custom transition-transform duration-200 hover:scale-110 md:hidden"
-        aria-label="Call Дентіс"
+        aria-label={lang === "uk" ? "Зателефонувати в Дентіс" : "Call Dentis"}
       >
         <Phone size={22} />
       </a>

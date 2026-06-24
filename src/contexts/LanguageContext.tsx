@@ -296,17 +296,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const lang = getLangFromPath(location.pathname) as Lang;
   const currentPath = stripLangFromPath(location.pathname);
+  const localizeCurrentLocation = useCallback(
+    (targetLang: Lang) => `${localizePath(location.pathname, targetLang)}${location.search}${location.hash}`,
+    [location.hash, location.pathname, location.search]
+  );
 
   const toggleLang = useCallback(() => {
     const next: Lang = lang === "uk" ? "en" : "uk";
-    navigate(localizePath(location.pathname, next));
-  }, [lang, location.pathname, navigate]);
+    navigate(localizeCurrentLocation(next));
+  }, [lang, localizeCurrentLocation, navigate]);
 
   const setLang = useCallback(
     (nextLang: Lang) => {
-      navigate(localizePath(location.pathname, nextLang));
+      navigate(localizeCurrentLocation(nextLang));
     },
-    [location.pathname, navigate]
+    [localizeCurrentLocation, navigate]
   );
 
   const getLocalizedPath = useCallback(
