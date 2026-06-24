@@ -47,6 +47,7 @@ export default function Orthodontics() {
       <PageSeo
         lang={lang}
         path="/orthodontics"
+        ogImage="/og-images/Ортодонтія.png"
         title={{
           uk: "Ортодонтія у Кропивницькому — брекети та вирівнювання прикусу | Дентіс",
           en: "Orthodontics in Kropyvnytskyi — Braces and Bite Correction | Dentis",
@@ -56,7 +57,7 @@ export default function Orthodontics() {
           en: description,
         }}
       />
-      <ServiceSchema id="orthodontics-schema" name={lang === "uk" ? "Ортодонтія" : "Orthodontics"} description={description} image={toAbsoluteUrl("/og-image.jpg")} />
+      <ServiceSchema id="orthodontics-schema" name={lang === "uk" ? "Ортодонтія" : "Orthodontics"} description={description} image={toAbsoluteUrl("/og-images/Ортодонтія.png")} />
       <FaqSchema id="orthodontics-faq" faqs={faqItems} />
 
       <Header />

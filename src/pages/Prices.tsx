@@ -52,6 +52,7 @@ export default function Prices() {
       <PageSeo
         lang={lang}
         path="/prices"
+        ogImage="/og-images/Ціни.png"
         title={{
           uk: "Ціни на стоматологію у Кропивницькому | Прайс Дентіс",
           en: "Dental Prices in Kropyvnytskyi | Dentis Price List",

@@ -98,7 +98,7 @@ export default function DiagnosticsPage() {
       <PageSeo
         lang={lang}
         path="/diagnostika-zubiv"
-        ogImage="/og-images/diagnostika-zubiv.jpg"
+        ogImage="/og-images/Діагностика зубів.png"
         title={{
           uk: "Діагностика зубів у Кропивницькому — Дентіс",
           en: "Dental Diagnostics in Kropyvnytskyi — Dentis",
@@ -112,7 +112,7 @@ export default function DiagnosticsPage() {
         id="diagnostika-schema"
         name={lang === "uk" ? "Діагностика зубів" : "Dental diagnostics"}
         description={description}
-        image={toAbsoluteUrl("/og-images/diagnostika-zubiv.jpg")}
+        image={toAbsoluteUrl("/og-images/Діагностика зубів.png")}
       />
 
       <Header />

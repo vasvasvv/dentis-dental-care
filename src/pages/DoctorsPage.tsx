@@ -13,6 +13,7 @@ export default function DoctorsPage() {
       <PageSeo
         lang={lang}
         path="/doctors"
+        ogImage="/og-images/Лікарі Dentis.png"
         title={{
           uk: "Лікарі стоматології Дентіс у Кропивницькому",
           en: "Dentis Doctors in Kropyvnytskyi",

@@ -245,17 +245,17 @@ export function getOgImageForPage(path: string) {
 
   const pageMap: Record<string, string> = {
     "/": "/og-image.jpg",
-    "/likuvannya-kariesu": "/og-images/likuvannya-kariesu.jpg",
-    "/implantaciya": "/og-images/implantaciya.jpg",
-    "/diagnostika-zubiv": "/og-images/diagnostika-zubiv.jpg",
-    "/estetychna-stomatolohiya": "/og-images/estetychna-stomatologiya.jpg",
-    "/profesijne-ochischennya": "/og-images/profesiyne-ochyschennya.jpg",
-    "/protezuvannya": "/og-images/protezuvannya.jpg",
-    "/orthodontics": "/og-image.jpg",
-    "/prices": "/og-image.jpg",
-    "/doctors": "/og-image.jpg",
-    "/blog": "/og-image-blog.jpg",
-    "/contacts": "/og-image-contacts.jpg",
+    "/likuvannya-kariesu": "/og-images/Лікування карієсу.png",
+    "/implantaciya": "/og-images/Імплантація.png",
+    "/diagnostika-zubiv": "/og-images/Діагностика зубів.png",
+    "/estetychna-stomatolohiya": "/og-images/Естетична стоматологія.png",
+    "/profesijne-ochischennya": "/og-images/Професійне чищення.png",
+    "/protezuvannya": "/og-images/Протезування.png",
+    "/orthodontics": "/og-images/Ортодонтія.png",
+    "/prices": "/og-images/Ціни.png",
+    "/doctors": "/og-images/Лікарі Dentis.png",
+    "/contacts": "/og-images/Контакти.png",
+    "/blog": "/og-images/Блог.png",
   };
 
   return toAbsoluteUrl(pageMap[neutralPath] ?? "/og-image.jpg");

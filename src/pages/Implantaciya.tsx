@@ -91,7 +91,7 @@ export default function Implantation() {
       <PageSeo
         lang={lang}
         path="/implantaciya"
-        ogImage="/og-images/implantaciya.jpg"
+        ogImage="/og-images/Імплантація.png"
         title={{
           uk: "Імплантація зубів Кропивницький: ціни, відгуки | Стоматологія Дентіс",
           en: "Dental Implants in Kropyvnytskyi — Dentis",
@@ -105,7 +105,7 @@ export default function Implantation() {
         id="implantaciya-schema"
         name={lang === "uk" ? "Імплантація зубів" : "Dental implants"}
         description={description}
-        image={toAbsoluteUrl("/og-images/implantaciya.jpg")}
+        image={toAbsoluteUrl("/og-images/Імплантація.png")}
       />
       <FaqSchema id="implantaciya-faq" faqs={faqItems} />
 

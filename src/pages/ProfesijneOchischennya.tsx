@@ -98,7 +98,7 @@ export default function ProfesijneOchischennya() {
       <PageSeo
         lang={lang}
         path="/profesijne-ochischennya"
-        ogImage="/og-images/profesiyne-ochyschennya.jpg"
+        ogImage="/og-images/Професійне чищення.png"
         title={{
           uk: "Професійне очищення зубів у Кропивницькому — Дентіс",
           en: "Professional Teeth Cleaning in Kropyvnytskyi — Dentis",
@@ -112,7 +112,7 @@ export default function ProfesijneOchischennya() {
         id="profesijne-ochischennya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-images/profesiyne-ochyschennya.jpg")}
+        image={toAbsoluteUrl("/og-images/Професійне чищення.png")}
       />
 
       <Header />

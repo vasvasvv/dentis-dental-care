@@ -109,7 +109,7 @@ export default function LikuvannyaKariesu() {
       <PageSeo
         lang={lang}
         path="/likuvannya-kariesu"
-        ogImage="/og-images/likuvannya-kariesu.jpg"
+        ogImage="/og-images/Лікування карієсу.png"
         title={{
           uk: "Лікування карієсу в Кропивницькому — ціни на лікування зубів",
           en: "Cavity Treatment in Kropyvnytskyi | Dentis Clinic",
@@ -119,7 +119,7 @@ export default function LikuvannyaKariesu() {
           en: description,
         }}
       />
-      <ServiceSchema id="likuvannya-kariesu-schema" name={serviceName} description={description} image={toAbsoluteUrl("/og-images/likuvannya-kariesu.jpg")} />
+      <ServiceSchema id="likuvannya-kariesu-schema" name={serviceName} description={description} image={toAbsoluteUrl("/og-images/Лікування карієсу.png")} />
       <FaqSchema id="likuvannya-kariesu-faq" faqs={faqItems} />
 
       <Header />

@@ -112,7 +112,7 @@ export default function Protezuvannya() {
       <PageSeo
         lang={lang}
         path="/protezuvannya"
-        ogImage="/og-images/protezuvannya.jpg"
+        ogImage="/og-images/Протезування.png"
         title={{
           uk: "Протезування зубів у Кропивницькому: якісно та безболісно | Дентіс",
           en: "Dentures & Prosthetics in Kropyvnytskyi — Dentis",
@@ -126,7 +126,7 @@ export default function Protezuvannya() {
         id="protezuvannya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-images/protezuvannya.jpg")}
+        image={toAbsoluteUrl("/og-images/Протезування.png")}
       />
       <FaqSchema id="protezuvannya-faq" faqs={faqItems} />
 

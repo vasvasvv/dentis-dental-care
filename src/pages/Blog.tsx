@@ -228,7 +228,7 @@ export default function Blog() {
       <PageSeo
         lang={lang}
         path="/blog"
-        ogImage="/og-image-blog.jpg"
+        ogImage="/og-images/Блог.png"
         title={{
           uk: "Блог Дентіс — поради та новини стоматології",
           en: "Dentis Blog — Dental Tips and News",
@@ -247,7 +247,7 @@ export default function Blog() {
         authorUrl={toAbsoluteUrl(authorProfilePath)}
         datePublished="2026-04-06"
         dateModified="2026-04-06"
-        image={toAbsoluteUrl("/og-image-blog.jpg")}
+        image={toAbsoluteUrl("/og-images/Блог.png")}
       />
 
       <Header />

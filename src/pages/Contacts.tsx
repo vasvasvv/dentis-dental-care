@@ -26,7 +26,7 @@ export default function ContactsPage() {
       <PageSeo
         lang={lang}
         path="/contacts"
-        ogImage="/og-image-contacts.jpg"
+        ogImage="/og-images/Контакти.png"
         title={{
           uk: "Контакти Дентіс — стоматологія у Кропивницькому",
           en: "Contact Dentis — Dental Clinic in Kropyvnytskyi",

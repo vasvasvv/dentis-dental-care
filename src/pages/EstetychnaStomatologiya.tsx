@@ -112,7 +112,7 @@ export default function EstetychnaStomatologiya() {
       <PageSeo
         lang={lang}
         path="/estetychna-stomatolohiya"
-        ogImage="/og-images/estetychna-stomatologiya.jpg"
+        ogImage="/og-images/Естетична стоматологія.png"
         title={{
           uk: "Естетична стоматологія у Кропивницькому — Дентіс",
           en: "Cosmetic Dentistry in Kropyvnytskyi — Dentis",
@@ -126,7 +126,7 @@ export default function EstetychnaStomatologiya() {
         id="estetychna-stomatolohiya-schema"
         name={serviceName}
         description={description}
-        image={toAbsoluteUrl("/og-images/estetychna-stomatologiya.jpg")}
+        image={toAbsoluteUrl("/og-images/Естетична стоматологія.png")}
       />
 
       <Header />

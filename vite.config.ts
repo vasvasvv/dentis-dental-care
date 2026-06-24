@@ -78,7 +78,7 @@ export default defineConfig(({ mode, isSsrBuild }) => ({
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png}"],
-        globIgnores: ["**/*.{webp,svg,woff,woff2}", "**/workbox-*.js"],
+        globIgnores: ["**/*.{webp,svg,woff,woff2}", "**/workbox-*.js", "**/og-images/**"],
         maximumFileSizeToCacheInBytes: 500_000,
       },
       devOptions: { enabled: mode === "development", type: "module" },
