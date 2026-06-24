@@ -49,8 +49,8 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/70 after:to-transparent ${
-        scrolled ? "bg-navy/90 backdrop-blur-xl shadow-nav" : "bg-navy/80 backdrop-blur-md"
+      className={`sticky top-0 z-50 transition-all duration-300  after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-gold/70 after:to-transparent ${
+        scrolled ? "bg-navy/70 backdrop-blur-xl shadow-nav" : "bg-navy/70 backdrop-blur-md"
       }`}
     >
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
