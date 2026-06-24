@@ -1,7 +1,7 @@
 -- Черга статей для автопублікації (Cloudflare Cron)
 CREATE TABLE IF NOT EXISTS scheduled_articles (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  type        TEXT    DEFAULT 'blog',
+  type        TEXT    DEFAULT 'news',
   badge       TEXT    DEFAULT 'Стаття',
   title       TEXT    NOT NULL,
   desc        TEXT    NOT NULL,

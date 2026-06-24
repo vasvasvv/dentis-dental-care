@@ -467,7 +467,18 @@ async function publishScheduledArticles(db, env) {
 
     let published = 0
     for (const article of results) {
+      let claimed = false
+      let inserted = false
       try {
+        const { meta: claimMeta } = await db.prepare(
+          'UPDATE scheduled_articles SET published = 2 WHERE id = ? AND published = 0'
+        ).bind(article.id).run()
+        if (!claimMeta?.changes) {
+          console.log(`[publishScheduledArticles]    Skipped already claimed article ID=${article.id}`)
+          continue
+        }
+        claimed = true
+
         console.log(`[publishScheduledArticles] 🔄 Processing article ID=${article.id}: "${article.title}"`)
         console.log(`[publishScheduledArticles]    publish_at="${article.publish_at}" vs now="${now}"`)
         
@@ -480,18 +491,19 @@ async function publishScheduledArticles(db, env) {
         const { meta } = await db.prepare(
           'INSERT INTO news (type, badge, title, desc, date, hot) VALUES (?, ?, ?, ?, ?, ?)'
         ).bind(
-          article.type || 'blog',
+          article.type === 'promo' ? 'promo' : 'news',
           article.badge || 'Стаття',
           article.title,
           article.desc,
           today,
           article.hot ?? 0
         ).run()
+        inserted = true
 
         console.log(`[publishScheduledArticles]    ✓ Inserted news record ID=${meta.last_row_id}`)
 
         await db.prepare(
-          "UPDATE scheduled_articles SET published = 1 WHERE id = ?"
+          "UPDATE scheduled_articles SET published = 1 WHERE id = ? AND published = 2"
         ).bind(article.id).run()
 
         console.log(`[publishScheduledArticles]    ✓ Marked scheduled_articles ID=${article.id} as published`)
@@ -514,6 +526,11 @@ async function publishScheduledArticles(db, env) {
         published++
         void meta
       } catch (e) {
+        if (claimed) {
+          await db.prepare(
+            'UPDATE scheduled_articles SET published = ? WHERE id = ? AND published = 2'
+          ).bind(inserted ? 1 : 0, article.id).run().catch(() => {})
+        }
         console.error(`[publishScheduledArticles] ❌ Error processing article ID=${article.id}:`, e?.message)
       }
     }
@@ -628,6 +645,38 @@ async function handleRequest(request, env, origin) {
     }
 
     // ── PUBLIC: News and Doctors (read-only, no auth) ─────────────────────────
+    if (p === '/api/public/news' && m === 'GET') {
+      const { results } = await env.DB.prepare(`
+        SELECT
+          id,
+          CASE WHEN type = 'promo' THEN 'promo' ELSE 'news' END AS kind,
+          COALESCE(badge, '') AS label,
+          title,
+          COALESCE(desc, '') AS description,
+          date AS expires_on,
+          COALESCE(hot, 0) AS is_hot,
+          created_at AS published_at
+        FROM news
+        ORDER BY hot DESC, created_at DESC
+      `).all()
+      return withPublicCache(json(results, 200, origin), 300)
+    }
+    if (p === '/api/public/doctors' && m === 'GET') {
+      const { results } = await env.DB.prepare(`
+        SELECT
+          id,
+          name AS full_name,
+          COALESCE(title, '') AS position,
+          speciality AS specialization,
+          CAST(COALESCE(NULLIF(REPLACE(experience, '+', ''), ''), '0') AS INTEGER) AS experience_years,
+          desc AS description,
+          img_url AS photo_url,
+          sort_order
+        FROM doctors
+        ORDER BY sort_order ASC
+      `).all()
+      return withPublicCache(json(results, 200, origin), 1800)
+    }
     if (p === '/api/news' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM news ORDER BY hot DESC, created_at DESC').all()
       return withPublicCache(json(results, 200, origin), 300)
@@ -651,6 +700,13 @@ async function handleRequest(request, env, origin) {
 
     // ── TELEGRAM WEBHOOK (public — called by Telegram servers, MUST be before auth check) ──
     if (p === '/api/telegram/webhook' && m === 'POST') {
+      if (env.TELEGRAM_WEBHOOK_SECRET) {
+        const providedSecret = request.headers.get('X-Telegram-Bot-Api-Secret-Token') || ''
+        if (providedSecret !== env.TELEGRAM_WEBHOOK_SECRET) {
+          return json({ error: 'Unauthorized' }, 401, origin)
+        }
+      }
+
       let upd
       try { upd = await request.json() } catch { return new Response('ok') }
       const msg = upd?.message
@@ -832,7 +888,7 @@ async function handleRequest(request, env, origin) {
         const { meta } = await env.DB.prepare(
           'INSERT INTO scheduled_articles (type, badge, title, desc, hot, publish_at) VALUES (?, ?, ?, ?, ?, ?)'
         ).bind(
-          b.type   || 'blog',
+          b.type === 'promo' ? 'promo' : 'news',
           b.badge  || 'Стаття',
           b.title,
           b.desc,
