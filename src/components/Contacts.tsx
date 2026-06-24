@@ -23,7 +23,7 @@ export default function Contacts() {
       icon: MapPin,
       label: t("contacts.addr.label"),
       value: t("contacts.addr.value"),
-      href: "https://maps.google.com/?q=Кропивницький+вулиця+Героїв-рятувальників+9",
+      href: "https://maps.app.goo.gl/q3DVsPUwjhfwkRJW7",
       sub: t("contacts.addr.sub"),
     },
     {
@@ -88,7 +88,7 @@ export default function Contacts() {
           <div className="rounded-2xl overflow-hidden shadow-card-custom h-80 lg:h-full min-h-[320px]">
             <iframe
               title="Dentis on map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2626.123456789!2d32.261234!3d48.501234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDMwJzA0LjQiTiAzMsKwMTUnNDEuNCJF!5e0!3m2!1suk!2sua!4v1234567890"
+              src="https://www.google.com/maps?q=48.5014697,32.2204513&hl=uk&z=17&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}
