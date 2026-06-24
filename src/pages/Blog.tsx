@@ -219,7 +219,7 @@ export default function Blog() {
   const promos = allItems.filter((item) => item.type === "promo");
   const news = allItems.filter((item) => item.type !== "promo");
   const displayPromos = fillWithFallback(promos, staticPromos, 2);
-  const displayNews = fillWithFallback(news, staticNews, 3);
+  const displayNews = news.length > 0 ? news : staticNews;
   const authorName = lang === "uk" ? "Лікар Dentis" : "Dentis doctor";
   const authorProfilePath = localizePath("/doctors/dentis-team-doctor");
 
