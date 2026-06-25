@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { BookOpen, CalendarDays, CheckCircle, Download, Phone, Tag } from "lucide-react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -6,7 +6,8 @@ import PageSeo from "@/components/SEO/PageSeo";
 import ArticleSchema from "@/components/SEO/ArticleSchema";
 import { useLang } from "@/contexts/LanguageContext";
 import heroVideo from "@/assets/hero-video.mp4";
-import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
+import { publicNewsByLang } from "@/data/publicNews.generated";
+import type { PublicNewsItem } from "@/lib/publicApi";
 import { toAbsoluteUrl } from "@/utils/seo";
 
 type NewsItem = {
@@ -219,7 +220,6 @@ function BlogCard({ item }: { item: NewsItem }) {
 
 export default function Blog() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const { lang, localizePath, t } = useLang();
 
   useEffect(() => {
@@ -230,17 +230,10 @@ export default function Blog() {
     video.playbackRate = 0.6;
   }, []);
 
-  useEffect(() => {
-    getPublicNews(lang)
-      .then((data) => {
-        setAllItems(data.map((item) => mapPublicNewsItem(item, lang)));
-      })
-      .catch(() => setAllItems([]));
-  }, [lang]);
-
   const copy = HYGIENE_GUIDE[lang];
   const staticPromos = lang === "uk" ? STATIC_PROMOS_UK : STATIC_PROMOS_EN;
   const staticNews = lang === "uk" ? STATIC_NEWS_UK : STATIC_NEWS_EN;
+  const allItems = publicNewsByLang[lang].map((item) => mapPublicNewsItem(item, lang));
   const promos = allItems.filter((item) => item.type === "promo");
   const news = allItems.filter((item) => item.type !== "promo");
   const displayPromos = fillWithFallback(promos, staticPromos, 2);

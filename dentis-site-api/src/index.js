@@ -542,6 +542,21 @@ async function publishScheduledArticles(db, env) {
       }
     }
 
+    if (published > 0) {
+      if (env.PAGES_DEPLOY_HOOK_URL) {
+        try {
+          const res = await fetch(env.PAGES_DEPLOY_HOOK_URL, { method: 'POST' })
+          if (!res.ok) {
+            console.warn(`[publishScheduledArticles] Pages deploy hook failed: ${res.status} ${res.statusText}`)
+          }
+        } catch (e) {
+          console.warn(`[publishScheduledArticles] Pages deploy hook error: ${e?.message}`)
+        }
+      } else {
+        console.warn('[publishScheduledArticles] PAGES_DEPLOY_HOOK_URL not configured, skipping Pages deploy')
+      }
+    }
+
     console.log(`[publishScheduledArticles] ✅ Complete: published ${published} article(s)`)
     return { published }
   } catch (e) {

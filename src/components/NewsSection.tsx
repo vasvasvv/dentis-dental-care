@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tag, CalendarDays, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getPublicNews, type PublicNewsItem } from "@/lib/publicApi";
+import { publicNewsByLang } from "@/data/publicNews.generated";
+import type { PublicNewsItem } from "@/lib/publicApi";
 import { useLang } from "@/contexts/LanguageContext";
 import SectionReveal from "@/components/SectionReveal";
 import { Badge } from "@/components/ui/badge";
@@ -171,26 +172,8 @@ function NewsCard({
 export default function NewsSection() {
   const navigate = useNavigate();
   const { lang, localizePath, t } = useLang();
-  const [allItems, setAllItems] = useState<NewsItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    getPublicNews(lang)
-      .then((data) => {
-        if (cancelled) return;
-        setAllItems(normalizeNews(data, lang));
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setAllItems([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [lang]);
+  const allItems = normalizeNews(publicNewsByLang[lang], lang);
 
   const fallbackPromos = lang === "uk" ? FALLBACK_PROMOS_UK : FALLBACK_PROMOS_EN;
   const fallbackNews = lang === "uk" ? FALLBACK_NEWS_UK : FALLBACK_NEWS_EN;

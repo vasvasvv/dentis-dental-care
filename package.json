@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "export:news": "node scripts/export-public-news.cjs",
+    "prebuild": "npm run export:news",
     "build": "vite-react-ssg build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
