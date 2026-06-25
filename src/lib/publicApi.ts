@@ -22,6 +22,12 @@ export type PublicNewsItem = {
   published_at: string | null;
 };
 
+export type AppointmentRequestPayload = {
+  patient_name: string;
+  phone: string;
+  problem: string;
+};
+
 export async function getPublicDoctors(): Promise<PublicDoctor[]> {
   const response = await fetch(`${BASE}/api/public/doctors`);
   if (!response.ok) throw new Error('Failed to fetch doctors');
@@ -32,4 +38,19 @@ export async function getPublicNews(lang: 'uk' | 'en' = 'uk'): Promise<PublicNew
   const response = await fetch(`${BASE}/api/public/news?lang=${lang}`);
   if (!response.ok) throw new Error('Failed to fetch news');
   return response.json();
+}
+
+export async function sendAppointmentRequest(payload: AppointmentRequestPayload): Promise<void> {
+  const response = await fetch(`${BASE}/api/public/appointment-request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let message = 'Failed to send appointment request';
+    const data = await response.json().catch(() => null);
+    if (typeof data?.error === 'string') message = data.error;
+    throw new Error(message);
+  }
 }

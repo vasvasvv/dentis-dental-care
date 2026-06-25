@@ -9,6 +9,24 @@ import { buildCanonical } from "@/utils/seo";
 
 export default function ContactsPage() {
   const { lang } = useLang();
+  const licenseText = `Верховський Олександр Олександрович
+Номер ліцензії: 128411
+Дата видачі: 22.05.2020
+Регіон: Кіровоградська
+
+
+Інформація про ліцензію
+Номер ліцензії: 128411
+Рішення: Видати
+Підстава прийняття: Заява ліцензіата про видачу ліцензії
+Дата прийняття: 22.05.2020
+Номер рішення: 1236
+Дата початку дії ліцензії: 22.05.2020
+
+Інформація про філію
+Номер філії: ФОП Верховський
+Назва філії: 25031, Кіровоградська обл., м.Кропивницький, вул. Героїв Рятувальників, буд. 9, корп. 2,
+Адреса філії: Хірургічна стоматологія,мол. Сестринська справа,Ортопедична стоматологія,Терапевтична стоматологія,Ортодонтія`;
 
   const webPageSchema = {
     "@context": "https://schema.org",
@@ -49,10 +67,8 @@ export default function ContactsPage() {
               <p className="mb-2 font-body text-xs font-semibold uppercase tracking-[0.25em] text-gold">
                 {lang === "uk" ? "Юридична інформація" : "Legal information"}
               </p>
-              <p className="font-body text-sm leading-7 text-muted-foreground">
-                {lang === "uk"
-                  ? "Ліцензія МОЗ України на медичну практику (дані уточнюються)."
-                  : "Ministry of Health of Ukraine medical practice license (data is updating)."}
+              <p className="whitespace-pre-line font-body text-sm leading-7 text-muted-foreground">
+                {licenseText}
               </p>
             </div>
           </div>

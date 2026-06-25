@@ -164,6 +164,16 @@ function normalizePhone(raw) {
   return null
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[ch])
+}
+
 // ── WEB PUSH (RFC 8291 / RFC 8292) ────────────────────────────────────────────
 function concat(...arrays) {
   const total = arrays.reduce((n, a) => n + a.length, 0)
@@ -724,6 +734,56 @@ async function handleRequest(request, env, origin) {
         ORDER BY sort_order ASC
       `).all()
       return withPublicCache(json(results, 200, origin), 1800)
+    }
+    if (p === '/api/public/appointment-request' && m === 'POST') {
+      const ip = getClientIp(request)
+      const rl = await checkRateLimit(env.DB, ip, 'appointment-request', 3, 300)
+      if (rl.limited) return json({ error: 'Забагато заявок. Спробуйте пізніше.' }, 429, origin)
+
+      let body
+      try {
+        body = await request.json()
+      } catch {
+        return json({ error: 'Некоректні дані заявки' }, 400, origin)
+      }
+
+      const patientName = String(body?.patient_name ?? '').trim().slice(0, 120)
+      const problem = String(body?.problem ?? '').trim().slice(0, 1000)
+      const normalPhone = normalizePhone(body?.phone)
+
+      if (patientName.length < 2) return json({ error: 'Вкажіть імʼя та прізвище' }, 400, origin)
+      if (!normalPhone) return json({ error: 'Невалідний номер телефону' }, 400, origin)
+      if (problem.length < 3) return json({ error: 'Опишіть, що турбує' }, 400, origin)
+      if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_APPOINTMENTS_CHAT_ID) {
+        return json({ error: 'Сервіс заявок тимчасово недоступний' }, 503, origin)
+      }
+
+      const text = [
+        '🦷 <b>Нова заявка на запис</b>',
+        '',
+        `<b>Пацієнт:</b> ${escapeHtml(patientName)}`,
+        `<b>Телефон:</b> +${normalPhone}`,
+        '',
+        '<b>Проблема або що турбує:</b>',
+        escapeHtml(problem),
+      ].join('\n')
+
+      try {
+        const tgResponse = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: env.TELEGRAM_APPOINTMENTS_CHAT_ID,
+            text,
+            parse_mode: 'HTML',
+          }),
+        })
+        if (!tgResponse.ok) return json({ error: 'Не вдалося надіслати заявку' }, 502, origin)
+      } catch {
+        return json({ error: 'Не вдалося надіслати заявку' }, 502, origin)
+      }
+
+      return json({ ok: true }, 201, origin)
     }
     if (p === '/api/news' && m === 'GET') {
       const { results } = await env.DB.prepare('SELECT * FROM news ORDER BY hot DESC, created_at DESC').all()

@@ -1,8 +1,70 @@
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
 import { useLang } from "@/contexts/LanguageContext";
+import { sendAppointmentRequest } from "@/lib/publicApi";
 
 export default function Contacts() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const [patientName, setPatientName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [problem, setProblem] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const formText = lang === "uk"
+    ? {
+        title: "Заявка на запис",
+        description: "Залиште контакти, адміністратор передзвонить і погодить дату, час та лікаря.",
+        name: "Ім'я та прізвище",
+        phone: "Номер телефону",
+        problem: "Проблема або що турбує",
+        submit: "Записатися",
+        sending: "Надсилаємо...",
+        required: "Заповніть усі поля.",
+        success: "Дякуємо, заявку надіслано. Адміністратор передзвонить вам.",
+        error: "Не вдалося надіслати заявку. Спробуйте ще раз або зателефонуйте.",
+      }
+    : {
+        title: "Appointment request",
+        description: "Leave your contacts and an administrator will call back to agree on the date, time and doctor.",
+        name: "First and last name",
+        phone: "Phone number",
+        problem: "Problem or concern",
+        submit: "Request appointment",
+        sending: "Sending...",
+        required: "Please fill in all fields.",
+        success: "Thank you, your request has been sent. An administrator will call you back.",
+        error: "Could not send the request. Please try again or call us.",
+      };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSuccess("");
+    setError("");
+
+    if (!patientName.trim() || !phone.trim() || !problem.trim()) {
+      setError(formText.required);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await sendAppointmentRequest({
+        patient_name: patientName.trim(),
+        phone: phone.trim(),
+        problem: problem.trim(),
+      });
+      setPatientName("");
+      setPhone("");
+      setProblem("");
+      setSuccess(formText.success);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : formText.error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const items = [
     {
@@ -84,19 +146,73 @@ export default function Contacts() {
             </div>
           </div>
 
-          {/* Map */}
-          <div className="rounded-2xl overflow-hidden shadow-card-custom h-80 lg:h-full min-h-[320px]">
-            <iframe
-              title="Dentis on map"
-              src="https://www.google.com/maps?q=48.5014697,32.2204513&hl=uk&z=17&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="rounded-lg border border-gold/25 bg-white p-6 shadow-card-custom">
+            <h3 className="font-display text-2xl font-bold text-navy mb-2">{formText.title}</h3>
+            <p className="font-body text-navy/70 text-sm mb-6">{formText.description}</p>
+
+            <div className="space-y-4">
+              <label className="block">
+                <span className="font-body text-navy/90 text-xs tracking-wider uppercase mb-2 block">{formText.name}</span>
+                <input
+                  value={patientName}
+                  onChange={(event) => setPatientName(event.target.value)}
+                  autoComplete="name"
+                  className="w-full h-12 rounded-lg border border-border bg-background px-4 font-body text-navy outline-none transition-colors focus:border-gold"
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="font-body text-navy/90 text-xs tracking-wider uppercase mb-2 block">{formText.phone}</span>
+                <input
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  autoComplete="tel"
+                  inputMode="tel"
+                  className="w-full h-12 rounded-lg border border-border bg-background px-4 font-body text-navy outline-none transition-colors focus:border-gold"
+                  required
+                />
+              </label>
+
+              <label className="block">
+                <span className="font-body text-navy/90 text-xs tracking-wider uppercase mb-2 block">{formText.problem}</span>
+                <textarea
+                  value={problem}
+                  onChange={(event) => setProblem(event.target.value)}
+                  rows={5}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 font-body text-navy outline-none transition-colors focus:border-gold"
+                  required
+                />
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full gradient-gold px-8 py-3.5 font-body font-semibold text-accent-foreground transition-all duration-200 hover:shadow-gold-custom disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <Send size={18} />
+              {submitting ? formText.sending : formText.submit}
+            </button>
+
+            <div aria-live="polite" className="mt-4 min-h-5">
+              {success && <p className="font-body text-sm font-semibold text-green-700">{success}</p>}
+              {error && <p className="font-body text-sm font-semibold text-red-700">{error}</p>}
+            </div>
+          </form>
+        </div>
+
+        <div className="mt-12 max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-card-custom h-80">
+          <iframe
+            title="Dentis on map"
+            src="https://www.google.com/maps?q=48.5014697,32.2204513&hl=uk&z=17&output=embed"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
         </div>
       </div>
     </section>

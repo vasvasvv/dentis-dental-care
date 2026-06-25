@@ -47,3 +47,19 @@ Admin API `/api/news` зберігає базові поля `type/badge/desc/da
 ```
 
 Контактні CTA використовують `tel:+380504800825`. Події аналітики мають залишатися сумісними з `dataLayer` і `gtag`, навіть якщо GTM/GA завантажуються відкладено.
+
+## Public appointment request
+
+`POST /api/public/appointment-request`
+
+Публічна форма запису без вибору дати, часу й лікаря. Приймає:
+
+```ts
+{
+  patient_name: string
+  phone: string
+  problem: string
+}
+```
+
+Worker нормалізує телефон, валідує обов'язкові поля, застосовує rate limit і надсилає заявку в Telegram-групу через `TELEGRAM_BOT_TOKEN` та `TELEGRAM_APPOINTMENTS_CHAT_ID`.
