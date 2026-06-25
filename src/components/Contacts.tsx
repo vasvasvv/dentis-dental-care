@@ -205,13 +205,13 @@ export default function Contacts() {
         <div className="mt-12 max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-card-custom h-80">
           <iframe
             title="Dentis on map"
-            src="https://www.google.com/maps?q=48.5014697,32.2204513&hl=uk&z=17&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2643.6569563694243!2d32.2204513!3d48.501469699999994!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d043f27017c63f%3A0x154da7cabb6e9d5c!2z0JTQtdC90YLQuNGB!5e0!3m2!1suk!2sua!4v1782393839884!5m2!1suk!2sua"
             width="100%"
             height="100%"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         </div>
       </div>
